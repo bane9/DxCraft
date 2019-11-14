@@ -17,7 +17,7 @@ Game::Game(size_t width, size_t heigth)
 		wnd.disableCursor();
 		wnd.mouse.EnableRaw();
 	}
-	cam.SetPos(0.0f, 0.0f, 0.0f);
+	cam.SetPos(-3.0f, 3.0f, -25.0f);
 	cam.setTravelSpeed(cameraSpeed);
 }
 
@@ -135,8 +135,8 @@ void Game::doFrame()
 			ImGui::End();
 		}
 
-		static constexpr float chunk_size = 16.0f;
-		static constexpr float block_render_size = 2.0f;
+		/*static constexpr float chunk_size = 16.0f;
+		
 
 		for (float x = 0; x < chunk_size; x++) {
 			for (float y = 0; y < chunk_size; y++) {
@@ -144,13 +144,73 @@ void Game::doFrame()
 					block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
 				}
 			}
-		}
-		block.Draw(0.0f, 0.0f, 0.0f);
+		}*/
 
+		drawTestHouse();
 		wnd.Gfx().endFrame();
 #ifdef THREADED
 	}
 #endif
+}
+
+void Game::drawTestHouse() {
+	for (float x = -18; x < 14; x++) {
+		for (float y = -16; y < 0; y++) {
+			for (float z = -18; z < 14; z++) {
+				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
+			}
+		}
+	}
+
+	for (float x = -5; x < -4; x++) {
+		for (float y = 0; y < 3; y++) {
+			for (float z = -5; z < 1; z++) {
+				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
+			}
+		}
+	}
+
+	for (float x = 1; x < 2; x++) {
+		for (float y = 0; y < 3; y++) {
+			for (float z = -5; z < 1; z++) {
+				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
+			}
+		}
+	}
+
+	for (float x = -5; x < 2; x++) {
+		for (float y = 0; y < 3; y++) {
+			for (float z = 0; z < 1; z++) {
+				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
+			}
+		}
+	}
+
+	for (float x = -4; x < 1; x++) {
+		for (float y = 3; y < 4; y++) {
+			for (float z = -4; z < 0; z++) {
+				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
+			}
+		}
+	}
+
+	for (float x = -4; x < 1; x++) {
+		for (float y = 2; y < 3; y++) {
+			for (float z = -5; z < -4; z++) {
+				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
+			}
+		}
+	}
+
+	for (float x = -4; x < 0; x++) {
+		for (float y = 0; y < 1; y++) {
+			for (float z = -5; z < -4; z++) {
+				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
+			}
+		}
+	}
+
+	block.Draw(-1.0f * block_render_size, 1.0f * block_render_size, -5.0f * block_render_size);
 }
 
 int Game::start()

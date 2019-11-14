@@ -96,21 +96,24 @@ Graphics& Window::Gfx()
 void Window::enableCursor() noexcept
 {
 	cursorEnabled = true;
-	showCursor();
 	freeCursor();
+	showCursor();
 }
 
 void Window::disableCursor() noexcept
 {
-	cursorEnabled = false;
 	hideCursor();
+	cursorEnabled = false;
 	confineCursor();
 }
 
 void Window::confineCursor() noexcept
 {
 	RECT rect;
-	GetClientRect(hWnd, &rect);
+	rect.top = height / 2;
+	rect.bottom = height / 2;
+	rect.left = width / 2;
+	rect.right = width / 2;
 	MapWindowPoints(hWnd, nullptr, reinterpret_cast<POINT*>(&rect), 2);
 	ClipCursor(&rect);
 }

@@ -16,6 +16,7 @@ public:
 	~Game();
 	int start();
 private:
+	void drawTestHouse();
 	void doFrame();
 	Window wnd;
 	Timer timer;
@@ -25,4 +26,5 @@ private:
 	float skyIntesity = 0.5f;
 	float cameraSpeed = 15.0f;
 	Block block;
+	static constexpr float block_render_size = 2.0f;
 };
