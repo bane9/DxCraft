@@ -5,10 +5,11 @@
 #include "GDIPlusManager.h"
 #include "imgui/imgui.h"
 
+
 GDIPlusManager gdipm;
 
 Game::Game(size_t width, size_t heigth)
-	: wnd(width, heigth)
+	: wnd(width, heigth), block(wnd.Gfx())
 {
 
 	wnd.Gfx().setProjection(DirectX::XMMatrixPerspectiveLH(1.0f, (float)heigth / (float)width, 0.5f, 200.0f));
@@ -134,7 +135,17 @@ void Game::doFrame()
 			ImGui::End();
 		}
 
-		wnd.Gfx().DrawTestTriangle(dt, 0.0f, 0.0f);
+		static constexpr float chunk_size = 16.0f;
+		static constexpr float block_render_size = 2.0f;
+
+		for (float x = 0; x < chunk_size; x++) {
+			for (float y = 0; y < chunk_size; y++) {
+				for (float z = 0; z < chunk_size; z++) {
+					block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
+				}
+			}
+		}
+		block.Draw(0.0f, 0.0f, 0.0f);
 
 		wnd.Gfx().endFrame();
 #ifdef THREADED

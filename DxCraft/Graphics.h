@@ -28,6 +28,7 @@ struct Vertex
 
 class Graphics
 {
+	friend class Block;
 public:
 	Graphics(HWND hWnd, size_t width, size_t height);
 	Graphics(Graphics&) = delete;
@@ -40,7 +41,6 @@ public:
 	void setProjection(DirectX::FXMMATRIX proj) noexcept;
 	void beginFrame(float red, float green, float blue) noexcept;
 	DirectX::XMMATRIX getProjection() const noexcept;
-	void DrawTestTriangle(float angle, float x, float z);
 	void Transform(std::vector<Vertex>& vertices);
 	void setResoultion(int x, int y) noexcept;
 #ifdef _DEBUG
@@ -50,7 +50,6 @@ private:
 	DirectX::XMMATRIX projection;
 	DirectX::XMMATRIX camera;
 	size_t width;
-	Surface s = Surface::FromFile("images\\cube.png");
 	size_t height;
 	bool temp_viewport = false;
 #ifdef _DEBUG

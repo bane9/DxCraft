@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "ThreadSettings.h"
 #include <memory>
+#include "Block.h"
 
 class Game
 {
@@ -23,4 +24,5 @@ private:
 	bool showCursor = true;
 	float skyIntesity = 0.5f;
 	float cameraSpeed = 15.0f;
+	Block block;
 };
