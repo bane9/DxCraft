@@ -5,6 +5,8 @@
 #include "imgui/imgui_impl_dx11.h"
 #include "imgui/imgui_impl_win32.h"
 #include "Surface.h"
+#include "ThreadSettings.h"
+
 #pragma comment(lib, "dxgi.lib")
 
 #define FLIPEFFECT
@@ -157,6 +159,18 @@ void Graphics::endFrame()
 			GFX_EXCEPT_THROW(hr);
 		}
 	}
+	if (temp_viewport) {
+		D3D11_VIEWPORT vp;
+		vp.Width = (float)width;
+		vp.Height = (float)height;
+		vp.MinDepth = 0.0f;
+		vp.MaxDepth = 1.0f;
+		vp.TopLeftX = 0.0f;
+		vp.TopLeftY = 0.0f;
+		pContext->RSSetViewports(1u, &vp);
+		projection = DirectX::XMMatrixPerspectiveLH(1.0f, (float)height / (float)width, 0.5f, 200.0f);
+		temp_viewport = false;
+	}
 #ifdef FLIPEFFECT
 	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDSV.Get());
 #endif
@@ -165,6 +179,15 @@ void Graphics::endFrame()
 void Graphics::Transform(std::vector<Vertex>& vertices)
 {
 	
+}
+
+
+
+void Graphics::setResoultion(int x, int y) noexcept
+{
+	width = x;
+	height = y;
+	temp_viewport = true;
 }
 
 void Graphics::DrawTestTriangle(float angle, float x, float z)

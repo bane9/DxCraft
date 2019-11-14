@@ -3,6 +3,7 @@
 #include "Window.h"
 #include "Timer.h"
 #include "Camera.h"
+#include "ThreadSettings.h"
 #include <memory>
 
 class Game
@@ -22,5 +23,4 @@ private:
 	bool showCursor = true;
 	float skyIntesity = 0.5f;
 	float cameraSpeed = 15.0f;
-	float cubeSize = 1.0f, renderDistance = 200.0f;
 };

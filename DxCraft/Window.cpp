@@ -32,7 +32,7 @@ Window::Window(size_t width, size_t height)
 		0,
 		wndName,
 		wndName,
-		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
+		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU | WS_THICKFRAME,
 		CW_USEDEFAULT, CW_USEDEFAULT, rt.right - rt.left, rt.bottom - rt.top,
 		nullptr,
 		nullptr,
@@ -158,6 +158,17 @@ LRESULT WINAPI Window::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
 	case WM_CREATE:
 		wnd = static_cast<Window*>(reinterpret_cast<CREATESTRUCT*>(lParam)->lpCreateParams);
 		break;
+	case WM_SIZE:
+	case WM_DISPLAYCHANGE:
+	{
+		
+		int width = static_cast<int>(lParam) & 0xffff;
+		int height = (static_cast<int>(lParam) & 0xffff0000) >> 16;
+		wnd->Gfx().setResoultion(width, height);
+		wnd->width = width;
+		wnd->height = height;
+	}
+	break;
 	case WM_CHAR:
 		wnd->kbd.OnChar(static_cast<char>(wParam));
 		break;

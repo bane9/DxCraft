@@ -11,6 +11,7 @@
 #include "CustomException.h"
 #include "DxgiInfoManager.h"
 #include "Surface.h"
+#include <optional>
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "D3DCompiler.lib")
@@ -41,8 +42,7 @@ public:
 	DirectX::XMMATRIX getProjection() const noexcept;
 	void DrawTestTriangle(float angle, float x, float z);
 	void Transform(std::vector<Vertex>& vertices);
-	float cubeSize = 1.0f;
-	void setCubeSize(float size) { cubeSize = size; }
+	void setResoultion(int x, int y) noexcept;
 #ifdef _DEBUG
 	DxgiInfoManager& getInfoManager();
 #endif
@@ -52,6 +52,7 @@ private:
 	size_t width;
 	Surface s = Surface::FromFile("images\\cube.png");
 	size_t height;
+	bool temp_viewport = false;
 #ifdef _DEBUG
 	DxgiInfoManager infoManager;
 #endif
