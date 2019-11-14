@@ -4,8 +4,6 @@
 #include <memory>
 #include "GDIPlusManager.h"
 #include "imgui/imgui.h"
-#include "imgui/imgui_impl_win32.h"
-#include "imgui/imgui_impl_dx11.h"
 
 GDIPlusManager gdipm;
 
@@ -13,12 +11,13 @@ Game::Game(size_t width, size_t heigth)
 	: wnd(width, heigth)
 {
 
-	wnd.Gfx().setProjection(DirectX::XMMatrixPerspectiveLH(1.0f, (float)heigth / (float)width, 0.5f, 20.0f));
+	wnd.Gfx().setProjection(DirectX::XMMatrixPerspectiveLH(1.0f, (float)heigth / (float)width, 0.5f, 200.0f));
 	if (!showCursor) {
 		wnd.disableCursor();
 		wnd.mouse.EnableRaw();
 	}
-
+	cam.SetPos(0.0f, 0.0f, 0.0f);
+	cam.setTravelSpeed(cameraSpeed);
 }
 
 void Game::doFrame()
@@ -29,10 +28,15 @@ void Game::doFrame()
 		const auto dt = timer.mark();
 		wnd.Gfx().beginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
 		wnd.Gfx().setCamera(cam.GetMatrix());
-		
 
 		while (auto e = wnd.kbd.ReadKey())
 		{
+			if (e->GetCode() == VK_SHIFT) {
+				if (e->isPress())
+					cam.setTravelSpeed(30.0f);
+				else cam.setTravelSpeed(15.0f);
+				continue;
+			}
 
 			if (!e->isPress())
 			{
@@ -123,12 +127,14 @@ void Game::doFrame()
 				cam.Rotate(delta->x, delta->y);
 			}
 		}
-
+		
 		if (ImGui::Begin("Performance")) {
 			ImGui::Text("Framerate: %.3f fps", ImGui::GetIO().Framerate);
 			ImGui::Text("Frametime: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
 			ImGui::End();
 		}
+
+		wnd.Gfx().DrawTestTriangle(dt, 0.0f, 0.0f);
 
 		wnd.Gfx().endFrame();
 #ifdef THREADED

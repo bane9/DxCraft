@@ -20,6 +20,7 @@ private:
 	Camera cam;
 	bool exit = false;
 	bool showCursor = true;
-	float skyIntesity = 1.0f;
-
+	float skyIntesity = 0.5f;
+	float cameraSpeed = 15.0f;
+	float cubeSize = 1.0f, renderDistance = 200.0f;
 };

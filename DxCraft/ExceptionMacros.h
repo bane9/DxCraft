@@ -1,4 +1,5 @@
 #pragma once
+#include "CustomException.h"
 
 #define FAILED_EXCEPT(type, hr) if(FAILED(hr)) throw CustomException(__LINE__, __FILE__, type, hr)
 #define FAILED_LAST_EXCEPT(type, b) if(!b) throw CustomException(__LINE__, __FILE__, type, GetLastError())
