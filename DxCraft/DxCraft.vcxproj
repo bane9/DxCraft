@@ -141,6 +141,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BasicChunk.cpp" />
+    <ClCompile Include="BlockRenderer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DxgiInfoManager.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -157,9 +159,12 @@
     <ClCompile Include="Surface.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WinMain.cpp" />
+    <ClCompile Include="WorldManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BasicChunk.h" />
     <ClInclude Include="Block.h" />
+    <ClInclude Include="BlockRenderer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CustomException.h" />
     <ClInclude Include="DxgiInfoManager.h" />
@@ -183,6 +188,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="WinConfig.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="WorldManager.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">

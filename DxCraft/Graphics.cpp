@@ -23,7 +23,7 @@ namespace wrl = Microsoft::WRL;
 namespace dx = DirectX;
 
 Graphics::Graphics(HWND hWnd, size_t width, size_t height) 
-	:width(width), height(height)
+	: width(width), height(height)
 {
 	DXGI_SWAP_CHAIN_DESC sd = {};
 	sd.BufferDesc.Width = 0;
@@ -93,10 +93,8 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	wrl::ComPtr<ID3D11DepthStencilState> pDSState;
 	GFX_EXCEPT_INFO(pDevice->CreateDepthStencilState(&dsDesc, &pDSState));
 
-	// bind depth state
 	pContext->OMSetDepthStencilState(pDSState.Get(), 1u);
 
-	// create depth stensil texture
 	wrl::ComPtr<ID3D11Texture2D> pDepthStencil;
 	D3D11_TEXTURE2D_DESC descDepth = {};
 	descDepth.Width = width;
@@ -110,19 +108,14 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	GFX_EXCEPT_INFO(pDevice->CreateTexture2D(&descDepth, nullptr, &pDepthStencil));
 
-	// create view of depth stensil texture
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};
 	descDSV.Format = DXGI_FORMAT_D32_FLOAT;
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0u;
-	GFX_EXCEPT_INFO(pDevice->CreateDepthStencilView(
-		pDepthStencil.Get(), &descDSV, &pDSV
-	));
+	GFX_EXCEPT_INFO(pDevice->CreateDepthStencilView(pDepthStencil.Get(), &descDSV, &pDSV));
 
-	// bind depth stensil view to OM
 	pContext->OMSetRenderTargets(1u, pTarget.GetAddressOf(), pDSV.Get());
 
-	// configure viewport
 	D3D11_VIEWPORT vp;
 	vp.Width = (float)width;
 	vp.Height = (float)height;
@@ -190,17 +183,12 @@ void Graphics::endFrame()
 #endif
 }
 
-void Graphics::Transform(std::vector<Vertex>& vertices)
+
+
+void Graphics::setResoultion(int width, int height) noexcept
 {
-	
-}
-
-
-
-void Graphics::setResoultion(int x, int y) noexcept
-{
-	width = x;
-	height = y;
+	this->width = width;
+	this->height = height;
 	temp_viewport = true;
 }
 

@@ -28,7 +28,7 @@ struct Vertex
 
 class Graphics
 {
-	friend class Block;
+	friend class BlockRenderer;
 public:
 	Graphics(HWND hWnd, size_t width, size_t height);
 	Graphics(Graphics&) = delete;
@@ -41,8 +41,7 @@ public:
 	void setProjection(DirectX::FXMMATRIX proj) noexcept;
 	void beginFrame(float red, float green, float blue) noexcept;
 	DirectX::XMMATRIX getProjection() const noexcept;
-	void Transform(std::vector<Vertex>& vertices);
-	void setResoultion(int x, int y) noexcept;
+	void setResoultion(int width, int height) noexcept;
 #ifdef _DEBUG
 	DxgiInfoManager& getInfoManager();
 #endif
