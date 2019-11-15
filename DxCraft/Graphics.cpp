@@ -12,7 +12,7 @@
 #define FLIPEFFECT
 
 #ifdef FLIPEFFECT
-#define EFFECT DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
+#define EFFECT DXGI_SWAP_EFFECT_FLIP_DISCARD
 #define BUFFERCOUNT 2
 #else
 #define EFFECT DXGI_SWAP_EFFECT_DISCARD;
@@ -124,6 +124,8 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	vp.TopLeftX = 0.0f;
 	vp.TopLeftY = 0.0f;
 	pContext->RSSetViewports(1u, &vp);
+
+	DirectX::XMMatrixPerspectiveLH(1.0f, (float)height / (float)width, 0.5f, 200.0f);
 
 	ImGui_ImplDX11_Init(pDevice.Get(), pContext.Get());
 }

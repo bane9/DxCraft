@@ -8,17 +8,18 @@
 
 GDIPlusManager gdipm;
 
-Game::Game(size_t width, size_t heigth)
-	: wnd(width, heigth), wManager(wnd.Gfx())
+Game::Game(size_t width, size_t height)
+	: wnd(width, height), wManager(wnd.Gfx())
 {
 
-	wnd.Gfx().setProjection(DirectX::XMMatrixPerspectiveLH(1.0f, (float)heigth / (float)width, 0.5f, 200.0f));
 	if (!showCursor) {
 		wnd.disableCursor();
 		wnd.mouse.EnableRaw();
 	}
+
 	cam.SetPos(-3.0f, 3.0f, -25.0f);
 	cam.setTravelSpeed(cameraSpeed);
+
 	wManager.CreateChunk(0, 0, 0);
 } 
 

@@ -11,7 +11,7 @@
 class Game
 {
 public:
-	Game(size_t width, size_t heigth);
+	Game(size_t width, size_t height);
 	Game(Game&) = delete;
 	Game& operator=(Game&) = delete;
 	~Game();
