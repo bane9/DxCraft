@@ -14,6 +14,7 @@ public:
 	void CreateChunk(int x, int y, int z);
 	void Draw();
 private:
+	bool isVisible(int chunkIndex, Block& block);
 	std::vector<BasicChunk> chunks;
 	BlockRenderer renderer;
 };

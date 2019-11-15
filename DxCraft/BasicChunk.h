@@ -16,9 +16,11 @@ public:
 	Block& GetBlock(int x, int y, int z) noexcept;
 	Position GetPosition() const noexcept;
 
-	static constexpr int chunkSize = 16;
 private:
+	Position Normalize(int x, int y, int z) const noexcept;
+	inline int FlatIndexPure(int x, int y, int z) noexcept;
 	inline int FlatIndex(int x, int y, int z) const noexcept;
+	static constexpr int chunkSize = 16;
 	std::vector<Block> blocks;
 	int x, y, z;
 };

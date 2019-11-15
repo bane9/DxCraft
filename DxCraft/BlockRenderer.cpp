@@ -1,6 +1,8 @@
 #include "BlockRenderer.h"
 
-BlockRenderer::BlockRenderer(Graphics& gfx) : gfx(gfx) {
+BlockRenderer::BlockRenderer(Graphics& gfx) 
+	: gfx(gfx) 
+{
 	
 	vertices.resize(14);
 	vertices[0].pos = { -side,-side,-side };
