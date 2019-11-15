@@ -4,6 +4,9 @@
 #include "BlockRenderer.h"
 #include "Graphics.h"
 #include <vector>
+#include <unordered_map>
+
+auto asd = []() {return true; };
 
 class WorldManager
 {
@@ -14,8 +17,7 @@ public:
 	void CreateChunk(int x, int y, int z);
 	void Draw();
 private:
-	bool isVisible(int chunkIndex, Block& block);
-	std::vector<BasicChunk> chunks;
+	bool isVisible(const BasicChunk& chunk, const Block& block);
+	std::unordered_map < Position, BasicChunk, PositionHash, PositionComparator > chunks;
 	BlockRenderer renderer;
 };
-

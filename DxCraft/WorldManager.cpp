@@ -7,15 +7,15 @@ WorldManager::WorldManager(Graphics& gfx)
 
 void WorldManager::CreateChunk(int x, int y, int z)
 {
-	chunks.push_back({x, y, z});
+	chunks.emplace(Position(x, y, z) , BasicChunk(x, y, z));
 }
 
 void WorldManager::Draw()
 {
 	for (auto& chunk : chunks) {
 		int i = 0;
-		for (auto& block : chunk.blocks) {
-			if(isVisible(i, block))
+		for (auto& block : chunk.second.blocks) {
+			if(isVisible(chunk.second, block))
 				renderer.Draw(block);
 		}
 		++i;
@@ -27,11 +27,10 @@ int FlatIndexPure(int x, int y, int z) noexcept
 	return x + 16 * (y + 16 * z);
 }
 
-bool WorldManager::isVisible(int chunkIndex, Block& block)
+bool WorldManager::isVisible(const BasicChunk& chunk, const Block& block)
 {
-	BasicChunk& chunk = chunks[chunkIndex];
 	Position pos = chunk.Normalize(block.x, block.y, block.z);
-	std::vector<Block>& chunkData = chunk.blocks;
+	const std::vector<Block>& chunkData = chunk.blocks;
 	
 	if ((pos.x + 1 < BasicChunk::chunkSize) && (pos.x - 1 >= 0) &&
 		(pos.y + 1 < BasicChunk::chunkSize) && (pos.y - 1 >= 0) &&

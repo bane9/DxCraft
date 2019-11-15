@@ -1,9 +1,26 @@
 #pragma once
 #include "Block.h"
 #include <vector>
+#include <unordered_map>
+
 
 struct Position {
+	Position(int x, int y, int z) : x(x), y(y), z(z) {}
+	Position() = default;
 	int x, y, z;
+};
+
+struct PositionHash {
+	std::size_t operator()(const Position& position) const {
+		std::hash<int> hash;
+		return ((hash(position.x) ^ hash(position.y)) << 1) ^ (hash(position.z) << 1);
+	}
+};
+
+struct PositionComparator {
+	bool operator()(const Position& first, const Position& second) const {
+		return first.x == second.x && first.y == second.y && first.z == second.z;
+	}
 };
 
 class BasicChunk

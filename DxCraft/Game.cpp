@@ -22,6 +22,8 @@ Game::Game(size_t width, size_t height)
 
 	wManager.CreateChunk(0, 0, 0);
 	wManager.CreateChunk(16, 0, 0);
+	wManager.CreateChunk(16, 0, 16);
+	wManager.CreateChunk(0, 0, 16);
 } 
 
 void Game::doFrame()
