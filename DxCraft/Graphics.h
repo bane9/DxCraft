@@ -28,6 +28,7 @@ struct Vertex
 
 class Graphics
 {
+	friend class MeshRenderer;
 	friend class BlockRenderer;
 public:
 	Graphics(HWND hWnd, size_t width, size_t height);

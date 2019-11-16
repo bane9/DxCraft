@@ -5,18 +5,14 @@
 #include "Surface.h"
 #include "Block.h"
 
-struct Transforms
-{
-	DirectX::XMMATRIX modelViewProj;
-	DirectX::XMMATRIX model;
-};
 
-class BlockRenderer {
+class MeshRenderer
+{
 public:
-	BlockRenderer(Graphics& gfx);
-	BlockRenderer(BlockRenderer&) = delete;
-	BlockRenderer& operator=(BlockRenderer&) = delete;
-	
+	MeshRenderer(Graphics& gfx);
+	MeshRenderer(MeshRenderer&) = delete;
+	MeshRenderer& operator=(MeshRenderer&) = delete;
+
 	void Draw(Block& block);
 
 private:
@@ -29,7 +25,7 @@ private:
 	UINT stride = sizeof(Vertex);
 
 	Surface s = Surface::FromFile("images\\cube.png");
-	
+
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture;
@@ -41,5 +37,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;
 	Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
-
 };
+

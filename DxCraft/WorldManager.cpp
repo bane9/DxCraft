@@ -8,6 +8,7 @@ WorldManager::WorldManager(Graphics& gfx)
 
 void WorldManager::CreateChunk(int x, int y, int z)
 {
+	if (y < 0) return;
 	chunks.emplace(Position(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize), 
 		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize));
 }
@@ -15,17 +16,18 @@ void WorldManager::CreateChunk(int x, int y, int z)
 void WorldManager::Draw()
 {
 	for (auto& chunk : chunks) {
-		int i = 0;
 		for (auto& block : chunk.second.blocks) {
 			if(isVisible(block))
 				renderer.Draw(block);
 		}
-		++i;
 	}
 }
 
 Block* WorldManager::getBlock(int x, int y, int z)
 {
+	if (y < 0) 
+		return nullptr;
+	
 	Position chunkPosition(
 		x - FixedMod(x, BasicChunk::chunkSize),
 		y - FixedMod(y, BasicChunk::chunkSize),

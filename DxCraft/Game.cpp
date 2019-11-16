@@ -9,7 +9,7 @@
 GDIPlusManager gdipm;
 
 Game::Game(size_t width, size_t height)
-	: wnd(width, height), wManager(wnd.Gfx())
+	: wnd(width, height), meshRenderer(wnd.Gfx())//, wManager(wnd.Gfx())
 {
 
 	if (!showCursor) {
@@ -20,10 +20,10 @@ Game::Game(size_t width, size_t height)
 	cam.SetPos(-3.0f, 3.0f, -25.0f);
 	cam.setTravelSpeed(cameraSpeed);
 
-	wManager.CreateChunk(0, 0, 0);
+	/*wManager.CreateChunk(0, 0, 0);
 	wManager.CreateChunk(0, 1, 0);
 	wManager.CreateChunk(0, 0, -1);
-	wManager.CreateChunk(-1, 0, 0);
+	wManager.CreateChunk(-1, 0, 0);*/
 } 
 
 void Game::doFrame()
@@ -133,14 +133,16 @@ void Game::doFrame()
 				cam.Rotate(delta->x, delta->y);
 			}
 		}
-		
+
 		if (ImGui::Begin("Performance")) {
 			ImGui::Text("Framerate: %.3f fps", ImGui::GetIO().Framerate);
 			ImGui::Text("Frametime: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
 			ImGui::End();
 		}
+		Block block{ 0,0,0,BlockType::Grass };
+		meshRenderer.Draw(block);
 
-		wManager.Draw();
+		//wManager.Draw();
 
 		wnd.Gfx().endFrame();
 #ifdef THREADED

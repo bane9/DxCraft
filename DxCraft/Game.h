@@ -7,6 +7,7 @@
 #include <memory>
 #include "BlockRenderer.h"
 #include "WorldManager.h"
+#include "MeshRenderer.h"
 
 class Game
 {
@@ -25,5 +26,6 @@ private:
 	bool showCursor = true;
 	float skyIntesity = 0.5f;
 	float cameraSpeed = 15.0f;
-	WorldManager wManager;
+	MeshRenderer meshRenderer;
+	//WorldManager wManager;
 };
