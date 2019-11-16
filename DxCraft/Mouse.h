@@ -72,7 +72,7 @@ public:
 	Mouse(const Mouse&) = delete;
 	Mouse& operator=(const Mouse&) = delete;
 	std::pair<int, int> GetPos() const noexcept;
-	std::optional<RawDelta> ReadRawDelta() noexcept;
+	std::optional<RawDelta> ReadRawDelta();
 	int GetPosX() const noexcept;
 	int GetPosY() const noexcept;
 	bool IsInWindow() const noexcept;
