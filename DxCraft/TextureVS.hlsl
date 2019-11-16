@@ -1,18 +1,23 @@
 cbuffer CBuf
 {
-	matrix transform;
+    matrix modelViewProj;
+    matrix modelView;
 };
 
 struct VSOut
 {
-	float2 tex : TexCoord;
-	float4 pos : SV_Position;
+    float3 worldPos : Position;
+    float3 normal : Normal;
+    float2 tc : Texcoord;
+    float4 pos : SV_Position;
 };
 
-VSOut main(float3 pos : Position, float2 tex : TexCoord)
+VSOut main(float3 pos : Position, float3 n : Normal, float2 tc : Texcoord)
 {
-	VSOut vso;
-	vso.pos = mul(float4(pos, 1.0f), transform);
-	vso.tex = tex;
-	return vso;
+    VSOut vso;
+    vso.worldPos = (float3) mul(float4(pos, 1.0f), modelView);
+    vso.normal = mul(n, (float3x3) modelView);
+    vso.pos = mul(float4(pos, 1.0f), modelViewProj);
+    vso.tc = tc;
+    return vso;
 }

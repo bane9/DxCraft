@@ -6,6 +6,13 @@
 #include "Block.h"
 
 
+struct indvVertex
+{
+	DirectX::XMFLOAT3 pos;
+	DirectX::XMFLOAT3 n;
+	DirectX::XMFLOAT2 tc;
+};
+
 class MeshRenderer
 {
 public:
@@ -16,15 +23,14 @@ public:
 	void Draw(Block& block);
 
 private:
-	std::vector<Vertex> vertices;
 	std::vector<unsigned short> indices;
 	const float side = 1.0f;
 	Graphics& gfx;
 
 	const UINT offset = 0u;
-	UINT stride = sizeof(Vertex);
+	UINT stride = sizeof(indvVertex);
 
-	Surface s = Surface::FromFile("images\\cube.png");
+	Surface s = Surface::FromFile("images\\block_face.png");
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView;

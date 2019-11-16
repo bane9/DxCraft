@@ -1,61 +1,113 @@
 #include "MeshRenderer.h"
 
+#pragma warning(disable : 26812)
+
 struct Transforms
 {
 	DirectX::XMMATRIX modelViewProj;
 	DirectX::XMMATRIX model;
 };
 
+
+
 MeshRenderer::MeshRenderer(Graphics& gfx)
 	: gfx(gfx)
 {
+	std::vector<indvVertex> vertices(24);
+	float side = 2.0f;
+	vertices[0].pos = { -side,-side,-side };// 0 near side
+	vertices[1].pos = { side,-side,-side };// 1
+	vertices[2].pos = { -side,side,-side };// 2
+	vertices[3].pos = { side,side,-side };// 3
 
-	vertices.resize(14);
-	vertices[0].pos = { -side,-side,-side };
-	vertices[0].tex = { 2.0f / 3.0f,0.0f / 4.0f };
-	vertices[1].pos = { side,-side,-side };
-	vertices[1].tex = { 1.0f / 3.0f,0.0f / 4.0f };
-	vertices[2].pos = { -side,side,-side };
-	vertices[2].tex = { 2.0f / 3.0f,1.0f / 4.0f };
-	vertices[3].pos = { side,side,-side };
-	vertices[3].tex = { 1.0f / 3.0f,1.0f / 4.0f };
-	vertices[4].pos = { -side,-side,side };
-	vertices[4].tex = { 2.0f / 3.0f,3.0f / 4.0f };
-	vertices[5].pos = { side,-side,side };
-	vertices[5].tex = { 1.0f / 3.0f,3.0f / 4.0f };
-	vertices[6].pos = { -side,side,side };
-	vertices[6].tex = { 2.0f / 3.0f,2.0f / 4.0f };
-	vertices[7].pos = { side,side,side };
-	vertices[7].tex = { 1.0f / 3.0f,2.0f / 4.0f };
-	vertices[8].pos = { -side,-side,-side };
-	vertices[8].tex = { 2.0f / 3.0f,4.0f / 4.0f };
-	vertices[9].pos = { side,-side,-side };
-	vertices[9].tex = { 1.0f / 3.0f,4.0f / 4.0f };
-	vertices[10].pos = { -side,-side,-side };
-	vertices[10].tex = { 3.0f / 3.0f,1.0f / 4.0f };
-	vertices[11].pos = { -side,-side,side };
-	vertices[11].tex = { 3.0f / 3.0f,2.0f / 4.0f };
-	vertices[12].pos = { side,-side,-side };
-	vertices[12].tex = { 0.0f / 3.0f,1.0f / 4.0f };
-	vertices[13].pos = { side,-side,side };
-	vertices[13].tex = { 0.0f / 3.0f,2.0f / 4.0f };
+	vertices[4].pos = { -side,-side,side };// 4 far side
+	vertices[5].pos = { side,-side,side };// 5
+	vertices[6].pos = { -side,side,side };// 6
+	vertices[7].pos = { side,side,side };// 7
+
+	vertices[8].pos = { -side,-side,-side };// 8 left side
+	vertices[9].pos = { -side,side,-side };// 9
+	vertices[10].pos = { -side,-side,side };// 10
+	vertices[11].pos = { -side,side,side };// 11
+
+	vertices[12].pos = { side,-side,-side };// 12 right side
+	vertices[13].pos = { side,side,-side };// 13
+	vertices[14].pos = { side,-side,side };// 14
+	vertices[15].pos = { side,side,side };// 15
+
+	vertices[16].pos = { -side,-side,-side };// 16 bottom side
+	vertices[17].pos = { side,-side,-side };// 17
+	vertices[18].pos = { -side,-side,side };// 18
+	vertices[19].pos = { side,-side,side };// 19
+
+	vertices[20].pos = { -side,side,-side };// 20 top side
+	vertices[21].pos = { side,side,-side };// 21
+	vertices[22].pos = { -side,side,side };// 22
+	vertices[23].pos = { side,side,side };// 23
+
+	vertices[0].tc = { 0.0f,0.0f };
+	vertices[1].tc = { 1.0f,0.0f };
+	vertices[2].tc = { 0.0f,1.0f };
+	vertices[3].tc = { 1.0f,1.0f };
+
+	vertices[4].tc = { 0.0f,0.0f };
+	vertices[5].tc = { 1.0f,0.0f };
+	vertices[6].tc = { 0.0f,1.0f };
+	vertices[7].tc = { 1.0f,1.0f };
+
+	vertices[8].tc =  { 0.0f,0.0f };
+	vertices[9].tc =  { 0.0f,1.0f };
+	vertices[10].tc = { 1.0f,0.0f };
+	vertices[11].tc = { 1.0f,1.0f };
+
+	vertices[12].tc = { 0.0f,0.0f };
+	vertices[13].tc = { 0.0f,1.0f };
+	vertices[14].tc = { 1.0f,0.0f };
+	vertices[15].tc = { 1.0f,1.0f };
+
+	vertices[16].tc = { 0.0f,0.0f };
+	vertices[17].tc = { 1.0f,0.0f };
+	vertices[18].tc = { 0.0f,1.0f };
+	vertices[19].tc = { 1.0f,1.0f };
+
+	vertices[20].tc = { 0.0f,0.0f };
+	vertices[21].tc = { 1.0f,0.0f };
+	vertices[22].tc = { 0.0f,1.0f };
+	vertices[23].tc = { 1.0f,1.0f };
 
 	indices = {
-			0,2,1,   2,3,1,
-			4,8,5,   5,8,9,
-			2,6,3,   3,6,7,
-			4,5,7,   4,7,6,
-			2,10,11, 2,11,6,
-			12,3,7,  12,7,13
+			0,2, 1,		2,3,1,
+			4,5, 7,		4,7,6,
+			8,10, 9,	10,11,9,
+			
+			12,13,15,	12,15,14,
+			16,17,18,	18,17,19,
+			20,23,21,	20,22,23
 	};
+
+	/*for (size_t i = 0; i < indices.size(); i += 3)
+	{
+		auto& v0 = vertices[indices[i]];
+		auto& v1 = vertices[indices[i + 1]];
+		auto& v2 = vertices[indices[i + 2]];
+		const auto p0 = DirectX::XMLoadFloat3(&v0.pos);
+		const auto p1 = DirectX::XMLoadFloat3(&v1.pos);
+		const auto p2 = DirectX::XMLoadFloat3(&v2.pos);
+
+		const auto n = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(DirectX::XMVectorSubtract(p1, p0), DirectX::XMVectorSubtract(p2, p0)));
+
+		XMStoreFloat3(&v0.n, n);
+		XMStoreFloat3(&v1.n, n);
+		XMStoreFloat3(&v2.n, n);
+	}*/
 
 	D3D11_BUFFER_DESC bd = {};
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
-	bd.ByteWidth = UINT(vertices.size() * sizeof(Vertex));
-	bd.StructureByteStride = sizeof(Vertex);
+	bd.ByteWidth = UINT(vertices.size() * sizeof(indvVertex));
+	bd.StructureByteStride = sizeof(indvVertex);
 	D3D11_SUBRESOURCE_DATA sd = {};
 	sd.pSysMem = vertices.data();
 
@@ -117,10 +169,11 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 	{
 		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "TexCoord",0,DXGI_FORMAT_R32G32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA,0 },
+		{ "Normal",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA,0 },
+		{ "TexCoord",0,DXGI_FORMAT_R32G32_FLOAT,0,24,D3D11_INPUT_PER_VERTEX_DATA,0 },
 	};
 
-	gfx.pDevice->CreateInputLayout(ied.data(), (UINT)ied.size(), blobVS->GetBufferPointer(), blobVS->GetBufferSize(), &pInputLayout);
+	gfx.pDevice->CreateInputLayout(ied.data(), static_cast<UINT>(ied.size()), blobVS->GetBufferPointer(), blobVS->GetBufferSize(), &pInputLayout);
 
 	D3D11_BUFFER_DESC cbd;
 	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
