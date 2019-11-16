@@ -5,8 +5,8 @@
 
 
 struct Position {
-	Position(int x, int y, int z) : x(x), y(y), z(z) {}
-	Position() = default;
+	Position(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {}
+	Position() = delete;
 	bool operator==(const Position& other) const {
 		return x == other.x && y == other.y && z == other.z;
 	}

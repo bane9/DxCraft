@@ -21,9 +21,9 @@ Game::Game(size_t width, size_t height)
 	cam.setTravelSpeed(cameraSpeed);
 
 	wManager.CreateChunk(0, 0, 0);
-	wManager.CreateChunk(0, 16, 0);
-	wManager.CreateChunk(0, 0, -16);
-	wManager.CreateChunk(-16, 0, 0);
+	wManager.CreateChunk(0, 1, 0);
+	wManager.CreateChunk(0, 0, -1);
+	wManager.CreateChunk(-1, 0, 0);
 } 
 
 void Game::doFrame()
@@ -147,66 +147,6 @@ void Game::doFrame()
 	}
 #endif
 }
-
-//void Game::drawTestHouse() {
-//	for (float x = -18; x < 14; x++) {
-//		for (float y = -16; y < 0; y++) {
-//			for (float z = -18; z < 14; z++) {
-//				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
-//			}
-//		}
-//	}
-//
-//	for (float x = -5; x < -4; x++) {
-//		for (float y = 0; y < 3; y++) {
-//			for (float z = -5; z < 1; z++) {
-//				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
-//			}
-//		}
-//	}
-//
-//	for (float x = 1; x < 2; x++) {
-//		for (float y = 0; y < 3; y++) {
-//			for (float z = -5; z < 1; z++) {
-//				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
-//			}
-//		}
-//	}
-//
-//	for (float x = -5; x < 2; x++) {
-//		for (float y = 0; y < 3; y++) {
-//			for (float z = 0; z < 1; z++) {
-//				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
-//			}
-//		}
-//	}
-//
-//	for (float x = -4; x < 1; x++) {
-//		for (float y = 3; y < 4; y++) {
-//			for (float z = -4; z < 0; z++) {
-//				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
-//			}
-//		}
-//	}
-//
-//	for (float x = -4; x < 1; x++) {
-//		for (float y = 2; y < 3; y++) {
-//			for (float z = -5; z < -4; z++) {
-//				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
-//			}
-//		}
-//	}
-//
-//	for (float x = -4; x < 0; x++) {
-//		for (float y = 0; y < 1; y++) {
-//			for (float z = -5; z < -4; z++) {
-//				block.Draw(x * block_render_size, y * block_render_size, z * block_render_size);
-//			}
-//		}
-//	}
-//
-//	block.Draw(-1.0f * block_render_size, 1.0f * block_render_size, -5.0f * block_render_size);
-//}
 
 int Game::start()
 {

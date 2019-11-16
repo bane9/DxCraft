@@ -8,7 +8,8 @@ WorldManager::WorldManager(Graphics& gfx)
 
 void WorldManager::CreateChunk(int x, int y, int z)
 {
-	chunks.emplace(Position(x, y, z) , BasicChunk(x, y, z));
+	chunks.emplace(Position(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize), 
+		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize));
 }
 
 void WorldManager::Draw()
