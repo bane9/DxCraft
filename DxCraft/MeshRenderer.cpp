@@ -1,6 +1,6 @@
 #include "MeshRenderer.h"
 #include <array>
-
+#include <utility>
 
 #pragma warning(disable : 26812)
 
@@ -12,41 +12,59 @@ struct Transforms
 
 struct Faces {
 	static constexpr float side = 2.0f;
-	static constexpr std::array<indvVertex, 4> NearSide{
-		indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
-		indvVertex{DirectX::XMFLOAT3(side,side,-side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> NearSide{
+		{
+			indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
+			indvVertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
+			indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
+			indvVertex{DirectX::XMFLOAT3(side,side,-side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+		},
+		{0,2,1,2,3,1}
 	};
-	static constexpr std::array<indvVertex, 4> FarSide{
+	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> FarSide{
+		{
 		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,-side,side),   DirectX::XMFLOAT3(), { 1.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(-side,side,side),   DirectX::XMFLOAT3(), { 0.0f,1.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,side,side) ,	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+		},
+		{4,5,7,4,7,6}
 	};													 
-	static constexpr std::array<indvVertex, 4> LeftSide{
+	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> LeftSide{
+		{
 		indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
 		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(-side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+		},
+		{8,10,9,10,11,9}
 	};													 
-	static constexpr std::array<indvVertex, 4> RightSide{
+	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> RightSide{
+		{
 		indvVertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,side,-side),   DirectX::XMFLOAT3(), { 0.0f,1.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,-side,side),   DirectX::XMFLOAT3(), { 1.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+		},
+		{12,13,15,12,15,14}
 	};
-	static constexpr std::array<indvVertex, 4> BottomSide{
+	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> BottomSide{
+		{
 		indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,-side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+		},
+		{16,17,18,18,17,19}
 	};
-	static constexpr std::array<indvVertex, 4> TopSide{
+	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> TopSide{
+		{
 		indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,side,-side),   DirectX::XMFLOAT3(), { 1.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(-side,side,side),   DirectX::XMFLOAT3(), { 0.0f,1.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+		},
+		{20,23,21,20,22,23}
 	};
 };
 
@@ -84,43 +102,43 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	vertices[22].pos = { -side,side,side };// 22
 	vertices[23].pos = { side,side,side };// 23
 
-	vertices[0].tc = { 0.0f,0.0f };
+	vertices[0].tc = { 0.0f,0.0f };//far
 	vertices[1].tc = { 1.0f,0.0f };
 	vertices[2].tc = { 0.0f,1.0f };
 	vertices[3].tc = { 1.0f,1.0f };
 
-	vertices[4].tc = { 0.0f,0.0f };
+	vertices[4].tc = { 0.0f,0.0f };//near
 	vertices[5].tc = { 1.0f,0.0f };
 	vertices[6].tc = { 0.0f,1.0f };
 	vertices[7].tc = { 1.0f,1.0f };
 
-	vertices[8].tc = { 0.0f,0.0f };
+	vertices[8].tc = { 0.0f,0.0f };//left
 	vertices[9].tc = { 0.0f,1.0f };
 	vertices[10].tc = { 1.0f,0.0f };
 	vertices[11].tc = { 1.0f,1.0f };
 
-	vertices[12].tc = { 0.0f,0.0f };
+	vertices[12].tc = { 0.0f,0.0f };//right
 	vertices[13].tc = { 0.0f,1.0f };
 	vertices[14].tc = { 1.0f,0.0f };
 	vertices[15].tc = { 1.0f,1.0f };
 
-	vertices[16].tc = { 0.0f,0.0f };
+	vertices[16].tc = { 0.0f,0.0f };//bottom
 	vertices[17].tc = { 1.0f,0.0f };
 	vertices[18].tc = { 0.0f,1.0f };
 	vertices[19].tc = { 1.0f,1.0f };
 
-	vertices[20].tc = { 0.0f,0.0f };
+	vertices[20].tc = { 0.0f,0.0f };//top
 	vertices[21].tc = { 1.0f,0.0f };
 	vertices[22].tc = { 0.0f,1.0f };
 	vertices[23].tc = { 1.0f,1.0f };
 
 	indices = {
-			0,2,1,2,3,1,
-			4,5,7,4,7,6,
-			//8,10,9,10,11,9,
-			12,13,15,12,15,14,
-			16,17,18,18,17,19,
-			20,23,21,20,22,23
+			0,2,1,2,3,1,//far
+			4,5,7,4,7,6,//near
+			8,10,9,10,11,9,//left
+			12,13,15,12,15,14,//right
+			16,17,18,18,17,19,//bottom
+			20,23,21,20,22,23//top
 	};
 
 	D3D11_BUFFER_DESC bd = {};
