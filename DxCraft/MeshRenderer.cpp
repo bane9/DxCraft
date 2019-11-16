@@ -12,13 +12,13 @@ struct Transforms
 };
 
 struct Faces {
-	static constexpr float side = 2.0f;
+	static constexpr float side = 1.0f;
 	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> NearSide{
 		{
-			indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
-			indvVertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
-			indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
-			indvVertex{DirectX::XMFLOAT3(side,side,-side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+			indvVertex{DirectX::XMFLOAT3(-side ,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
+			indvVertex{DirectX::XMFLOAT3(side ,-side,-side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
+			indvVertex{DirectX::XMFLOAT3(-side ,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
+			indvVertex{DirectX::XMFLOAT3(side ,side,-side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
 		},
 		{0, 2, 1, 2, 3, 1}
 	};
@@ -74,9 +74,15 @@ struct Faces {
 	};
 };
 
-void MeshRenderer::AppendFace(const std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>>& face)
+void MeshRenderer::AppendFace(const std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>>& face, 
+	float offsetX, float offsetY, float offsetZ)
 {
-	std::copy(face.first.begin(), face.first.end(), std::back_inserter(vertices));
+	std::transform(face.first.begin(), face.first.end(), std::back_inserter(vertices), [offsetX, offsetY, offsetZ](indvVertex vertex) {
+			vertex.pos.x += offsetX * Faces::side * 2;
+			vertex.pos.y += offsetY * Faces::side * 2;
+			vertex.pos.z += offsetZ * Faces::side * 2;
+			return std::move(vertex);
+		});
 	const int offset = (vertices.size() / 4 - 1) * 4;
 	std::transform(face.second.begin(), face.second.end(), std::back_inserter(indices), [offset](int a) {return offset + a;});
 }
@@ -84,12 +90,23 @@ void MeshRenderer::AppendFace(const std::pair<std::array<indvVertex, 4>, std::ar
 MeshRenderer::MeshRenderer(Graphics& gfx)
 	: gfx(gfx)
 {
-	AppendFace(Faces::NearSide);
-	AppendFace(Faces::FarSide);
-	AppendFace(Faces::LeftSide);
-	AppendFace(Faces::RightSide);
-	AppendFace(Faces::BottomSide);
-	AppendFace(Faces::TopSide);
+	AppendFace(Faces::NearSide, 0.0f, 0.0f, 0.0f);
+	AppendFace(Faces::NearSide, 1.0f, 0.0f, 0.0f);
+
+	AppendFace(Faces::FarSide, 0.0f, 0.0f, 0.0f);
+	AppendFace(Faces::FarSide, 1.0f, 0.0f, 0.0f);
+
+	AppendFace(Faces::LeftSide, 0.0f, 0.0f, 0.0f);
+	AppendFace(Faces::LeftSide, 1.0f, 0.0f, 0.0f);
+
+	//AppendFace(Faces::RightSide, 0.0f, 0.0f, 0.0f);
+	AppendFace(Faces::RightSide, 1.0f, 0.0f, 0.0f);
+
+	AppendFace(Faces::TopSide, 0.0f, 0.0f, 0.0f);
+	AppendFace(Faces::TopSide, 1.0f, 0.0f, 0.0f);
+
+	AppendFace(Faces::BottomSide, 0.0f, 0.0f, 0.0f);
+	AppendFace(Faces::BottomSide, 1.0f, 0.0f, 0.0f);
 
 	D3D11_BUFFER_DESC bd = {};
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
