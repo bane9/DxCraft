@@ -40,19 +40,16 @@ Block* WorldManager::getBlock(int x, int y, int z)
 	return &chunk->second.blocks[chunk->second.FlatIndex(x, y, z)];
 }
 
+#define TESTFACE(x) if (x == nullptr || x->type == BlockType::Air) return true
+
 bool WorldManager::isVisible(const Block& block)
 {
-	Block* north = getBlock(block.x, block.y + 1, block.z);
-	if (north == nullptr || north->type == BlockType::Air) return true;
-	Block* south = getBlock(block.x, block.y - 1, block.z + 1);
-	if (south == nullptr || south->type == BlockType::Air) return true;
-	Block* west = getBlock(block.x - 1, block.y, block.z);
-	if (west == nullptr || west->type == BlockType::Air) return true;
-	Block* east = getBlock(block.x + 1, block.y, block.z);
-	if (east == nullptr || east->type == BlockType::Air) return true;
-	Block* front = getBlock(block.x, block.y + 1, block.z - 1);
-	if (front == nullptr || front->type == BlockType::Air) return true;
-	Block* back = getBlock(block.x, block.y, block.z + 1);
-	if (back == nullptr || back->type == BlockType::Air) return true;
+	TESTFACE(getBlock(block.x + 1, block.y, block.z));
+	TESTFACE(getBlock(block.x - 1, block.y, block.z));
+	TESTFACE(getBlock(block.x, block.y + 1, block.z));
+	TESTFACE(getBlock(block.x, block.y - 1, block.z));
+	TESTFACE(getBlock(block.x, block.y, block.z + 1));
+	TESTFACE(getBlock(block.x, block.y, block.z - 1));
+
 	return false;
 }
