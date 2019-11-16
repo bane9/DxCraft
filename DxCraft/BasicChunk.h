@@ -3,7 +3,6 @@
 #include <vector>
 #include <unordered_map>
 
-
 struct Position {
 	Position(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {}
 	Position() = delete;
@@ -29,11 +28,10 @@ public:
 	void RemoveBlock(int x, int y, int z) noexcept;
 	Block& GetBlock(int x, int y, int z) noexcept;
 	Position GetPosition() const noexcept;
-
+	static constexpr int chunkSize = 16;
 private:
 	Position Normalize(int x, int y, int z) const noexcept;
 	inline int FlatIndex(int x, int y, int z) const noexcept;
-	static constexpr int chunkSize = 16;
 	std::vector<Block> blocks;
 	int x, y, z;
 };

@@ -2,123 +2,14 @@
 #include <array>
 #include <utility>
 #include <algorithm>
+#include "BasicChunk.h"
 
 #pragma warning(disable : 26812)
-
-struct Transforms
-{
-	DirectX::XMMATRIX modelViewProj;
-	DirectX::XMMATRIX model;
-};
-
-struct Faces {
-	static constexpr float side = 1.0f;
-	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> NearSide{
-		{
-			indvVertex{DirectX::XMFLOAT3(-side ,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
-			indvVertex{DirectX::XMFLOAT3(side ,-side,-side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
-			indvVertex{DirectX::XMFLOAT3(-side ,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
-			indvVertex{DirectX::XMFLOAT3(side ,side,-side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
-		},
-		{0, 2, 1, 2, 3, 1}
-	};
-
-	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> FarSide{
-		{
-		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(side,-side,side),   DirectX::XMFLOAT3(), { 1.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(-side,side,side),   DirectX::XMFLOAT3(), { 0.0f,1.0f }},
-		indvVertex{DirectX::XMFLOAT3(side,side,side) ,	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
-		},
-		{0, 1, 3, 0, 3, 2}
-	};					
-
-	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> LeftSide{
-		{
-		indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
-		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(-side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
-		},
-		{0, 2, 1, 2, 3, 1}
-	};		
-
-	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> RightSide{
-		{
-		indvVertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(side,side,-side),   DirectX::XMFLOAT3(), { 0.0f,1.0f }},
-		indvVertex{DirectX::XMFLOAT3(side,-side,side),   DirectX::XMFLOAT3(), { 1.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
-		},
-		{0, 1, 3, 0, 3, 2}
-	};
-
-	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> BottomSide{
-		{
-		indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
-		indvVertex{DirectX::XMFLOAT3(side,-side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
-		},
-		{0, 1, 2, 2, 1, 3}
-	};
-
-	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> TopSide{
-		{
-		indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(side,side,-side),   DirectX::XMFLOAT3(), { 1.0f,0.0f }},
-		indvVertex{DirectX::XMFLOAT3(-side,side,side),   DirectX::XMFLOAT3(), { 0.0f,1.0f }},
-		indvVertex{DirectX::XMFLOAT3(side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
-		},
-		{0, 3, 1, 0, 2, 3}
-	};
-};
-
-void MeshRenderer::AppendFace(const std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>>& face, 
-	float offsetX, float offsetY, float offsetZ)
-{
-	std::transform(face.first.begin(), face.first.end(), std::back_inserter(vertices), [offsetX, offsetY, offsetZ](indvVertex vertex) {
-			vertex.pos.x += offsetX * Faces::side * 2;
-			vertex.pos.y += offsetY * Faces::side * 2;
-			vertex.pos.z += offsetZ * Faces::side * 2;
-			return std::move(vertex);
-		});
-	const int offset = (vertices.size() / 4 - 1) * 4;
-	std::transform(face.second.begin(), face.second.end(), std::back_inserter(indices), [offset](int a) {return offset + a;});
-}
 
 MeshRenderer::MeshRenderer(Graphics& gfx)
 	: gfx(gfx)
 {
-	AppendFace(Faces::NearSide, 0.0f, 0.0f, 0.0f);
-	AppendFace(Faces::NearSide, 1.0f, 0.0f, 0.0f);
-
-	AppendFace(Faces::FarSide, 0.0f, 0.0f, 0.0f);
-	AppendFace(Faces::FarSide, 1.0f, 0.0f, 0.0f);
-
-	AppendFace(Faces::LeftSide, 0.0f, 0.0f, 0.0f);
-	AppendFace(Faces::LeftSide, 1.0f, 0.0f, 0.0f);
-
-	//AppendFace(Faces::RightSide, 0.0f, 0.0f, 0.0f);
-	AppendFace(Faces::RightSide, 1.0f, 0.0f, 0.0f);
-
-	AppendFace(Faces::TopSide, 0.0f, 0.0f, 0.0f);
-	AppendFace(Faces::TopSide, 1.0f, 0.0f, 0.0f);
-
-	AppendFace(Faces::BottomSide, 0.0f, 0.0f, 0.0f);
-	AppendFace(Faces::BottomSide, 1.0f, 0.0f, 0.0f);
-
-	D3D11_BUFFER_DESC bd = {};
-	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.CPUAccessFlags = 0;
-	bd.MiscFlags = 0;
-	bd.ByteWidth = UINT(vertices.size() * sizeof(indvVertex));
-	bd.StructureByteStride = sizeof(indvVertex);
-	D3D11_SUBRESOURCE_DATA sd = {};
-	sd.pSysMem = vertices.data();
-
-	gfx.pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer);
+	
 
 	D3D11_TEXTURE2D_DESC textureDesc = {};
 	textureDesc.Width = s.GetWidth();
@@ -160,19 +51,6 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	D3DReadFileToBlob(L"TexturePS.cso", &pBlob);
 	gfx.pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
 
-	UINT count = indices.size();
-
-	D3D11_BUFFER_DESC ibd = {};
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.Usage = D3D11_USAGE_DEFAULT;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	ibd.ByteWidth = UINT(count * sizeof(unsigned short));
-	ibd.StructureByteStride = sizeof(unsigned short);
-	D3D11_SUBRESOURCE_DATA isd = {};
-	isd.pSysMem = indices.data();
-	gfx.pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer);
-
 	const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 	{
 		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
@@ -193,8 +71,34 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	gfx.pDevice->CreateBuffer(&cbd, nullptr, &pConstantBuffer);
 }
 
-void MeshRenderer::Draw(Block& block) {
-	if (block.type == BlockType::Air) return;
+void MeshRenderer::Draw(const std::vector<Vertex>& vertices, const std::vector<unsigned short>& indices, float x, float y, float z) {
+	if (vertices.empty() || indices.empty()) return;
+	D3D11_BUFFER_DESC bd = {};
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.CPUAccessFlags = 0;
+	bd.MiscFlags = 0;
+	bd.ByteWidth = UINT(vertices.size() * sizeof(Vertex));
+	bd.StructureByteStride = sizeof(Vertex);
+	D3D11_SUBRESOURCE_DATA sd = {};
+	sd.pSysMem = vertices.data();
+
+	UINT count = indices.size();
+
+	D3D11_BUFFER_DESC ibd = {};
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.Usage = D3D11_USAGE_DEFAULT;
+	ibd.CPUAccessFlags = 0;
+	ibd.MiscFlags = 0;
+	ibd.ByteWidth = UINT(count * sizeof(unsigned short));
+	ibd.StructureByteStride = sizeof(unsigned short);
+	D3D11_SUBRESOURCE_DATA isd = {};
+	isd.pSysMem = indices.data();
+	gfx.pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer);
+
+	gfx.pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer);
+
+
 	gfx.pContext->IASetVertexBuffers(0u, 1, pVertexBuffer.GetAddressOf(), &stride, &offset);
 
 	gfx.pContext->PSSetShaderResources(0, 1, pTextureView.GetAddressOf());
@@ -211,7 +115,7 @@ void MeshRenderer::Draw(Block& block) {
 
 	gfx.pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	auto model = DirectX::XMMatrixTranslation(block.x * 2.0f, block.y * 2.0f, block.z * 2.0f);
+	auto model = DirectX::XMMatrixTranslation(x * 2.0f, y * 2.0f, z * 2.0f);
 
 	const Transforms tf =
 	{

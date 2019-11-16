@@ -8,12 +8,12 @@ BasicChunk::BasicChunk(int x, int y, int z)
 	for (int ix = 0; ix < chunkSize; ix++) {
 		for (int iy = 0; iy < chunkSize; iy++) {
 			for (int iz = 0; iz < chunkSize; iz++) {
-				//if (iy % 5 == 0) continue;
 				Block& block = blocks[FlatIndex(ix, iy, iz)];
 				block.x = x + ix;
 				block.y = y + iy;
 				block.z = z + iz;
 				block.type = BlockType::Grass;
+				//if (iy % 2 == 0) block.type = BlockType::Air;
 			}
 		}
 	}

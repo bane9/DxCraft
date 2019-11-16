@@ -142,7 +142,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BasicChunk.cpp" />
-    <ClCompile Include="BlockRenderer.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DxgiInfoManager.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -165,7 +164,6 @@
   <ItemGroup>
     <ClInclude Include="BasicChunk.h" />
     <ClInclude Include="Block.h" />
-    <ClInclude Include="BlockRenderer.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CustomException.h" />
     <ClInclude Include="DxgiInfoManager.h" />
@@ -191,6 +189,7 @@
     <ClInclude Include="WinConfig.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="WorldManager.h" />
+    <ClInclude Include="XM_Structs.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">

@@ -4,14 +4,7 @@
 #include <vector>
 #include "Surface.h"
 #include "Block.h"
-
-
-struct indvVertex
-{
-	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT3 n;
-	DirectX::XMFLOAT2 tc;
-};
+#include "XM_Structs.h"
 
 class MeshRenderer
 {
@@ -20,17 +13,14 @@ public:
 	MeshRenderer(MeshRenderer&) = delete;
 	MeshRenderer& operator=(MeshRenderer&) = delete;
 
-	void Draw(Block& block);
+	void Draw(const std::vector<Vertex>& vertices, const std::vector<unsigned short>& indices, float x, float y, float z);
 
 private:
-	void AppendFace(const std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>>& face, float offsetX, float offsetY, float offsetZ);
-	std::vector<unsigned short> indices;
-	std::vector<indvVertex> vertices;
 	const float side = 1.0f;
 	Graphics& gfx;
 
 	const UINT offset = 0u;
-	UINT stride = sizeof(indvVertex);
+	UINT stride = sizeof(Vertex);
 
 	Surface s = Surface::FromFile("images\\block_face.png");
 

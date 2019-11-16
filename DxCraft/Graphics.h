@@ -16,20 +16,9 @@
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "D3DCompiler.lib")
 
-struct Vertex
-{
-	DirectX::XMFLOAT3 pos;
-	struct
-	{
-		float u;
-		float v;
-	} tex;
-};
-
 class Graphics
 {
 	friend class MeshRenderer;
-	friend class BlockRenderer;
 public:
 	Graphics(HWND hWnd, size_t width, size_t height);
 	Graphics(Graphics&) = delete;
