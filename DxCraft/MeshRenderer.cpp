@@ -1,6 +1,7 @@
 #include "MeshRenderer.h"
 #include <array>
 #include <utility>
+#include <algorithm>
 
 #pragma warning(disable : 26812)
 
@@ -19,8 +20,9 @@ struct Faces {
 			indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
 			indvVertex{DirectX::XMFLOAT3(side,side,-side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
 		},
-		{0,2,1,2,3,1}
+		{0, 2, 1, 2, 3, 1}
 	};
+
 	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> FarSide{
 		{
 		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
@@ -28,8 +30,9 @@ struct Faces {
 		indvVertex{DirectX::XMFLOAT3(-side,side,side),   DirectX::XMFLOAT3(), { 0.0f,1.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,side,side) ,	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
 		},
-		{4,5,7,4,7,6}
-	};													 
+		{0, 1, 3, 0, 3, 2}
+	};					
+
 	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> LeftSide{
 		{
 		indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
@@ -37,8 +40,9 @@ struct Faces {
 		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(-side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
 		},
-		{8,10,9,10,11,9}
-	};													 
+		{0, 2, 1, 2, 3, 1}
+	};		
+
 	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> RightSide{
 		{
 		indvVertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
@@ -46,8 +50,9 @@ struct Faces {
 		indvVertex{DirectX::XMFLOAT3(side,-side,side),   DirectX::XMFLOAT3(), { 1.0f,0.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
 		},
-		{12,13,15,12,15,14}
+		{0, 1, 3, 0, 3, 2}
 	};
+
 	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> BottomSide{
 		{
 		indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
@@ -55,8 +60,9 @@ struct Faces {
 		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,-side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
 		},
-		{16,17,18,18,17,19}
+		{0, 1, 2, 2, 1, 3}
 	};
+
 	static constexpr std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> TopSide{
 		{
 		indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
@@ -64,82 +70,31 @@ struct Faces {
 		indvVertex{DirectX::XMFLOAT3(-side,side,side),   DirectX::XMFLOAT3(), { 0.0f,1.0f }},
 		indvVertex{DirectX::XMFLOAT3(side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
 		},
-		{20,23,21,20,22,23}
+		{0, 3, 1, 0, 2, 3}
 	};
 };
+
+void MeshRenderer::AppendFace(std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> face)
+{
+	std::copy(face.first.begin(), face.first.end(), std::back_inserter(vertices));
+	int offset = (vertices.size() / 4 - 1) * 4;
+	indices.push_back(offset + face.second[0]);
+	indices.push_back(offset + face.second[1]);
+	indices.push_back(offset + face.second[2]);
+	indices.push_back(offset + face.second[3]);
+	indices.push_back(offset + face.second[4]);
+	indices.push_back(offset + face.second[5]);
+}
 
 MeshRenderer::MeshRenderer(Graphics& gfx)
 	: gfx(gfx)
 {
-	std::vector<indvVertex> vertices(28);
-	vertices[0].pos = { -side,-side,-side };// 0 near side
-	vertices[1].pos = { side,-side,-side };// 1
-	vertices[2].pos = { -side,side,-side };// 2
-	vertices[3].pos = { side,side,-side };// 3
-
-	vertices[4].pos = { -side,-side,side };// 4 far side
-	vertices[5].pos = { side,-side,side };// 5
-	vertices[6].pos = { -side,side,side };// 6
-	vertices[7].pos = { side,side,side };// 7
-
-	vertices[8].pos = { -side,-side,-side };// 8 left side
-	vertices[9].pos = { -side,side,-side };// 9
-	vertices[10].pos = { -side,-side,side };// 10
-	vertices[11].pos = { -side,side,side };// 11
-
-	vertices[12].pos = { side,-side,-side };// 12 right side
-	vertices[13].pos = { side,side,-side };// 13
-	vertices[14].pos = { side,-side,side };// 14
-	vertices[15].pos = { side,side,side };// 15
-
-	vertices[16].pos = { -side,-side,-side };// 16 bottom side
-	vertices[17].pos = { side,-side,-side };// 17
-	vertices[18].pos = { -side,-side,side };// 18
-	vertices[19].pos = { side,-side,side };// 19
-
-	vertices[20].pos = { -side,side,-side };// 20 top side
-	vertices[21].pos = { side,side,-side };// 21
-	vertices[22].pos = { -side,side,side };// 22
-	vertices[23].pos = { side,side,side };// 23
-
-	vertices[0].tc = { 0.0f,0.0f };//far
-	vertices[1].tc = { 1.0f,0.0f };
-	vertices[2].tc = { 0.0f,1.0f };
-	vertices[3].tc = { 1.0f,1.0f };
-
-	vertices[4].tc = { 0.0f,0.0f };//near
-	vertices[5].tc = { 1.0f,0.0f };
-	vertices[6].tc = { 0.0f,1.0f };
-	vertices[7].tc = { 1.0f,1.0f };
-
-	vertices[8].tc = { 0.0f,0.0f };//left
-	vertices[9].tc = { 0.0f,1.0f };
-	vertices[10].tc = { 1.0f,0.0f };
-	vertices[11].tc = { 1.0f,1.0f };
-
-	vertices[12].tc = { 0.0f,0.0f };//right
-	vertices[13].tc = { 0.0f,1.0f };
-	vertices[14].tc = { 1.0f,0.0f };
-	vertices[15].tc = { 1.0f,1.0f };
-
-	vertices[16].tc = { 0.0f,0.0f };//bottom
-	vertices[17].tc = { 1.0f,0.0f };
-	vertices[18].tc = { 0.0f,1.0f };
-	vertices[19].tc = { 1.0f,1.0f };
-
-	vertices[20].tc = { 0.0f,0.0f };//top
-	vertices[21].tc = { 1.0f,0.0f };
-	vertices[22].tc = { 0.0f,1.0f };
-	vertices[23].tc = { 1.0f,1.0f };
-
-	indices = {
-			0,2,1,2,3,1,//far
-			4,5,7,4,7,6,//near
-			8,10,9,10,11,9,//left
-			12,13,15,12,15,14,//right
-			16,17,18,18,17,19,//bottom
-			20,23,21,20,22,23//top
-	};
+	AppendFace(Faces::NearSide);
+	AppendFace(Faces::FarSide);
+	//AppendFace(Faces::LeftSide);
+	AppendFace(Faces::RightSide);
+	AppendFace(Faces::BottomSide);
+	//AppendFace(Faces::TopSide);
 
 	D3D11_BUFFER_DESC bd = {};
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
