@@ -6,8 +6,6 @@
 #include <vector>
 #include <unordered_map>
 
-auto asd = []() {return true; };
-
 class WorldManager
 {
 public:
@@ -17,7 +15,8 @@ public:
 	void CreateChunk(int x, int y, int z);
 	void Draw();
 private:
-	bool isVisible(const BasicChunk& chunk, const Block& block);
-	std::unordered_map < Position, BasicChunk, PositionHash, PositionComparator > chunks;
+	Block* getBlock(int x, int y, int z);
+	bool isVisible(const Block& block);
+	std::unordered_map <Position, BasicChunk, PositionHash> chunks;
 	BlockRenderer renderer;
 };

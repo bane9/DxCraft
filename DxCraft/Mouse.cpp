@@ -12,9 +12,13 @@ std::optional<Mouse::RawDelta> Mouse::ReadRawDelta() noexcept
 	if (rawDeltaBuffer.empty()) {
 		return {};
 	}
-	const RawDelta d = rawDeltaBuffer.front();
-	rawDeltaBuffer.pop();
-	return d;
+	try { // Fix later
+		const RawDelta d = rawDeltaBuffer.front();
+		rawDeltaBuffer.pop();
+		return d;
+	}
+	catch (...) {}
+	return {};
 }
 
 int Mouse::GetPosX() const noexcept

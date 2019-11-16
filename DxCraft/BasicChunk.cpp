@@ -44,11 +44,6 @@ inline Position BasicChunk::Normalize(int x, int y, int z) const noexcept
 	return { std::abs(x - this->x) % chunkSize, std::abs(y - this->y) % chunkSize, std::abs(z - this->z) % chunkSize };
 }
 
-inline int BasicChunk::FlatIndexPure(int x, int y, int z) noexcept
-{
-	return x + chunkSize * (y + chunkSize * z);
-}
-
 inline int BasicChunk::FlatIndex(int x, int y, int z) const noexcept
 {
 	Position p = Normalize(x, y, z);

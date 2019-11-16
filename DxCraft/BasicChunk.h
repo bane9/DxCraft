@@ -7,6 +7,9 @@
 struct Position {
 	Position(int x, int y, int z) : x(x), y(y), z(z) {}
 	Position() = default;
+	bool operator==(const Position& other) const {
+		return x == other.x && y == other.y && z == other.z;
+	}
 	int x, y, z;
 };
 
@@ -14,12 +17,6 @@ struct PositionHash {
 	std::size_t operator()(const Position& position) const {
 		std::hash<int> hash;
 		return ((hash(position.x) ^ hash(position.y)) << 1) ^ (hash(position.z) << 1);
-	}
-};
-
-struct PositionComparator {
-	bool operator()(const Position& first, const Position& second) const {
-		return first.x == second.x && first.y == second.y && first.z == second.z;
 	}
 };
 
@@ -35,7 +32,6 @@ public:
 
 private:
 	Position Normalize(int x, int y, int z) const noexcept;
-	inline int FlatIndexPure(int x, int y, int z) noexcept;
 	inline int FlatIndex(int x, int y, int z) const noexcept;
 	static constexpr int chunkSize = 16;
 	std::vector<Block> blocks;
