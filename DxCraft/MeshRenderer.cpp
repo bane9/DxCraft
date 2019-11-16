@@ -1,4 +1,6 @@
 #include "MeshRenderer.h"
+#include <array>
+
 
 #pragma warning(disable : 26812)
 
@@ -8,13 +10,50 @@ struct Transforms
 	DirectX::XMMATRIX model;
 };
 
-
+struct Faces {
+	static constexpr float side = 2.0f;
+	static constexpr std::array<indvVertex, 4> NearSide{
+		indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
+		indvVertex{DirectX::XMFLOAT3(side,side,-side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+	};
+	static constexpr std::array<indvVertex, 4> FarSide{
+		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(side,-side,side),   DirectX::XMFLOAT3(), { 1.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(-side,side,side),   DirectX::XMFLOAT3(), { 0.0f,1.0f }},
+		indvVertex{DirectX::XMFLOAT3(side,side,side) ,	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+	};													 
+	static constexpr std::array<indvVertex, 4> LeftSide{
+		indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
+		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(-side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+	};													 
+	static constexpr std::array<indvVertex, 4> RightSide{
+		indvVertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(side,side,-side),   DirectX::XMFLOAT3(), { 0.0f,1.0f }},
+		indvVertex{DirectX::XMFLOAT3(side,-side,side),   DirectX::XMFLOAT3(), { 1.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+	};
+	static constexpr std::array<indvVertex, 4> BottomSide{
+		indvVertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
+		indvVertex{DirectX::XMFLOAT3(side,-side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+	};
+	static constexpr std::array<indvVertex, 4> TopSide{
+		indvVertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 0.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(side,side,-side),   DirectX::XMFLOAT3(), { 1.0f,0.0f }},
+		indvVertex{DirectX::XMFLOAT3(-side,side,side),   DirectX::XMFLOAT3(), { 0.0f,1.0f }},
+		indvVertex{DirectX::XMFLOAT3(side,side,side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+	};
+};
 
 MeshRenderer::MeshRenderer(Graphics& gfx)
 	: gfx(gfx)
 {
-	std::vector<indvVertex> vertices(24);
-	float side = 2.0f;
+	std::vector<indvVertex> vertices(28);
 	vertices[0].pos = { -side,-side,-side };// 0 near side
 	vertices[1].pos = { side,-side,-side };// 1
 	vertices[2].pos = { -side,side,-side };// 2
@@ -55,8 +94,8 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	vertices[6].tc = { 0.0f,1.0f };
 	vertices[7].tc = { 1.0f,1.0f };
 
-	vertices[8].tc =  { 0.0f,0.0f };
-	vertices[9].tc =  { 0.0f,1.0f };
+	vertices[8].tc = { 0.0f,0.0f };
+	vertices[9].tc = { 0.0f,1.0f };
 	vertices[10].tc = { 1.0f,0.0f };
 	vertices[11].tc = { 1.0f,1.0f };
 
@@ -76,30 +115,13 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	vertices[23].tc = { 1.0f,1.0f };
 
 	indices = {
-			0,2, 1,		2,3,1,
-			4,5, 7,		4,7,6,
-			8,10, 9,	10,11,9,
-			
-			12,13,15,	12,15,14,
-			16,17,18,	18,17,19,
-			20,23,21,	20,22,23
+			0,2,1,2,3,1,
+			4,5,7,4,7,6,
+			//8,10,9,10,11,9,
+			12,13,15,12,15,14,
+			16,17,18,18,17,19,
+			20,23,21,20,22,23
 	};
-
-	/*for (size_t i = 0; i < indices.size(); i += 3)
-	{
-		auto& v0 = vertices[indices[i]];
-		auto& v1 = vertices[indices[i + 1]];
-		auto& v2 = vertices[indices[i + 2]];
-		const auto p0 = DirectX::XMLoadFloat3(&v0.pos);
-		const auto p1 = DirectX::XMLoadFloat3(&v1.pos);
-		const auto p2 = DirectX::XMLoadFloat3(&v2.pos);
-
-		const auto n = DirectX::XMVector3Normalize(DirectX::XMVector3Cross(DirectX::XMVectorSubtract(p1, p0), DirectX::XMVectorSubtract(p2, p0)));
-
-		XMStoreFloat3(&v0.n, n);
-		XMStoreFloat3(&v1.n, n);
-		XMStoreFloat3(&v2.n, n);
-	}*/
 
 	D3D11_BUFFER_DESC bd = {};
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
