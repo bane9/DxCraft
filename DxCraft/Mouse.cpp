@@ -7,7 +7,7 @@ std::pair<int, int> Mouse::GetPos() const noexcept
 	return { x,y };
 }
 
-std::optional<Mouse::RawDelta> Mouse::ReadRawDelta() noexcept
+std::optional<Mouse::RawDelta> Mouse::ReadRawDelta()
 {
 	if (rawDeltaBuffer.empty()) {
 		return {};
