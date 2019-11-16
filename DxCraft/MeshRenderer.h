@@ -23,7 +23,7 @@ public:
 	void Draw(Block& block);
 
 private:
-	void AppendFace(std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> face);
+	void AppendFace(const std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>>& face);
 	std::vector<unsigned short> indices;
 	std::vector<indvVertex> vertices;
 	const float side = 1.0f;

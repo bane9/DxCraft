@@ -74,16 +74,11 @@ struct Faces {
 	};
 };
 
-void MeshRenderer::AppendFace(std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>> face)
+void MeshRenderer::AppendFace(const std::pair<std::array<indvVertex, 4>, std::array<uint16_t, 6>>& face)
 {
 	std::copy(face.first.begin(), face.first.end(), std::back_inserter(vertices));
-	int offset = (vertices.size() / 4 - 1) * 4;
-	indices.push_back(offset + face.second[0]);
-	indices.push_back(offset + face.second[1]);
-	indices.push_back(offset + face.second[2]);
-	indices.push_back(offset + face.second[3]);
-	indices.push_back(offset + face.second[4]);
-	indices.push_back(offset + face.second[5]);
+	const int offset = (vertices.size() / 4 - 1) * 4;
+	std::transform(face.second.begin(), face.second.end(), std::back_inserter(indices), [offset](int a) {return offset + a;});
 }
 
 MeshRenderer::MeshRenderer(Graphics& gfx)
@@ -91,10 +86,10 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 {
 	AppendFace(Faces::NearSide);
 	AppendFace(Faces::FarSide);
-	//AppendFace(Faces::LeftSide);
+	AppendFace(Faces::LeftSide);
 	AppendFace(Faces::RightSide);
 	AppendFace(Faces::BottomSide);
-	//AppendFace(Faces::TopSide);
+	AppendFace(Faces::TopSide);
 
 	D3D11_BUFFER_DESC bd = {};
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
