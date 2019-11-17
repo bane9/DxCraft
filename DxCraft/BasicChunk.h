@@ -15,7 +15,7 @@ struct Position {
 struct PositionHash {
 	std::size_t operator()(const Position& position) const {
 		std::hash<int> hash;
-		return ((hash(position.x) ^ hash(position.y)) << 1) ^ (hash(position.z) << 1);
+		return hash(position.x) ^ hash(position.y) ^ hash(position.z);
 	}
 };
 
