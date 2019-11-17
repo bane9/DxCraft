@@ -2,6 +2,7 @@
 #include "Block.h"
 #include <vector>
 #include <unordered_map>
+#include "XM_Structs.h"
 
 struct Position {
 	Position(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {}
@@ -22,6 +23,7 @@ struct PositionHash {
 class BasicChunk
 {
 	friend class WorldManager;
+	friend class MeshRenderer;
 public:
 	BasicChunk(int x, int y, int z);
 	void AddBlock(int x, int y, int z, BlockType type) noexcept;
@@ -33,6 +35,8 @@ private:
 	Position Normalize(int x, int y, int z) const noexcept;
 	inline int FlatIndex(int x, int y, int z) const noexcept;
 	std::vector<Block> blocks;
+	std::vector<Vertex> vertices;
+	std::vector<unsigned short> indices;
 	int x, y, z;
 };
 

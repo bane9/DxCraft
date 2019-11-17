@@ -2,7 +2,6 @@
 #include <array>
 #include <utility>
 #include <algorithm>
-#include "BasicChunk.h"
 
 #pragma warning(disable : 26812)
 
@@ -71,19 +70,19 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	gfx.pDevice->CreateBuffer(&cbd, nullptr, &pConstantBuffer);
 }
 
-void MeshRenderer::Draw(const std::vector<Vertex>& vertices, const std::vector<unsigned short>& indices, float x, float y, float z) {
-	if (vertices.empty() || indices.empty()) return;
+void MeshRenderer::Draw(const BasicChunk& chunk) {
+	if (chunk.vertices.empty() || chunk.indices.empty()) return;
 	D3D11_BUFFER_DESC bd = {};
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
-	bd.ByteWidth = UINT(vertices.size() * sizeof(Vertex));
+	bd.ByteWidth = UINT(chunk.vertices.size() * sizeof(Vertex));
 	bd.StructureByteStride = sizeof(Vertex);
 	D3D11_SUBRESOURCE_DATA sd = {};
-	sd.pSysMem = vertices.data();
+	sd.pSysMem = chunk.vertices.data();
 
-	UINT count = indices.size();
+	UINT count = chunk.indices.size();
 
 	D3D11_BUFFER_DESC ibd = {};
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -93,7 +92,7 @@ void MeshRenderer::Draw(const std::vector<Vertex>& vertices, const std::vector<u
 	ibd.ByteWidth = UINT(count * sizeof(unsigned short));
 	ibd.StructureByteStride = sizeof(unsigned short);
 	D3D11_SUBRESOURCE_DATA isd = {};
-	isd.pSysMem = indices.data();
+	isd.pSysMem = chunk.indices.data();
 	gfx.pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer);
 
 	gfx.pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer);
@@ -115,7 +114,7 @@ void MeshRenderer::Draw(const std::vector<Vertex>& vertices, const std::vector<u
 
 	gfx.pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	auto model = DirectX::XMMatrixTranslation(x * 2.0f, y * 2.0f, z * 2.0f);
+	auto model = DirectX::XMMatrixTranslation(chunk.x * 2.0f, chunk.y * 2.0f, chunk.z * 2.0f);
 
 	const Transforms tf =
 	{
@@ -130,5 +129,5 @@ void MeshRenderer::Draw(const std::vector<Vertex>& vertices, const std::vector<u
 
 	gfx.pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
 
-	gfx.pContext->DrawIndexed(indices.size(), 0, 0);
+	gfx.pContext->DrawIndexed(chunk.indices.size(), 0, 0);
 }

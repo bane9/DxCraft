@@ -5,6 +5,7 @@
 #include "Surface.h"
 #include "Block.h"
 #include "XM_Structs.h"
+#include "BasicChunk.h"
 
 class MeshRenderer
 {
@@ -13,7 +14,7 @@ public:
 	MeshRenderer(MeshRenderer&) = delete;
 	MeshRenderer& operator=(MeshRenderer&) = delete;
 
-	void Draw(const std::vector<Vertex>& vertices, const std::vector<unsigned short>& indices, float x, float y, float z);
+	void Draw(const BasicChunk& chunk);
 
 private:
 	const float side = 1.0f;
