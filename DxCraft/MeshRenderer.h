@@ -6,6 +6,7 @@
 #include "Block.h"
 #include "XM_Structs.h"
 #include "BasicChunk.h"
+#include <tuple>
 
 class MeshRenderer
 {
@@ -14,7 +15,8 @@ public:
 	MeshRenderer(MeshRenderer&) = delete;
 	MeshRenderer& operator=(MeshRenderer&) = delete;
 
-	void Draw(const BasicChunk& chunk);
+	void Draw();
+	void AppendData(BasicChunk& chunk);
 
 private:
 	const float side = 1.0f;
@@ -25,13 +27,13 @@ private:
 
 	Surface s = Surface::FromFile("images\\block_face.png");
 
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
+	std::vector<std::tuple<Microsoft::WRL::ComPtr<ID3D11Buffer>, Microsoft::WRL::ComPtr<ID3D11Buffer>, BasicChunk*>> renderData;
+
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture;
 	Microsoft::WRL::ComPtr<ID3DBlob> pBytecodeBlob;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> pSampler;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;

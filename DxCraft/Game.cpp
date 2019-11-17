@@ -20,7 +20,7 @@ Game::Game(size_t width, size_t height)
 	cam.SetPos(-3.0f, 3.0f, -25.0f);
 	cam.setTravelSpeed(cameraSpeed);
 
-	const int area = 2;
+	const int area = 10;
 	for (int x = 0; x < area; x++) {
 		for (int z = 0; z < area; z++) {
 			wManager.CreateChunk(x, 0, z);

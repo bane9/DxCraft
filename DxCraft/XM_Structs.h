@@ -20,10 +20,10 @@ struct Faces {
 	static constexpr float side = 1.0f;
 	static constexpr std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>> NearSide{
 		{
-			Vertex{DirectX::XMFLOAT3(-side ,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
-			Vertex{DirectX::XMFLOAT3(side ,-side,-side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
-			Vertex{DirectX::XMFLOAT3(-side ,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
-			Vertex{DirectX::XMFLOAT3(side ,side,-side),	 DirectX::XMFLOAT3(), { 1.0f,1.0f }}
+		Vertex{DirectX::XMFLOAT3(-side ,-side,-side), DirectX::XMFLOAT3(), { 0.0f,0.0f }},
+		Vertex{DirectX::XMFLOAT3(side ,-side,-side),  DirectX::XMFLOAT3(), { 1.0f,0.0f }},
+		Vertex{DirectX::XMFLOAT3(-side ,side,-side),  DirectX::XMFLOAT3(), { 0.0f,1.0f }},
+		Vertex{DirectX::XMFLOAT3(side ,side,-side),	  DirectX::XMFLOAT3(), { 1.0f,1.0f }}
 		},
 		{0, 2, 1, 2, 3, 1}
 	};

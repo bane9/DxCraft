@@ -15,14 +15,12 @@ void WorldManager::CreateChunk(int x, int y, int z)
 		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize));
 	const auto& chunk = chunks.find(position);
 	GenerateMesh(chunk->second);
-
+	renderer.AppendData(chunk->second);
 }
 
 void WorldManager::Draw()
 {
-	for (auto& chunk : chunks) {
-		renderer.Draw(chunk.second);
-	}
+	renderer.Draw();
 }
 
 void WorldManager::AppendFace(const std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>>& face, 

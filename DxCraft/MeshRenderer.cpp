@@ -8,7 +8,6 @@
 MeshRenderer::MeshRenderer(Graphics& gfx)
 	: gfx(gfx)
 {
-	
 
 	D3D11_TEXTURE2D_DESC textureDesc = {};
 	textureDesc.Width = s.GetWidth();
@@ -70,8 +69,57 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	gfx.pDevice->CreateBuffer(&cbd, nullptr, &pConstantBuffer);
 }
 
-void MeshRenderer::Draw(const BasicChunk& chunk) {
+void MeshRenderer::Draw() {
+	
+	for (auto chunkData : renderData) {
+
+		Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer = std::get<0>(chunkData);
+		Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer = std::get<1>(chunkData);
+
+		gfx.pContext->IASetVertexBuffers(0u, 1, pVertexBuffer.GetAddressOf(), &stride, &offset);
+
+		gfx.pContext->PSSetShaderResources(0, 1, pTextureView.GetAddressOf());
+
+		gfx.pContext->PSSetSamplers(0, 1, pSampler.GetAddressOf());
+
+		gfx.pContext->VSSetShader(pVertexShader.Get(), nullptr, 0);
+
+		gfx.pContext->PSSetShader(pPixelShader.Get(), nullptr, 0);
+
+		gfx.pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+
+		gfx.pContext->IASetInputLayout(pInputLayout.Get());
+
+		gfx.pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		BasicChunk* chunk = std::get<2>(chunkData);
+
+		auto model = DirectX::XMMatrixTranslation(chunk->x * 2.0f, chunk->y * 2.0f, chunk->z * 2.0f);
+
+		const Transforms tf =
+		{
+			DirectX::XMMatrixTranspose(model * gfx.camera * gfx.projection),
+			DirectX::XMMatrixTranspose(model)
+		};
+
+		D3D11_MAPPED_SUBRESOURCE msr;
+		gfx.pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+		memcpy(msr.pData, &tf, sizeof(tf));
+		gfx.pContext->Unmap(pConstantBuffer.Get(), 0);
+
+		gfx.pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
+
+		gfx.pContext->DrawIndexed(chunk->indices.size(), 0, 0);
+	}
+}
+
+void MeshRenderer::AppendData(BasicChunk& chunk)
+{
 	if (chunk.vertices.empty() || chunk.indices.empty()) return;
+
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
+
 	D3D11_BUFFER_DESC bd = {};
 	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bd.Usage = D3D11_USAGE_DEFAULT;
@@ -96,38 +144,5 @@ void MeshRenderer::Draw(const BasicChunk& chunk) {
 	gfx.pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer);
 
 	gfx.pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer);
-
-
-	gfx.pContext->IASetVertexBuffers(0u, 1, pVertexBuffer.GetAddressOf(), &stride, &offset);
-
-	gfx.pContext->PSSetShaderResources(0, 1, pTextureView.GetAddressOf());
-
-	gfx.pContext->PSSetSamplers(0, 1, pSampler.GetAddressOf());
-
-	gfx.pContext->VSSetShader(pVertexShader.Get(), nullptr, 0);
-
-	gfx.pContext->PSSetShader(pPixelShader.Get(), nullptr, 0);
-
-	gfx.pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
-
-	gfx.pContext->IASetInputLayout(pInputLayout.Get());
-
-	gfx.pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	auto model = DirectX::XMMatrixTranslation(chunk.x * 2.0f, chunk.y * 2.0f, chunk.z * 2.0f);
-
-	const Transforms tf =
-	{
-		DirectX::XMMatrixTranspose(model * gfx.camera * gfx.projection),
-		DirectX::XMMatrixTranspose(model)
-	};
-
-	D3D11_MAPPED_SUBRESOURCE msr;
-	gfx.pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, &tf, sizeof(tf));
-	gfx.pContext->Unmap(pConstantBuffer.Get(), 0);
-
-	gfx.pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
-
-	gfx.pContext->DrawIndexed(chunk.indices.size(), 0, 0);
+	renderData.push_back({std::move(pVertexBuffer), std::move(pIndexBuffer), &chunk});
 }
