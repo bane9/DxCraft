@@ -14,8 +14,10 @@ BasicChunk::BasicChunk(int x, int y, int z)
 				block.z = z + iz;
 				if (iy == 15)
 					block.type = BlockType::Grass;
-				else if (iy > 0 && iy < 15)
+				else if (iy >= 12 && iy < 15)
 					block.type = BlockType::Dirt;
+				else if (iy > 0 && iy < 12)
+					block.type = BlockType::Stone;
 				else
 					block.type = BlockType::Bedrock;
 				//if ((iy + ix + iz) % 2 == 0) block.type = BlockType::Air;
