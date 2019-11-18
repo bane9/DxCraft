@@ -21,7 +21,7 @@ public:
 private:
 	const float side = 1.0f;
 	Graphics& gfx;
-
+	DxgiInfoManager& infoManager;
 	const UINT offset = 0u;
 	UINT stride = sizeof(Vertex);
 

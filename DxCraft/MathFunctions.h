@@ -31,7 +31,8 @@ constexpr T to_rad(T deg)
 	return deg * PI / (T)180.0;
 }
 
-inline int FixedMod(int a, int b) 
+template<typename T>
+inline constexpr T FixedMod(T a, T b) 
 { 
 	return (a % b + b) % b; 
 }

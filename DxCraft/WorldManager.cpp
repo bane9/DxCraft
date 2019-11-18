@@ -13,9 +13,9 @@ void WorldManager::CreateChunk(int x, int y, int z)
 	const auto position = Position(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize);
 	chunks.emplace(position,
 		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize));
-	const auto& chunk = chunks.find(position);
-	GenerateMesh(chunk->second);
-	renderer.AppendData(chunk->second);
+	auto& chunk = chunks.at(position);
+	GenerateMesh(chunk);
+	renderer.AppendData(chunk);
 }
 
 void WorldManager::Draw()

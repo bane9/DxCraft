@@ -1,4 +1,5 @@
 #include "MeshRenderer.h"
+#include "ExceptionMacros.h"
 #include <array>
 #include <utility>
 #include <algorithm>
@@ -6,7 +7,7 @@
 #pragma warning(disable : 26812)
 
 MeshRenderer::MeshRenderer(Graphics& gfx)
-	: gfx(gfx)
+	: gfx(gfx), infoManager(gfx.infoManager)
 {
 
 	D3D11_TEXTURE2D_DESC textureDesc = {};
@@ -24,14 +25,14 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	D3D11_SUBRESOURCE_DATA sd1 = {};
 	sd1.pSysMem = s.GetBufferPtr();
 	sd1.SysMemPitch = s.GetWidth() * sizeof(Surface::Color);
-	gfx.pDevice->CreateTexture2D(&textureDesc, &sd1, &pTexture);
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateTexture2D(&textureDesc, &sd1, &pTexture));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = textureDesc.Format;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = 1;
-	gfx.pDevice->CreateShaderResourceView(pTexture.Get(), &srvDesc, &pTextureView);
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateShaderResourceView(pTexture.Get(), &srvDesc, &pTextureView));
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -39,15 +40,15 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 
-	gfx.pDevice->CreateSamplerState(&samplerDesc, &pSampler);
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateSamplerState(&samplerDesc, &pSampler));
 
 	D3DReadFileToBlob(L"TextureVS.cso", &pBytecodeBlob);
-	gfx.pDevice->CreateVertexShader(pBytecodeBlob->GetBufferPointer(), pBytecodeBlob->GetBufferSize(), nullptr, &pVertexShader);
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateVertexShader(pBytecodeBlob->GetBufferPointer(), pBytecodeBlob->GetBufferSize(), nullptr, &pVertexShader));
 
 	auto blobVS = pBytecodeBlob.Get();
 
 	D3DReadFileToBlob(L"TexturePS.cso", &pBlob);
-	gfx.pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader);
+	GFX_EXCEPT_INFO(gfx.pDevice->CreatePixelShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pPixelShader));
 
 	const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 	{
@@ -56,7 +57,7 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 		{ "TexCoord",0,DXGI_FORMAT_R32G32_FLOAT,0,24,D3D11_INPUT_PER_VERTEX_DATA,0 },
 	};
 
-	gfx.pDevice->CreateInputLayout(ied.data(), static_cast<UINT>(ied.size()), blobVS->GetBufferPointer(), blobVS->GetBufferSize(), &pInputLayout);
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateInputLayout(ied.data(), static_cast<UINT>(ied.size()), blobVS->GetBufferPointer(), blobVS->GetBufferSize(), &pInputLayout));
 
 	D3D11_BUFFER_DESC cbd;
 	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -66,12 +67,12 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	cbd.ByteWidth = sizeof(Transforms);
 	cbd.StructureByteStride = 0;
 
-	gfx.pDevice->CreateBuffer(&cbd, nullptr, &pConstantBuffer);
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateBuffer(&cbd, nullptr, &pConstantBuffer));
 }
 
 void MeshRenderer::Draw(const BasicChunk& chunk) {
 
-		gfx.pContext->IASetVertexBuffers(0u, 1, chunk.pVertexBuffer.GetAddressOf(), &stride, &offset);
+		gfx.pContext->IASetVertexBuffers(0, 1, chunk.pVertexBuffer.GetAddressOf(), &stride, &offset);
 
 		gfx.pContext->PSSetShaderResources(0, 1, pTextureView.GetAddressOf());
 
@@ -133,9 +134,10 @@ void MeshRenderer::AppendData(BasicChunk& chunk)
 	ibd.StructureByteStride = sizeof(unsigned short);
 	D3D11_SUBRESOURCE_DATA isd = {};
 	isd.pSysMem = chunk.indices.data();
-	gfx.pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer);
-
-	gfx.pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer);
+	
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer));
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer));
+	
 	chunk.pVertexBuffer = std::move(pVertexBuffer);
 	chunk.pIndexBuffer = std::move(pIndexBuffer);
 }

@@ -24,5 +24,6 @@ private:
 	bool showCursor = true;
 	float skyIntesity = 0.5f;
 	float cameraSpeed = 15.0f;
+	int chunkZ = 0;
 	WorldManager wManager;
 };

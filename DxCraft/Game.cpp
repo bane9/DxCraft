@@ -19,13 +19,9 @@ Game::Game(size_t width, size_t height)
 
 	cam.SetPos(0.0f, 50.0f, 0.0f);
 	cam.setTravelSpeed(cameraSpeed);
-
-	const int area = 5;
-	for (int x = 0; x < area; x++) {
-		for (int z = 0; z < area; z++) {
-			wManager.CreateChunk(x, 0, z);
-		}
-	}
+	
+	++chunkZ;
+	wManager.CreateChunk(0, 0, chunkZ);
 } 
 
 void Game::doFrame()
@@ -61,34 +57,9 @@ void Game::doFrame()
 					wnd.mouse.DisableRaw();
 				}
 				break;
-			}
-
-		}
-
-		while (auto e = wnd.kbd.ReadKey())
-		{
-			if (e->GetCode() == VK_SHIFT) {
-				if (e->isPress())
-					cam.setTravelSpeed(40.0f);
-				else cam.setTravelSpeed(20.0f);
-				continue;
-			}
-
-			if (!e->isPress())
-			{
-				continue;
-			}
-
-			switch (e->GetCode())
-			{
-			case VK_ESCAPE:
-				if (!showCursor)
-				{
-					wnd.enableCursor();
-					showCursor = true;
-					wnd.mouse.DisableRaw();
-				}
-				break;
+			case 'N':
+				++chunkZ;
+				wManager.CreateChunk(0, 0, chunkZ);
 			}
 
 		}
