@@ -21,11 +21,13 @@ public:
 private:
 	const float side = 1.0f;
 	Graphics& gfx;
+#ifdef _DEBUG
 	DxgiInfoManager& infoManager;
+#endif
 	const UINT offset = 0u;
 	UINT stride = sizeof(Vertex);
 
-	Surface s = Surface::FromFile("images\\block_face.png");
+	Surface s = Surface::FromFile("images\\texturepack.png");
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture;

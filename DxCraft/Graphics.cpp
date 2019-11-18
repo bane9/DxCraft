@@ -64,7 +64,7 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	if (adapter < 0) adapter = 0;
 
 	GFX_EXCEPT_INFO(D3D11CreateDeviceAndSwapChain(
-		vAdapters[adapter],
+		vAdapters[0],
 		D3D_DRIVER_TYPE_UNKNOWN,
 		nullptr,
 		swapCreateFlags,

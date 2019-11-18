@@ -7,9 +7,12 @@
 #pragma warning(disable : 26812)
 
 MeshRenderer::MeshRenderer(Graphics& gfx)
-	: gfx(gfx), infoManager(gfx.infoManager)
+	: gfx(gfx)
+#ifdef _DEBUG
+	, infoManager(gfx.infoManager)
+#endif
+	
 {
-
 	D3D11_TEXTURE2D_DESC textureDesc = {};
 	textureDesc.Width = s.GetWidth();
 	textureDesc.Height = s.GetHeight();
@@ -35,7 +38,7 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	GFX_EXCEPT_INFO(gfx.pDevice->CreateShaderResourceView(pTexture.Get(), &srvDesc, &pTextureView));
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -118,25 +121,25 @@ void MeshRenderer::AppendData(BasicChunk& chunk)
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.CPUAccessFlags = 0;
 	bd.MiscFlags = 0;
-	bd.ByteWidth = UINT(chunk.vertices.size() * sizeof(Vertex));
+	bd.ByteWidth = static_cast<UINT>(chunk.vertices.size() * sizeof(Vertex));
 	bd.StructureByteStride = sizeof(Vertex);
 	D3D11_SUBRESOURCE_DATA sd = {};
 	sd.pSysMem = chunk.vertices.data();
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer));
+
 
 	UINT count = chunk.indices.size();
-
 	D3D11_BUFFER_DESC ibd = {};
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.Usage = D3D11_USAGE_DEFAULT;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
-	ibd.ByteWidth = UINT(count * sizeof(unsigned short));
+	ibd.ByteWidth = static_cast<UINT>(count * sizeof(unsigned short));
 	ibd.StructureByteStride = sizeof(unsigned short);
 	D3D11_SUBRESOURCE_DATA isd = {};
 	isd.pSysMem = chunk.indices.data();
-	
 	GFX_EXCEPT_INFO(gfx.pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer));
-	GFX_EXCEPT_INFO(gfx.pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer));
+	
 	
 	chunk.pVertexBuffer = std::move(pVertexBuffer);
 	chunk.pIndexBuffer = std::move(pIndexBuffer);

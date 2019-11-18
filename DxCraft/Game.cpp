@@ -17,11 +17,26 @@ Game::Game(size_t width, size_t height)
 		wnd.mouse.EnableRaw();
 	}
 
-	cam.SetPos(0.0f, 50.0f, 0.0f);
+	cam.SetPos(-10.0f, 50.0f, -10.0f);
 	cam.setTravelSpeed(cameraSpeed);
 	
-	++chunkZ;
-	wManager.CreateChunk(0, 0, chunkZ);
+	/*++chunkZ;
+	wManager.CreateChunk(0, 0, chunkZ);*/
+
+	const int area = 5;
+	/*for (int x = 0; x < (2 * area) / 5; x++) {
+		for (int y = 0; y < area / 5; y++) {
+			for (int z = 0; z < (2 * area) / 5; z++) {
+				wManager.CreateChunk(x, y, z);
+			}
+		}
+	}*/
+
+	for (int x = 0; x < area; x++) {
+			for (int z = 0; z < area; z++) {
+				wManager.CreateChunk(x, 0, z);
+			}
+	}
 } 
 
 void Game::doFrame()

@@ -13,7 +13,7 @@ BasicChunk::BasicChunk(int x, int y, int z)
 				block.y = y + iy;
 				block.z = z + iz;
 				block.type = BlockType::Grass;
-				if ((iy + ix) % 2 == 0) block.type = BlockType::Air;
+				//if((iy + ix + iz) % 2 == 0) block.type = BlockType::Air;
 			}
 		}
 	}
