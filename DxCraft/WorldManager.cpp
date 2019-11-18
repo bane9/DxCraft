@@ -29,12 +29,18 @@ void WorldManager::Draw()
 }
 
 void WorldManager::AppendFace(const std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>>& face, 
-	BasicChunk& chunk, float offsetX, float offsetY, float offsetZ)
+	BasicChunk& chunk, const std::array<float, 2>& texture, float offsetX, float offsetY, float offsetZ)
 {
-	std::transform(face.first.begin(), face.first.end(), std::back_inserter(chunk.vertices), [offsetX, offsetY, offsetZ](Vertex vertex) {
+	std::transform(face.first.begin(), face.first.end(), std::back_inserter(chunk.vertices), [offsetX, offsetY, offsetZ, &texture](Vertex vertex) {
 		vertex.pos.x += offsetX * Faces::side * 2;
 		vertex.pos.y += offsetY * Faces::side * 2;
 		vertex.pos.z += offsetZ * Faces::side * 2;
+		float startTexX = texture[0] / 16.0f;
+		float endTexX   = (texture[0] + 1.0f) / 16.0f;
+		float startTexY = texture[1] / 16.0f;
+		float endTexY   = (texture[1] + 1.0f) / 16.0f;
+		vertex.tc.x = vertex.tc.x == 1 ? startTexX : endTexX;
+		vertex.tc.y = vertex.tc.y == 1 ? startTexY : endTexY;
 		return std::move(vertex);
 		});
 	const int offset = (chunk.vertices.size() / 4 - 1) * 4;
@@ -75,22 +81,28 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 				if (block.type == BlockType::Air) continue;
 
 				TESTFACE(getBlock(block.x + 1, block.y, block.z)) {
-					AppendFace(Faces::RightSide, chunk, x, y, z);
+					AppendFace(Faces::RightSide, chunk, BlockFaces[static_cast<int>(block.type)][3],
+						x, y, z);
 				}
 				TESTFACE(getBlock(block.x - 1, block.y, block.z)) {
-					AppendFace(Faces::LeftSide, chunk, x, y, z);
+					AppendFace(Faces::LeftSide, chunk, BlockFaces[static_cast<int>(block.type)][2], 
+						x, y, z);
 				}
 				TESTFACE(getBlock(block.x, block.y + 1, block.z)) {
-					AppendFace(Faces::TopSide, chunk, x, y, z);
+					AppendFace(Faces::TopSide, chunk, BlockFaces[static_cast<int>(block.type)][5], 
+						x, y, z);
 				}
 				TESTFACE(getBlock(block.x, block.y - 1, block.z)) {
-					AppendFace(Faces::BottomSide, chunk, x, y, z);
+					AppendFace(Faces::BottomSide, chunk, BlockFaces[static_cast<int>(block.type)][4], 
+						x, y, z);
 				}
 				TESTFACE(getBlock(block.x, block.y, block.z + 1)) {
-					AppendFace(Faces::FarSide, chunk, x, y, z);
+					AppendFace(Faces::FarSide, chunk, BlockFaces[static_cast<int>(block.type)][0],
+						x, y, z);
 				}
 				TESTFACE(getBlock(block.x, block.y, block.z - 1)) {
-					AppendFace(Faces::NearSide, chunk, x, y, z);
+					AppendFace(Faces::NearSide, chunk, BlockFaces[static_cast<int>(block.type)][1],
+						x, y, z);
 				}
 			}
 		}
@@ -103,22 +115,28 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 				const Block& block = chunk.blocks[chunk.FlatIndex(x, y, z)];
 				if (block.type == BlockType::Air) continue;
 				if (x + 1 == BasicChunk::chunkSize || TRANSPARENT_BLOCK(chunk.blocks[chunk.FlatIndex(x + 1, y, z)])) {
-					AppendFace(Faces::RightSide, chunk, x, y, z);
+					AppendFace(Faces::RightSide, chunk, BlockFaces[static_cast<int>(block.type)][0], 
+						x, y, z);
 				}
 				if (x - 1 < 0 || TRANSPARENT_BLOCK(chunk.blocks[chunk.FlatIndex(x - 1, y, z)])) {
-					AppendFace(Faces::LeftSide, chunk, x, y, z);
+					AppendFace(Faces::LeftSide, chunk, BlockFaces[static_cast<int>(block.type)][0], 
+						x, y, z);
 				}
 				if (y + 1 == BasicChunk::chunkSize || TRANSPARENT_BLOCK(chunk.blocks[chunk.FlatIndex(x, y + 1, z)])) {
-					AppendFace(Faces::TopSide, chunk, x, y, z);
+					AppendFace(Faces::TopSide, chunk, BlockFaces[static_cast<int>(block.type)][0], 
+						x, y, z);
 				}
 				if (y - 1 < 0 || TRANSPARENT_BLOCK(chunk.blocks[chunk.FlatIndex(x, y - 1, z)])) {
-					AppendFace(Faces::BottomSide, chunk, x, y, z);
+					AppendFace(Faces::BottomSide, chunk, BlockFaces[static_cast<int>(block.type)][0], 
+						x, y, z);
 				}
 				if (z + 1 == BasicChunk::chunkSize || TRANSPARENT_BLOCK(chunk.blocks[chunk.FlatIndex(x, y, z + 1)])) {
-					AppendFace(Faces::FarSide, chunk, x, y, z);
+					AppendFace(Faces::FarSide, chunk, BlockFaces[static_cast<int>(block.type)][0],
+						x, y, z);
 				}
 				if (z - 1 < 0 || TRANSPARENT_BLOCK(chunk.blocks[chunk.FlatIndex(x, y, z - 1)])) {
-					AppendFace(Faces::NearSide, chunk, x, y, z);
+					AppendFace(Faces::NearSide, chunk, BlockFaces[static_cast<int>(block.type)][0],
+						x, y, z);
 				}
 			}
 		}

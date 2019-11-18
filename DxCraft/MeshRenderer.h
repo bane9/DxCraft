@@ -27,7 +27,7 @@ private:
 	const UINT offset = 0u;
 	UINT stride = sizeof(Vertex);
 
-	Surface s = Surface::FromFile("images\\texturepack.png");
+	Surface s = Surface::FromFile("images\\terrain.png");
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture;

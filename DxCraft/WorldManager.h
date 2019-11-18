@@ -18,7 +18,8 @@ public:
 	void Draw();
 private:
 	void GenerateMesh(BasicChunk& chunk);
-	void AppendFace(const std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>>& face, BasicChunk& chunk, float offsetX, float offsetY, float offsetZ);
+	void AppendFace(const std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>>& face, 
+		BasicChunk& chunk, const std::array<float, 2>& texture, float offsetX, float offsetY, float offsetZ);
 	Block* getBlock(int x, int y, int z);
 	std::unordered_map <Position, BasicChunk, PositionHash> chunks;
 	MeshRenderer renderer;

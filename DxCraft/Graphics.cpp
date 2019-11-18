@@ -36,10 +36,10 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.BufferCount = 1;
+	sd.BufferCount = BUFFERCOUNT;
 	sd.OutputWindow = hWnd;
 	sd.Windowed = TRUE;
-	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	sd.SwapEffect = EFFECT;
 	sd.Flags = 0;
 
 	UINT swapCreateFlags = 0u;
@@ -184,8 +184,6 @@ void Graphics::endFrame()
 	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDSV.Get());
 #endif
 }
-
-
 
 void Graphics::setResoultion(int width, int height) noexcept
 {

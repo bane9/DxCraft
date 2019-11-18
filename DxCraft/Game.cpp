@@ -19,19 +19,8 @@ Game::Game(size_t width, size_t height)
 
 	cam.SetPos(-10.0f, 50.0f, -10.0f);
 	cam.setTravelSpeed(cameraSpeed);
-	
-	/*++chunkZ;
-	wManager.CreateChunk(0, 0, chunkZ);*/
 
 	const int area = 10;
-	/*for (int x = 0; x < (2 * area) / 5; x++) {
-		for (int y = 0; y < area / 5; y++) {
-			for (int z = 0; z < (2 * area) / 5; z++) {
-				wManager.CreateChunk(x, y, z);
-			}
-		}
-	}*/
-
 	for (int x = 0; x < area; x++) {
 		for (int z = 0; z < area; z++) {
 			wManager.CreateChunk(x, 0, z);
@@ -48,6 +37,13 @@ void Game::doFrame()
 		const auto dt = timer.mark();
 		wnd.Gfx().beginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
 		wnd.Gfx().setCamera(cam.GetMatrix());
+
+		if (showCursor && ImGui::Begin("Settings")) {
+			if (ImGui::SliderFloat("Camera Speed", &cameraSpeed, 1.0f, 200.0f)) {
+				cam.setTravelSpeed(cameraSpeed);
+			}
+			ImGui::End();
+		}
 
 		while (auto e = wnd.kbd.ReadKey())
 		{
@@ -74,8 +70,10 @@ void Game::doFrame()
 				}
 				break;
 			case 'N':
+				break;
 				++chunkZ;
 				wManager.CreateChunk(0, 0, chunkZ);
+				wManager.GenerateMeshes();
 			}
 
 		}
