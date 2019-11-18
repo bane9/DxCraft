@@ -10,12 +10,15 @@ WorldManager::WorldManager(Graphics& gfx)
 void WorldManager::CreateChunk(int x, int y, int z)
 {
 	if (y < 0) return;
-	const auto position = Position(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize);
-	chunks.emplace(position,
+	chunks.emplace(Position(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize),
 		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize));
-	auto& chunk = chunks.at(position);
-	GenerateMesh(chunk);
-	renderer.AppendData(chunk);
+}
+
+void WorldManager::GenerateMeshes() {
+	for (auto& chunk : chunks) {
+		GenerateMesh(chunk.second);
+		renderer.AppendData(chunk.second);
+	}
 }
 
 void WorldManager::Draw()
@@ -57,12 +60,43 @@ Block* WorldManager::getBlock(int x, int y, int z)
 	return &chunk->second.blocks[chunk->second.FlatIndex(x, y, z)];
 }
 
-#define TRANSPARENT_BLOCK(x) x.type == BlockType::Air
+#define NEIGHBOUR_CHECKING
 
 void WorldManager::GenerateMesh(BasicChunk& chunk)
 {
 	chunk.vertices.clear();
 	chunk.indices.clear();
+#ifdef NEIGHBOUR_CHECKING
+#define TESTFACE(x) if (x == nullptr || x->type == BlockType::Air)
+	for (int x = 0; x < BasicChunk::chunkSize; x++) {
+		for (int y = 0; y < BasicChunk::chunkSize; y++) {
+			for (int z = 0; z < BasicChunk::chunkSize; z++) {
+				const Block& block = chunk.blocks[chunk.FlatIndex(x, y, z)];
+				if (block.type == BlockType::Air) continue;
+
+				TESTFACE(getBlock(block.x + 1, block.y, block.z)) {
+					AppendFace(Faces::RightSide, chunk, x, y, z);
+				}
+				TESTFACE(getBlock(block.x - 1, block.y, block.z)) {
+					AppendFace(Faces::LeftSide, chunk, x, y, z);
+				}
+				TESTFACE(getBlock(block.x, block.y + 1, block.z)) {
+					AppendFace(Faces::TopSide, chunk, x, y, z);
+				}
+				TESTFACE(getBlock(block.x, block.y - 1, block.z)) {
+					AppendFace(Faces::BottomSide, chunk, x, y, z);
+				}
+				TESTFACE(getBlock(block.x, block.y, block.z + 1)) {
+					AppendFace(Faces::FarSide, chunk, x, y, z);
+				}
+				TESTFACE(getBlock(block.x, block.y, block.z - 1)) {
+					AppendFace(Faces::NearSide, chunk, x, y, z);
+				}
+			}
+		}
+	}
+#else
+#define TRANSPARENT_BLOCK(x) x.type == BlockType::Air
 	for (int x = 0; x < BasicChunk::chunkSize; x++) {
 		for (int y = 0; y < BasicChunk::chunkSize; y++) {
 			for (int z = 0; z < BasicChunk::chunkSize; z++) {
@@ -89,4 +123,5 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 			}
 		}
 	}
+#endif
 }

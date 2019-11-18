@@ -23,7 +23,7 @@ Game::Game(size_t width, size_t height)
 	/*++chunkZ;
 	wManager.CreateChunk(0, 0, chunkZ);*/
 
-	const int area = 5;
+	const int area = 10;
 	/*for (int x = 0; x < (2 * area) / 5; x++) {
 		for (int y = 0; y < area / 5; y++) {
 			for (int z = 0; z < (2 * area) / 5; z++) {
@@ -33,10 +33,11 @@ Game::Game(size_t width, size_t height)
 	}*/
 
 	for (int x = 0; x < area; x++) {
-			for (int z = 0; z < area; z++) {
-				wManager.CreateChunk(x, 0, z);
-			}
+		for (int z = 0; z < area; z++) {
+			wManager.CreateChunk(x, 0, z);
+		}
 	}
+	wManager.GenerateMeshes();
 } 
 
 void Game::doFrame()

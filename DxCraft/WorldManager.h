@@ -14,6 +14,7 @@ public:
 	WorldManager(WorldManager&) = delete;
 	WorldManager& operator=(WorldManager&) = delete;
 	void CreateChunk(int x, int y, int z);
+	void GenerateMeshes();
 	void Draw();
 private:
 	void GenerateMesh(BasicChunk& chunk);
