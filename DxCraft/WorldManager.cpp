@@ -20,7 +20,9 @@ void WorldManager::CreateChunk(int x, int y, int z)
 
 void WorldManager::Draw()
 {
-	renderer.Draw();
+	for (auto& chunk : chunks) {
+		renderer.Draw(chunk.second);
+	}
 }
 
 void WorldManager::AppendFace(const std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>>& face, 

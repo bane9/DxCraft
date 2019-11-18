@@ -17,10 +17,10 @@ Game::Game(size_t width, size_t height)
 		wnd.mouse.EnableRaw();
 	}
 
-	cam.SetPos(-3.0f, 3.0f, -25.0f);
+	cam.SetPos(0.0f, 50.0f, 0.0f);
 	cam.setTravelSpeed(cameraSpeed);
 
-	const int area = 10;
+	const int area = 5;
 	for (int x = 0; x < area; x++) {
 		for (int z = 0; z < area; z++) {
 			wManager.CreateChunk(x, 0, z);
@@ -41,8 +41,8 @@ void Game::doFrame()
 		{
 			if (e->GetCode() == VK_SHIFT) {
 				if (e->isPress())
-					cam.setTravelSpeed(30.0f);
-				else cam.setTravelSpeed(15.0f);
+					cam.setTravelSpeed(cameraSpeed * 2);
+				else cam.setTravelSpeed(cameraSpeed);
 				continue;
 			}
 

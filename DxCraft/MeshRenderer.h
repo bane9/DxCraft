@@ -15,7 +15,7 @@ public:
 	MeshRenderer(MeshRenderer&) = delete;
 	MeshRenderer& operator=(MeshRenderer&) = delete;
 
-	void Draw();
+	void Draw(const BasicChunk& chunk);
 	void AppendData(BasicChunk& chunk);
 
 private:
@@ -26,8 +26,6 @@ private:
 	UINT stride = sizeof(Vertex);
 
 	Surface s = Surface::FromFile("images\\block_face.png");
-
-	std::vector<std::tuple<Microsoft::WRL::ComPtr<ID3D11Buffer>, Microsoft::WRL::ComPtr<ID3D11Buffer>, BasicChunk*>> renderData;
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture;

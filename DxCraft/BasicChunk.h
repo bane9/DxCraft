@@ -3,6 +3,8 @@
 #include <vector>
 #include <unordered_map>
 #include "XM_Structs.h"
+#include <wrl.h>
+#include <d3d11.h>
 
 struct Position {
 	Position(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {}
@@ -26,9 +28,6 @@ class BasicChunk
 	friend class MeshRenderer;
 public:
 	BasicChunk(int x, int y, int z);
-	void AddBlock(int x, int y, int z, BlockType type) noexcept;
-	void RemoveBlock(int x, int y, int z) noexcept;
-	Block& GetBlock(int x, int y, int z) noexcept;
 	Position GetPosition() const noexcept;
 	static constexpr int chunkSize = 16;
 private:
@@ -36,7 +35,9 @@ private:
 	inline int FlatIndex(int x, int y, int z) const noexcept;
 	std::vector<Block> blocks;
 	std::vector<Vertex> vertices;
-	std::vector<unsigned short> indices;
+	std::vector<uint16_t> indices;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
 	int x, y, z;
 };
 

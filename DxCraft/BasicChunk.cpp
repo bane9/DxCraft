@@ -19,21 +19,6 @@ BasicChunk::BasicChunk(int x, int y, int z)
 	}
 }
 
-void BasicChunk::AddBlock(int x, int y, int z, BlockType type) noexcept
-{
-	blocks[FlatIndex(x, y, z)].type = type;
-}
-
-void BasicChunk::RemoveBlock(int x, int y, int z) noexcept
-{
-	blocks[FlatIndex(x, y, z)].type = BlockType::Air;
-}
-
-Block& BasicChunk::GetBlock(int x, int y, int z) noexcept
-{
-	return blocks[FlatIndex(x, y, z)];
-}
-
 Position BasicChunk::GetPosition() const noexcept
 {
 	return { x, y, z };

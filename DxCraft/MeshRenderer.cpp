@@ -69,14 +69,9 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 	gfx.pDevice->CreateBuffer(&cbd, nullptr, &pConstantBuffer);
 }
 
-void MeshRenderer::Draw() {
-	
-	for (auto chunkData : renderData) {
+void MeshRenderer::Draw(const BasicChunk& chunk) {
 
-		Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer = std::get<0>(chunkData);
-		Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer = std::get<1>(chunkData);
-
-		gfx.pContext->IASetVertexBuffers(0u, 1, pVertexBuffer.GetAddressOf(), &stride, &offset);
+		gfx.pContext->IASetVertexBuffers(0u, 1, chunk.pVertexBuffer.GetAddressOf(), &stride, &offset);
 
 		gfx.pContext->PSSetShaderResources(0, 1, pTextureView.GetAddressOf());
 
@@ -86,15 +81,13 @@ void MeshRenderer::Draw() {
 
 		gfx.pContext->PSSetShader(pPixelShader.Get(), nullptr, 0);
 
-		gfx.pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+		gfx.pContext->IASetIndexBuffer(chunk.pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
 
 		gfx.pContext->IASetInputLayout(pInputLayout.Get());
 
 		gfx.pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		BasicChunk* chunk = std::get<2>(chunkData);
-
-		auto model = DirectX::XMMatrixTranslation(chunk->x * 2.0f, chunk->y * 2.0f, chunk->z * 2.0f);
+		auto model = DirectX::XMMatrixTranslation(chunk.x * 2.0f, chunk.y * 2.0f, chunk.z * 2.0f);
 
 		const Transforms tf =
 		{
@@ -109,8 +102,7 @@ void MeshRenderer::Draw() {
 
 		gfx.pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
 
-		gfx.pContext->DrawIndexed(chunk->indices.size(), 0, 0);
-	}
+		gfx.pContext->DrawIndexed(chunk.indices.size(), 0, 0);
 }
 
 void MeshRenderer::AppendData(BasicChunk& chunk)
@@ -144,5 +136,6 @@ void MeshRenderer::AppendData(BasicChunk& chunk)
 	gfx.pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer);
 
 	gfx.pDevice->CreateBuffer(&bd, &sd, &pVertexBuffer);
-	renderData.push_back({std::move(pVertexBuffer), std::move(pIndexBuffer), &chunk});
+	chunk.pVertexBuffer = std::move(pVertexBuffer);
+	chunk.pIndexBuffer = std::move(pIndexBuffer);
 }
