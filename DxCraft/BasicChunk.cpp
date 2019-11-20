@@ -20,6 +20,9 @@ BasicChunk::BasicChunk(int x, int y, int z)
 					block.type = BlockType::Stone;
 				else
 					block.type = BlockType::Bedrock;
+
+				//block.type = static_cast<BlockType>(rand() % static_cast<int>(BlockType::block_count));
+
 				/*if ((ix + iy + iz) % 2 == 0) block.type = BlockType::Air;
 				else block.type = BlockType::Grass;*/
 			}
