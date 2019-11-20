@@ -1,10 +1,10 @@
 #pragma once
 #include "Block.h"
 #include <vector>
-#include <unordered_map>
 #include "XM_Structs.h"
 #include <wrl.h>
 #include <d3d11.h>
+#include "robin_hood.h"
 
 struct Position {
 	Position(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {}
@@ -17,7 +17,7 @@ struct Position {
 
 struct PositionHash {
 	std::size_t operator()(const Position& position) const {
-		std::hash<int> hash;
+		robin_hood::hash<int> hash;
 		return hash(position.x) ^ hash(position.y) ^ hash(position.z);
 	}
 };
@@ -39,5 +39,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
 	int x, y, z;
+	size_t vertexBufferSize, indexBufferSize;
 };
 

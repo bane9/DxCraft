@@ -128,8 +128,6 @@ Block* WorldManager::GetBlock(int x, int y, int z)
 
 void WorldManager::GenerateMesh(BasicChunk& chunk)
 {
-	chunk.vertices.clear();
-	chunk.indices.clear();
 	for (int x = 0; x < BasicChunk::chunkSize; x++) {
 		for (int y = 0; y < BasicChunk::chunkSize; y++) {
 			for (int z = 0; z < BasicChunk::chunkSize; z++) {

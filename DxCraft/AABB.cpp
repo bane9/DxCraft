@@ -10,7 +10,7 @@ void AABB::Update(const DirectX::XMFLOAT3& position) noexcept
 	this->position = position;
 }
 
-float  AABB::hitbox_x_depth(const AABB& obj1, const AABB& obj2, float eps)
+float  AABB::hitbox_x_depth(const AABB& obj1, const AABB& obj2, float eps) noexcept
 {
 	if (obj1.position.x + obj1.dimension.x > obj2.position.x + obj2.dimension.x)
 	{
@@ -22,7 +22,7 @@ float  AABB::hitbox_x_depth(const AABB& obj1, const AABB& obj2, float eps)
 	}
 }
 
-float AABB::hitbox_y_depth(const AABB& obj1, const AABB& obj2, float eps)
+float AABB::hitbox_y_depth(const AABB& obj1, const AABB& obj2, float eps) noexcept
 {
 	if (obj1.position.y + obj1.dimension.y > obj2.position.y + obj2.dimension.y)
 	{
@@ -34,7 +34,7 @@ float AABB::hitbox_y_depth(const AABB& obj1, const AABB& obj2, float eps)
 	}
 }
 
-float AABB::hitbox_z_depth(const AABB& obj1, const AABB& obj2, float eps)
+float AABB::hitbox_z_depth(const AABB& obj1, const AABB& obj2, float eps) noexcept
 {
 	if (obj1.position.z + obj1.dimension.z > obj2.position.z + obj2.dimension.z)
 	{
@@ -84,5 +84,4 @@ bool AABB::IsColided(const AABB& obj1, const AABB& obj2) noexcept
 	return (obj1.position.x <= obj2.position.x + obj2.dimension.x && obj1.position.x + obj1.dimension.x >= obj2.position.x) ||
 		(obj1.position.y <= obj2.position.y + obj2.dimension.y && obj1.position.y + obj1.dimension.y >= obj2.position.y) ||
 		(obj1.position.z <= obj2.position.z + obj2.dimension.z && obj1.position.z + obj1.dimension.z >= obj2.position.z);
-
 }

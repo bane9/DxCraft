@@ -1,5 +1,6 @@
 #include "BasicChunk.h"
 #include <math.h>
+#include "MathFunctions.h"
 
 BasicChunk::BasicChunk(int x, int y, int z)
 	: x(x), y(y), z(z)
@@ -34,7 +35,7 @@ Position BasicChunk::GetPosition() const noexcept
 
 inline Position BasicChunk::Normalize(int x, int y, int z) const noexcept
 {
-	return { std::abs(x - this->x) % chunkSize, std::abs(y - this->y) % chunkSize, std::abs(z - this->z) % chunkSize };
+	return { FixedMod((x - this->x), chunkSize), FixedMod((y - this->y), chunkSize), FixedMod((z - this->z), chunkSize) };
 }
 
 inline int BasicChunk::FlatIndex(int x, int y, int z) const noexcept

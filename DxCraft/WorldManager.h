@@ -5,7 +5,7 @@
 #include "Graphics.h"
 #include <vector>
 #include "XM_Structs.h"
-#include <unordered_map>
+#include "robin_hood.h"
 
 class WorldManager
 {
@@ -24,6 +24,6 @@ private:
 		BasicChunk& chunk, const std::array<float, 2>& texture, float offsetX, float offsetY, float offsetZ);
 	bool BlockVisible(const BasicChunk& chunk, int x, int y, int z);
 	BasicChunk* GetChunkFromBlock(int x, int y, int z);
-	std::unordered_map <Position, BasicChunk, PositionHash> chunks;
+	robin_hood::unordered_flat_map <Position, BasicChunk, PositionHash> chunks;
 	MeshRenderer renderer;
 };

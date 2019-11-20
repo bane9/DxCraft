@@ -17,10 +17,10 @@ Game::Game(size_t width, size_t height)
 		wnd.mouse.EnableRaw();
 	}
 
-	cam.SetPos(0.0f, 35.0f, 0.0f);
+	cam.SetPos(0.0f, 25.0f, 0.0f);
 	cam.setTravelSpeed(cameraSpeed);
 
-	const int area = 20;
+	const int area = 4;
 	for (int x = -area / 2; x < area / 2; x++) {
 		for (int z = -area / 2; z < area / 2; z++) {
 			wManager.CreateChunk(x, 0, z);
@@ -69,6 +69,9 @@ void Game::doFrame()
 					wnd.mouse.DisableRaw();
 				}
 				break;
+			case 'L':
+				wManager.ModifyBlock(0, 15, destroyedZ);
+				++destroyedZ;
 			}
 
 		}

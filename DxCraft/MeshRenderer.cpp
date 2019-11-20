@@ -75,6 +75,8 @@ MeshRenderer::MeshRenderer(Graphics& gfx)
 
 void MeshRenderer::Draw(const BasicChunk& chunk) {
 
+	if (chunk.vertexBufferSize == 0 || chunk.indexBufferSize == 0) return;
+
 		gfx.pContext->IASetVertexBuffers(0, 1, chunk.pVertexBuffer.GetAddressOf(), &stride, &offset);
 
 		gfx.pContext->PSSetShaderResources(0, 1, pTextureView.GetAddressOf());
@@ -106,7 +108,7 @@ void MeshRenderer::Draw(const BasicChunk& chunk) {
 
 		gfx.pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
 
-		gfx.pContext->DrawIndexed(chunk.indices.size(), 0, 0);
+		gfx.pContext->DrawIndexed(chunk.indexBufferSize, 0, 0);
 }
 
 void MeshRenderer::AppendData(BasicChunk& chunk)
@@ -143,4 +145,10 @@ void MeshRenderer::AppendData(BasicChunk& chunk)
 	
 	chunk.pVertexBuffer = std::move(pVertexBuffer);
 	chunk.pIndexBuffer = std::move(pIndexBuffer);
+
+	chunk.vertexBufferSize = chunk.vertices.size();
+	chunk.indexBufferSize =  chunk.indices.size();
+
+	chunk.vertices.clear();
+	chunk.indices.clear();
 }
