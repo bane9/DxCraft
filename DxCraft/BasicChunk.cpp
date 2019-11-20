@@ -1,5 +1,4 @@
 #include "BasicChunk.h"
-#include <math.h>
 #include "MathFunctions.h"
 
 BasicChunk::BasicChunk(int x, int y, int z)
@@ -21,7 +20,7 @@ BasicChunk::BasicChunk(int x, int y, int z)
 					block.type = BlockType::Stone;
 				else
 					block.type = BlockType::Bedrock;
-				/*if ((ix) % 2 == 0) block.type = BlockType::Air;
+				/*if ((ix + iy + iz) % 2 == 0) block.type = BlockType::Air;
 				else block.type = BlockType::Grass;*/
 			}
 		}
@@ -35,7 +34,7 @@ Position BasicChunk::GetPosition() const noexcept
 
 inline Position BasicChunk::Normalize(int x, int y, int z) const noexcept
 {
-	return { FixedMod((x - this->x), chunkSize), FixedMod((y - this->y), chunkSize), FixedMod((z - this->z), chunkSize) };
+	return { FixedMod(x - this->x, chunkSize), FixedMod(y - this->y, chunkSize), FixedMod(z - this->z, chunkSize) };
 }
 
 inline int BasicChunk::FlatIndex(int x, int y, int z) const noexcept

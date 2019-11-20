@@ -9,16 +9,6 @@
 
 #pragma comment(lib, "dxgi.lib")
 
-#define FLIPEFFECT
-
-#ifdef FLIPEFFECT
-#define EFFECT DXGI_SWAP_EFFECT_FLIP_DISCARD
-#define BUFFERCOUNT 2
-#else
-#define EFFECT DXGI_SWAP_EFFECT_DISCARD;
-#define BUFFERCOUNT 1
-#endif
-
 namespace wrl = Microsoft::WRL;
 namespace dx = DirectX;
 
@@ -36,13 +26,13 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	sd.SampleDesc.Count = 1;
 	sd.SampleDesc.Quality = 0;
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.BufferCount = BUFFERCOUNT;
+	sd.BufferCount = 2;
 	sd.OutputWindow = hWnd;
 	sd.Windowed = TRUE;
-	sd.SwapEffect = EFFECT;
+	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	sd.Flags = 0;
 
-	UINT swapCreateFlags = 0u;
+	UINT swapCreateFlags = 0;
 #ifdef _DEBUG
 	swapCreateFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
@@ -64,7 +54,7 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	if (adapter < 0) adapter = 0;
 
 	GFX_EXCEPT_INFO(D3D11CreateDeviceAndSwapChain(
-		vAdapters[adapter],
+		vAdapters[0],
 		D3D_DRIVER_TYPE_UNKNOWN,
 		nullptr,
 		swapCreateFlags,
@@ -99,11 +89,11 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	D3D11_TEXTURE2D_DESC descDepth = {};
 	descDepth.Width = width;
 	descDepth.Height = height;
-	descDepth.MipLevels = 1u;
-	descDepth.ArraySize = 1u;
+	descDepth.MipLevels = 1;
+	descDepth.ArraySize = 1;
 	descDepth.Format = DXGI_FORMAT_D32_FLOAT;
-	descDepth.SampleDesc.Count = 1u;
-	descDepth.SampleDesc.Quality = 0u;
+	descDepth.SampleDesc.Count = 1;
+	descDepth.SampleDesc.Quality = 0;
 	descDepth.Usage = D3D11_USAGE_DEFAULT;
 	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 	GFX_EXCEPT_INFO(pDevice->CreateTexture2D(&descDepth, nullptr, &pDepthStencil));
@@ -111,10 +101,10 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV = {};
 	descDSV.Format = DXGI_FORMAT_D32_FLOAT;
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	descDSV.Texture2D.MipSlice = 0u;
+	descDSV.Texture2D.MipSlice = 0;
 	GFX_EXCEPT_INFO(pDevice->CreateDepthStencilView(pDepthStencil.Get(), &descDSV, &pDSV));
 
-	pContext->OMSetRenderTargets(1u, pTarget.GetAddressOf(), pDSV.Get());
+	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDSV.Get());
 
 	D3D11_VIEWPORT vp;
 	vp.Width = (float)width;
@@ -180,9 +170,7 @@ void Graphics::endFrame()
 		projection = DirectX::XMMatrixPerspectiveLH(1.0f, vp.Height / vp.Width, 0.5f, 200.0f);
 		temp_viewport = false;
 	}
-#ifdef FLIPEFFECT
 	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDSV.Get());
-#endif
 }
 
 void Graphics::setResoultion(int width, int height) noexcept

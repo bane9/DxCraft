@@ -5,4 +5,3 @@
 #include <chrono>
 #include <mutex>
 
-#define THREADED

@@ -64,24 +64,13 @@ Window::~Window() {
 std::optional<int> Window::processMessages()
 {
 	MSG msg;
-#ifdef THREADED
 	while (GetMessage(&msg, nullptr, 0, 0)) {
-#else
-	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-#endif
-#ifndef THREADED
-		if (msg.message == WM_QUIT) {
-			return static_cast<int>(msg.wParam);
-		}
-#endif
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-#ifdef THREADED
 	if (msg.message == WM_QUIT) {
 		return static_cast<int>(msg.wParam);
 	}
-#endif
 	return {};
 }
 

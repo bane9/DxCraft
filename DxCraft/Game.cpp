@@ -26,14 +26,14 @@ Game::Game(size_t width, size_t height)
 			wManager.CreateChunk(x, 0, z);
 		}
 	}
+
+
 	wManager.GenerateMeshes();
 } 
 
 void Game::doFrame()
 {
-#ifdef THREADED
 	while (!exit) {
-#endif
 		const auto dt = timer.mark();
 		wnd.Gfx().beginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
 		wnd.Gfx().setCamera(cam.GetMatrix());
@@ -128,28 +128,18 @@ void Game::doFrame()
 		wManager.Draw();
 
 		wnd.Gfx().endFrame();
-#ifdef THREADED
 	}
-#endif
 }
 
 int Game::start()
 {
-#ifdef THREADED
 	std::thread tr(&Game::doFrame, this);
-#endif
 	while (1) {
 		if (const auto result = Window::processMessages()) {
-#ifdef THREADED
 			exit = true;
 			tr.join();
-#endif
 			return result.value();
 		}
-#ifndef THREADED
-		doFrame();
-#endif
-
 	}
 }
 
