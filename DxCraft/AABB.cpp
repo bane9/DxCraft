@@ -5,7 +5,7 @@ AABB::AABB(const DirectX::XMFLOAT3& dimension)
 {
 }
 
-void AABB::Update(const DirectX::XMFLOAT3& position) noexcept
+void AABB::SetPosition(const DirectX::XMFLOAT3& position) noexcept
 {
 	this->position = position;
 }
@@ -44,8 +44,8 @@ DirectX::XMFLOAT3 AABB::GetVP(const DirectX::XMFLOAT3& normal) const noexcept
 
 bool AABB::IsColided(const AABB& obj1, const AABB& obj2) noexcept
 {
-	return (obj1.position.x <= obj2.position.x + obj2.dimension.x && obj1.position.x + obj1.dimension.x >= obj2.position.x) ||
-		(obj1.position.y <= obj2.position.y + obj2.dimension.y && obj1.position.y + obj1.dimension.y >= obj2.position.y) ||
+	return (obj1.position.x <= obj2.position.x + obj2.dimension.x && obj1.position.x + obj1.dimension.x >= obj2.position.x) &&
+		(obj1.position.y <= obj2.position.y + obj2.dimension.y && obj1.position.y + obj1.dimension.y >= obj2.position.y) &&
 		(obj1.position.z <= obj2.position.z + obj2.dimension.z && obj1.position.z + obj1.dimension.z >= obj2.position.z);
 }
 
