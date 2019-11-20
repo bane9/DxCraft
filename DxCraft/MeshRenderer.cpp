@@ -91,7 +91,7 @@ void MeshRenderer::Draw(const BasicChunk& chunk) {
 
 		gfx.pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		auto model = DirectX::XMMatrixTranslation(chunk.x * 2.0f, chunk.y * 2.0f, chunk.z * 2.0f);
+		auto model = DirectX::XMMatrixTranslation(chunk.x, chunk.y, chunk.z);
 
 		const Transforms tf =
 		{

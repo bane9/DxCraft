@@ -14,10 +14,45 @@ void WorldManager::CreateChunk(int x, int y, int z)
 		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize));
 }
 
+void WorldManager::ModifyBlock(int x, int y, int z, BlockType type)
+{
+	BasicChunk* chunk = GetChunkFromBlock(x, y, z);
+	if (chunk == nullptr) return;
+	Position normalized = chunk->Normalize(x, y, z);
+	Block& block = chunk->blocks[chunk->FlatIndex(x, y, z)];
+	if (block.type == BlockType::Bedrock) return;
+	block.type = type;
+	GenerateMesh(*chunk);
+	if (normalized.x + 1 >= BasicChunk::chunkSize) {
+		BasicChunk* neighbourChunk = GetChunkFromBlock(x + 1, y, z);
+		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+	}
+	if (normalized.x - 1 < 0) {
+		BasicChunk* neighbourChunk = GetChunkFromBlock(x - 1, y, z);
+		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+	}
+	if (normalized.y + 1 >= BasicChunk::chunkSize) {
+		BasicChunk* neighbourChunk = GetChunkFromBlock(x, y + 1, z);
+		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+	}
+	if (normalized.y - 1 < 0) {
+		BasicChunk* neighbourChunk = GetChunkFromBlock(x, y - 1, z);
+		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+	}
+	if (normalized.z + 1 >= BasicChunk::chunkSize) {
+		BasicChunk* neighbourChunk = GetChunkFromBlock(x, y, z + 1);
+		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+	}
+	if (normalized.z - 1 < 0) {
+		BasicChunk* neighbourChunk = GetChunkFromBlock(x, y, z - 1);
+		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+	}
+
+}
+
 void WorldManager::GenerateMeshes() {
 	for (auto& chunk : chunks) {
 		GenerateMesh(chunk.second);
-		renderer.AppendData(chunk.second);
 	}
 }
 
@@ -32,13 +67,13 @@ void WorldManager::AppendFace(const std::pair<std::array<Vertex, 4>, std::array<
 	BasicChunk& chunk, const std::array<float, 2>& texture, float offsetX, float offsetY, float offsetZ)
 {
 	std::transform(face.first.begin(), face.first.end(), std::back_inserter(chunk.vertices), [offsetX, offsetY, offsetZ, &texture](Vertex vertex) {
-		vertex.pos.x += offsetX * Faces::side * 2;
-		vertex.pos.y += offsetY * Faces::side * 2;
-		vertex.pos.z += offsetZ * Faces::side * 2;
-		float startTexX = texture[0] / 16.0f;
-		float endTexX   = (texture[0] + 1.0f) / 16.0f;
-		float startTexY = texture[1] / 16.0f;
-		float endTexY   = (texture[1] + 1.0f) / 16.0f;
+		vertex.pos.x += offsetX;
+		vertex.pos.y += offsetY;
+		vertex.pos.z += offsetZ;
+		const float startTexX = texture[0] / 16.0f;
+		const float endTexX   = (texture[0] + 1.0f) / 16.0f;
+		const float startTexY = texture[1] / 16.0f;
+		const float endTexY   = (texture[1] + 1.0f) / 16.0f;
 		vertex.tc.x = vertex.tc.x == 1 ? startTexX : endTexX;
 		vertex.tc.y = vertex.tc.y == 1 ? startTexY : endTexY;
 		return std::move(vertex);
@@ -56,30 +91,39 @@ bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z)
 	}
 	else
 	{
-		auto block = getBlock(x, y, z);
+		auto block = GetBlock(x, y, z);
 		if (block == nullptr) return true;
 		return block->type == BlockType::Air;
 	}
 	return false;
 }
 
-Block* WorldManager::getBlock(int x, int y, int z)
+BasicChunk* WorldManager::GetChunkFromBlock(int x, int y, int z)
 {
-	if (y < 0) 
+	if (y < 0)
 		return nullptr;
-	
+
 	Position chunkPosition(
 		x - FixedMod(x, BasicChunk::chunkSize),
 		y - FixedMod(y, BasicChunk::chunkSize),
 		z - FixedMod(z, BasicChunk::chunkSize)
 	);
-
+	
 	auto chunk = chunks.find(chunkPosition);
 
-	if (chunk == chunks.end()) 
+	if (chunk == chunks.end())
+		return nullptr;
+	else return &chunk->second;
+}
+
+Block* WorldManager::GetBlock(int x, int y, int z)
+{
+	auto chunk = GetChunkFromBlock(x, y, z);
+		
+	if (chunk == nullptr) 
 		return nullptr;
 
-	return &chunk->second.blocks[chunk->second.FlatIndex(x, y, z)];
+	return &chunk->blocks[chunk->FlatIndex(x, y, z)];
 }
 
 void WorldManager::GenerateMesh(BasicChunk& chunk)
@@ -119,4 +163,5 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 			}
 		}
 	}
+	renderer.AppendData(chunk);
 }

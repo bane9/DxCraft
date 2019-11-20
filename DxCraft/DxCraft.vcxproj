@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AABB.cpp" />
     <ClCompile Include="BasicChunk.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DxgiInfoManager.cpp" />
@@ -166,6 +167,7 @@
     <ClCompile Include="WorldManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="BasicChunk.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="Camera.h" />

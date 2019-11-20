@@ -20,7 +20,8 @@ BasicChunk::BasicChunk(int x, int y, int z)
 					block.type = BlockType::Stone;
 				else
 					block.type = BlockType::Bedrock;
-				//if ((iy + ix + iz) % 2 == 0) block.type = BlockType::Air;
+				/*if ((ix) % 2 == 0) block.type = BlockType::Air;
+				else block.type = BlockType::Grass;*/
 			}
 		}
 	}

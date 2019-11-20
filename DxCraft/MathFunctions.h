@@ -36,3 +36,8 @@ inline constexpr T FixedMod(T a, T b)
 { 
 	return (a % b + b) % b; 
 }
+
+inline int sgn(float n)
+{
+	return (0.0f < n) - (n < 0.0f);
+}

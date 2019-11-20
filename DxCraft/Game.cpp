@@ -69,11 +69,6 @@ void Game::doFrame()
 					wnd.mouse.DisableRaw();
 				}
 				break;
-			case 'N':
-				break;
-				++chunkZ;
-				wManager.CreateChunk(0, 0, chunkZ);
-				wManager.GenerateMeshes();
 			}
 
 		}
