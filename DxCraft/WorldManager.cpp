@@ -131,8 +131,6 @@ Block* WorldManager::GetBlock(int x, int y, int z)
 
 void WorldManager::GenerateMesh(BasicChunk& chunk)
 {
-	chunk.vertices.clear();
-	chunk.indices.clear();
 	int numOfAirBlocks = 0;
 	for (int x = 0; x < BasicChunk::chunkSize; x++) {
 		for (int y = 0; y < BasicChunk::chunkSize; y++) {

@@ -4,8 +4,6 @@
 #include <utility>
 #include <algorithm>
 
-#pragma warning(disable : 26812)
-
 MeshRenderer::MeshRenderer(Graphics& gfx)
 	: gfx(gfx)
 #ifdef _DEBUG

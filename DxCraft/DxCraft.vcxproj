@@ -81,6 +81,8 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <StringPooling>true</StringPooling>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4244;4267;26495;26812;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -97,6 +99,8 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <StringPooling>true</StringPooling>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4244;4267;26495;26812;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -116,6 +120,8 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <StringPooling>true</StringPooling>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4244;4267;26495;26812;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -137,6 +143,8 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <StringPooling>true</StringPooling>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4244;4267;26495;26812;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
