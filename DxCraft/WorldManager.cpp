@@ -16,6 +16,7 @@ void WorldManager::CreateChunk(int x, int y, int z)
 
 void WorldManager::ModifyBlock(int x, int y, int z, BlockType type)
 {
+	if (y < 0) return;
 	BasicChunk* chunk = GetChunkFromBlock(x, y, z);
 	if (chunk == nullptr) return;
 	Position normalized = chunk->Normalize(x, y, z);
@@ -84,7 +85,8 @@ void WorldManager::AppendFace(const std::pair<std::array<Vertex, 4>, std::array<
 
 bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z)
 {
-	if (x < BasicChunk::chunkSize && y < BasicChunk::chunkSize && z < BasicChunk::chunkSize
+	if (y < 0) return true;
+	if (x < BasicChunk::chunkSize - 1 && y < BasicChunk::chunkSize - 1 && z < BasicChunk::chunkSize - 1
 		&& x > 0 && y > 0 && z > 0)
 	{
 		if(chunk.blocks[chunk.FlatIndex(x, y, z)].type == BlockType::Air) return true;
@@ -118,6 +120,7 @@ BasicChunk* WorldManager::GetChunkFromBlock(int x, int y, int z)
 
 Block* WorldManager::GetBlock(int x, int y, int z)
 {
+	if (y < 0) return nullptr;
 	auto chunk = GetChunkFromBlock(x, y, z);
 		
 	if (chunk == nullptr) 

@@ -26,7 +26,7 @@ public:
 		rayDistance = 0.0f;
 	}
 
-	Position GetBlock() {
+	Position GetBlock() noexcept {
 		Position pos(-1, -1, -1);
 
 		while(rayDistance < rayLimit) {
