@@ -27,7 +27,7 @@ class BasicChunk
 	friend class WorldManager;
 	friend class MeshRenderer;
 public:
-	BasicChunk(int x, int y, int z);
+	BasicChunk(int x, int y, int z, bool empty = false);
 	Position GetPosition() const noexcept;
 	static constexpr int chunkSize = 16;
 private:

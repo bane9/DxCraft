@@ -1,7 +1,7 @@
 #include "BasicChunk.h"
 #include "MathFunctions.h"
 
-BasicChunk::BasicChunk(int x, int y, int z)
+BasicChunk::BasicChunk(int x, int y, int z, bool empty)
 	: x(x), y(y), z(z)
 {
 	blocks.resize(chunkSize * chunkSize * chunkSize);
@@ -20,6 +20,7 @@ BasicChunk::BasicChunk(int x, int y, int z)
 					block.type = BlockType::Stone;
 				else
 					block.type = BlockType::Bedrock;
+				if (empty) block.type = BlockType::Air;
 
 				//block.type = static_cast<BlockType>(rand() % static_cast<int>(BlockType::block_count));
 

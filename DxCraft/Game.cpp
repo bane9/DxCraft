@@ -27,6 +27,12 @@ Game::Game(size_t width, size_t height)
 		}
 	}
 
+	for (int x = -area / 2; x < area / 2; x++) {
+		for (int z = -area / 2; z < area / 2; z++) {
+			wManager.CreateChunk(x, 1, z, true);
+		}
+	}
+
 	//wManager.CreateChunk(0, 0, 0);
 
 	wManager.GenerateMeshes();
@@ -129,10 +135,19 @@ void Game::doFrame()
 		wManager.Draw();
 
 		cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw());
-		auto pos = cameraRay.GetBlock();
+		auto old = cameraRay.GetVector();
+		auto n = old;
+		while (cameraRay.Next()) {
+			auto block = wManager.GetBlock(n.x, n.y, n.z);
+			if (block != nullptr && block->type != BlockType::Air) break;
+			old = std::move(n);
+			n = cameraRay.GetVector();
+		}
 
-		if(wnd.mouse.LeftIsPressed())
-			wManager.ModifyBlock(pos.x, pos.y, pos.z);
+		if (wnd.mouse.LeftIsPressed())
+			wManager.ModifyBlock(n.x, n.y, n.z);
+		else if (wnd.mouse.RightIsPressed())
+			wManager.ModifyBlock(old.x, old.y, old.z, BlockType::Dirt);
 
 		wnd.Gfx().endFrame();
 	}

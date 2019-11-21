@@ -26,25 +26,18 @@ public:
 		rayDistance = 0.0f;
 	}
 
-	Position GetBlock(float precision = 0.01f) noexcept {
-		Position pos(-1, -1, -1);
+	bool Next(float precision = 0.05f) noexcept
+	{
+		rayPos.x += dx * precision;
+		rayPos.y += dy * precision;
+		rayPos.z += dz * precision;
+		rayDistance += precision;
+		return rayDistance < rayLimit;
+	}
 
-		while(rayDistance < rayLimit) {
-			rayPos.x += dx * precision;
-			rayPos.y += dy * precision;
-			rayPos.z += dz * precision;
-			auto block = wManager.GetBlock(rayPos.x, rayPos.y, rayPos.z);
-			
-			if (block != nullptr && block->type != BlockType::Air) {
-				pos.x = block->x;
-				pos.y = block->y;
-				pos.z = block->z;
-				break;
-			}
-				
-			rayDistance += precision;
-		}
-		return pos;
+
+	DirectX::XMFLOAT3 GetVector() {
+		return rayPos;
 	}
 
 private:

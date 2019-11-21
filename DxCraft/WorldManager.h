@@ -13,7 +13,7 @@ public:
 	WorldManager(Graphics& gfx);
 	WorldManager(WorldManager&) = delete;
 	WorldManager& operator=(WorldManager&) = delete;
-	void CreateChunk(int x, int y, int z);
+	void CreateChunk(int x, int y, int z, bool empty = false);
 	void ModifyBlock(int x, int y, int z, BlockType type = BlockType::Air);
 	void GenerateMeshes();
 	void Draw();

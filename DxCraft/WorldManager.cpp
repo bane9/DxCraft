@@ -7,11 +7,11 @@ WorldManager::WorldManager(Graphics& gfx)
 {
 }
 
-void WorldManager::CreateChunk(int x, int y, int z)
+void WorldManager::CreateChunk(int x, int y, int z, bool empty)
 {
 	if (y < 0) return;
 	chunks.emplace(Position(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize),
-		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize));
+		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize, empty));
 }
 
 void WorldManager::ModifyBlock(int x, int y, int z, BlockType type)
