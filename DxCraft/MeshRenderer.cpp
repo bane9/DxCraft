@@ -141,8 +141,7 @@ void MeshRenderer::AppendData(BasicChunk& chunk)
 	D3D11_SUBRESOURCE_DATA isd = {};
 	isd.pSysMem = chunk.indices.data();
 	GFX_EXCEPT_INFO(gfx.pDevice->CreateBuffer(&ibd, &isd, &pIndexBuffer));
-	
-	
+
 	chunk.pVertexBuffer = std::move(pVertexBuffer);
 	chunk.pIndexBuffer = std::move(pIndexBuffer);
 

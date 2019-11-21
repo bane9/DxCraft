@@ -29,4 +29,5 @@ private:
 	int off_y = 0;
 	WorldManager wManager;
 	Ray cameraRay;
+	Timer clickTimer;
 };

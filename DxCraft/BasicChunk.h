@@ -39,6 +39,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
 	int x, y, z;
-	size_t vertexBufferSize, indexBufferSize;
+	size_t vertexBufferSize = 0;
+	size_t indexBufferSize = 0;
 };
 

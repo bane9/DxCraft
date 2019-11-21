@@ -1,10 +1,6 @@
 #pragma once
 #include <DirectXMath.h>
-#include "BasicChunk.h"
-#include "imgui/imgui.h"
 #include <math.h>
-#include "WorldManager.h"
-#include "Block.h"
 #include "MathFunctions.h"
 
 class Ray {
@@ -13,7 +9,7 @@ public:
 		: wManager(wManager), rayLimit(limit)
 	{}
 
-	void SetPositionAndDirection(const DirectX::XMFLOAT3& startCoord, float pitch, float yaw) noexcept {
+	void SetPositionAndDirection(const DirectX::XMFLOAT3& startCoord, float pitch, float yaw, float startDisance = 2.0f) noexcept {
 		rayPos = startCoord;
 		rayPos.x += 0.5f * sgn(rayPos.x);
 		rayPos.y += 0.5f * sgn(rayPos.y);
@@ -24,6 +20,9 @@ public:
 		dz = std::cos(yaw) * std::cos(pitch);
 		
 		rayDistance = 0.0f;
+
+		while(rayDistance < startDisance)
+			Next(0.5f);
 	}
 
 	bool Next(float precision = 0.05f) noexcept

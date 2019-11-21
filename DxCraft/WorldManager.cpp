@@ -131,11 +131,17 @@ Block* WorldManager::GetBlock(int x, int y, int z)
 
 void WorldManager::GenerateMesh(BasicChunk& chunk)
 {
+	chunk.vertices.clear();
+	chunk.indices.clear();
+	int numOfAirBlocks = 0;
 	for (int x = 0; x < BasicChunk::chunkSize; x++) {
 		for (int y = 0; y < BasicChunk::chunkSize; y++) {
 			for (int z = 0; z < BasicChunk::chunkSize; z++) {
 				const Block& block = chunk.blocks[chunk.FlatIndex(x, y, z)];
-				if (block.type == BlockType::Air) continue;
+				if (block.type == BlockType::Air) {
+					++numOfAirBlocks;
+					continue;
+				}
 
 				if(BlockVisible(chunk, block.x + 1, block.y, block.z)) {
 					AppendFace(Faces::RightSide, chunk, BlockFaces[static_cast<int>(block.type)][3],
@@ -163,6 +169,11 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 				}
 			}
 		}
+	}
+	if (numOfAirBlocks == BasicChunk::chunkSize * BasicChunk::chunkSize * BasicChunk::chunkSize) {
+		chunk.vertexBufferSize = 0;
+		chunk.indexBufferSize = 0;
+		return;
 	}
 	renderer.AppendData(chunk);
 }
