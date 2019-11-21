@@ -79,7 +79,7 @@ void WorldManager::AppendFace(const std::pair<std::array<Vertex, 4>, std::array<
 		return std::move(vertex);
 		});
 	const int offset = (chunk.vertices.size() / 4 - 1) * 4;
-	std::transform(face.second.begin(), face.second.end(), std::back_inserter(chunk.indices), [offset](int a) {return offset + a; });
+	std::transform(face.second.begin(), face.second.end(), std::back_inserter(chunk.indices), [offset](int a) {return offset + a;});
 }
 
 bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z)

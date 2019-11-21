@@ -1,6 +1,7 @@
 #pragma once
 #include <queue>
 #include <optional>
+#include <mutex>
 
 class Mouse
 {
@@ -72,7 +73,7 @@ public:
 	Mouse(const Mouse&) = delete;
 	Mouse& operator=(const Mouse&) = delete;
 	std::pair<int, int> GetPos() const noexcept;
-	std::optional<RawDelta> ReadRawDelta();
+	std::optional<RawDelta> ReadRawDelta() noexcept;
 	int GetPosX() const noexcept;
 	int GetPosY() const noexcept;
 	bool IsInWindow() const noexcept;
@@ -117,4 +118,5 @@ private:
 	bool rawEnabled = false;
 	std::queue<Event> buffer;
 	std::queue<RawDelta> rawDeltaBuffer;
+	std::mutex mouseMutex;
 };

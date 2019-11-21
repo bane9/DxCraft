@@ -189,6 +189,7 @@
     <ClInclude Include="MathFunctions.h" />
     <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="Mouse.h" />
+    <ClInclude Include="Ray.h" />
     <ClInclude Include="robin_hood.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="ThreadSettings.h" />

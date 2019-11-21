@@ -10,8 +10,12 @@ public:
 	void Rotate(float dx, float dy) noexcept;
 	void Translate(DirectX::XMFLOAT3 translation) noexcept;
 	void setTravelSpeed(float speed);
+	DirectX::XMFLOAT3 getLookVector();
 	float getTravelSpeed();
 	void SetPos(float x, float y, float z) noexcept;
+	DirectX::XMFLOAT3 GetPos();
+	float GetPitch();
+	float GetYaw();
 private:
 	DirectX::XMFLOAT3 pos;
 	float pitch;

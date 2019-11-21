@@ -33,6 +33,21 @@ void Camera::SetPos(float x, float y, float z) noexcept {
 	pos = { x, y, z };
 }
 
+DirectX::XMFLOAT3 Camera::GetPos()
+{
+	return pos;
+}
+
+float Camera::GetPitch()
+{
+	return pitch;
+}
+
+float Camera::GetYaw()
+{
+	return yaw;
+}
+
 void Camera::Rotate(float dx, float dy) noexcept
 {
 	yaw = wrap_angle(yaw + dx * rotationSpeed);

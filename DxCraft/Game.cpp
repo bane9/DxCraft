@@ -9,7 +9,7 @@
 GDIPlusManager gdipm;
 
 Game::Game(size_t width, size_t height)
-	: wnd(width, height), wManager(wnd.Gfx())
+	: wnd(width, height), wManager(wnd.Gfx()), cameraRay(wManager)
 {
 
 	if (!showCursor) {
@@ -21,12 +21,13 @@ Game::Game(size_t width, size_t height)
 	cam.setTravelSpeed(cameraSpeed);
 
 	const int area = 4;
-	for (int x = -area / 2; x < area / 2; x++) {
+	/*for (int x = -area / 2; x < area / 2; x++) {
 		for (int z = -area / 2; z < area / 2; z++) {
 			wManager.CreateChunk(x, 0, z);
 		}
-	}
+	}*/
 
+	wManager.CreateChunk(0, 0, 0);
 
 	wManager.GenerateMeshes();
 } 
@@ -126,6 +127,12 @@ void Game::doFrame()
 		}
 
 		wManager.Draw();
+
+		cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw());
+		auto pos = cameraRay.GetBlock();
+
+		if(wnd.mouse.LeftIsPressed())
+			wManager.ModifyBlock(pos.x, pos.y, pos.z);
 
 		wnd.Gfx().endFrame();
 	}

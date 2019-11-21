@@ -7,18 +7,17 @@ std::pair<int, int> Mouse::GetPos() const noexcept
 	return { x,y };
 }
 
-std::optional<Mouse::RawDelta> Mouse::ReadRawDelta()
+std::optional<Mouse::RawDelta> Mouse::ReadRawDelta() noexcept
 {
+	mouseMutex.lock();
 	if (rawDeltaBuffer.empty()) {
+		mouseMutex.unlock();
 		return {};
 	}
-	try { // Fix later
-		const RawDelta d = rawDeltaBuffer.front();
-		rawDeltaBuffer.pop();
-		return d;
-	}
-	catch (...) {}
-	return {};
+	const RawDelta d = rawDeltaBuffer.front();
+	rawDeltaBuffer.pop();
+	mouseMutex.unlock();
+	return d;
 }
 
 int Mouse::GetPosX() const noexcept
@@ -60,11 +59,14 @@ void Mouse::clearStates() noexcept
 
 std::optional<Mouse::Event> Mouse::Read() noexcept
 {
+	mouseMutex.lock();
 	if (buffer.size() > 0) {
 		Mouse::Event e = buffer.front();
 		buffer.pop();
+		mouseMutex.unlock();
 		return e;
 	}
+	mouseMutex.unlock();
 	return {};
 }
 
@@ -179,16 +181,20 @@ void Mouse::OnWheelDown(int x, int y) noexcept
 
 void Mouse::TrimBuffer() noexcept
 {
+	mouseMutex.lock();
 	while (buffer.size() > bufferSize) {
 		buffer.pop();
 	}
+	mouseMutex.unlock();
 }
 
 void Mouse::TrimRawInputBuffer() noexcept
 {
+	mouseMutex.lock();
 	while (rawDeltaBuffer.size() > bufferSize) {
 		rawDeltaBuffer.pop();
 	}
+	mouseMutex.unlock();
 }
 
 void Mouse::OnWheelDelta(int x, int y, int delta) noexcept

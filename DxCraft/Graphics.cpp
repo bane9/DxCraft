@@ -159,6 +159,7 @@ void Graphics::endFrame()
 		}
 	}
 	if (temp_viewport) {
+		if (width == 0 || height == 0) return;
 		D3D11_VIEWPORT vp;
 		vp.Width = (float) width;
 		vp.Height = (float) height;

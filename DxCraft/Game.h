@@ -6,6 +6,7 @@
 #include "ThreadSettings.h"
 #include <memory>
 #include "WorldManager.h"
+#include "Ray.h"
 
 class Game
 {
@@ -27,4 +28,5 @@ private:
 	int destroyedZ = 0;
 	int off_y = 0;
 	WorldManager wManager;
+	Ray cameraRay;
 };
