@@ -15,9 +15,9 @@ public:
 
 	void SetPositionAndDirection(const DirectX::XMFLOAT3& startCoord, float pitch, float yaw) noexcept {
 		rayPos = startCoord;
-		rayPos.x += 0.5f;
-		rayPos.y += 0.5f;
-		rayPos.z += 0.5f;
+		rayPos.x += 0.5f * sgn(rayPos.x);
+		rayPos.y += 0.5f * sgn(rayPos.y);
+		rayPos.z += 0.5f * sgn(rayPos.z);
 
 		dx = std::sin(yaw) * std::cos(pitch);
 		dy = std::sin(-pitch);
@@ -26,13 +26,13 @@ public:
 		rayDistance = 0.0f;
 	}
 
-	Position GetBlock() noexcept {
+	Position GetBlock(float precision = 0.01f) noexcept {
 		Position pos(-1, -1, -1);
 
 		while(rayDistance < rayLimit) {
-			rayPos.x += dx * 0.001f;
-			rayPos.y += dy * 0.001f;
-			rayPos.z += dz * 0.001f;
+			rayPos.x += dx * precision;
+			rayPos.y += dy * precision;
+			rayPos.z += dz * precision;
 			auto block = wManager.GetBlock(rayPos.x, rayPos.y, rayPos.z);
 			
 			if (block != nullptr && block->type != BlockType::Air) {
@@ -42,9 +42,8 @@ public:
 				break;
 			}
 				
-			rayDistance += 0.001f;
+			rayDistance += precision;
 		}
-
 		return pos;
 	}
 

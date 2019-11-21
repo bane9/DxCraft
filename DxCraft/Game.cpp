@@ -4,7 +4,7 @@
 #include <memory>
 #include "GDIPlusManager.h"
 #include "imgui/imgui.h"
-
+#include <math.h>
 
 GDIPlusManager gdipm;
 
