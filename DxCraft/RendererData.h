@@ -8,8 +8,9 @@
 #include "DxgiInfoManager.h"
 #include <optional>
 #include <utility>
+#include <type_traits>
 
-template<typename vertexType, typename cBuf>
+template<typename vertexType, typename cBuf = int>
 class RendererData
 {
 	friend class Renderer;
@@ -117,15 +118,17 @@ inline RendererData<vertexType, cBuf>::RendererData(Graphics& gfx, const wchar_t
 	GFX_EXCEPT_INFO(gfx.getDevice()->CreateInputLayout(inputDescriptor.data(), 
 		static_cast<UINT>(inputDescriptor.size()), blobVS->GetBufferPointer(), blobVS->GetBufferSize(), &pInputLayout));
 
-	D3D11_BUFFER_DESC cbd;
-	cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cbd.Usage = D3D11_USAGE_DYNAMIC;
-	cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	cbd.MiscFlags = 0;
-	cbd.ByteWidth = sizeof(cBuf);
-	cbd.StructureByteStride = 0;
+	if (!std::is_same<cBuf, int>::value) {
+		D3D11_BUFFER_DESC cbd;
+		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		cbd.Usage = D3D11_USAGE_DYNAMIC;
+		cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		cbd.MiscFlags = 0;
+		cbd.ByteWidth = sizeof(cBuf);
+		cbd.StructureByteStride = 0;
 
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateBuffer(&cbd, nullptr, &pConstantBuffer));
+		GFX_EXCEPT_INFO(gfx.getDevice()->CreateBuffer(&cbd, nullptr, &pConstantBuffer));
+	}
 }
 
 template<typename vertexType, typename cBuf>
@@ -171,6 +174,7 @@ inline std::optional<std::pair<Microsoft::WRL::ComPtr<ID3D11Buffer>, size_t>>
 template<typename vertexType, typename cBuf>
 inline void RendererData<vertexType, cBuf>::UpdateConstantBuffer(const cBuf& constBuffer)
 {
+	static_assert(!std::is_same<cBuf, int>::value, "Attempting to append to omited constant buffer");
 	D3D11_MAPPED_SUBRESOURCE msr;
 	gfx.getContext()->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, &constBuffer, sizeof(cBuf));

@@ -5,12 +5,23 @@
 #include "GDIPlusManager.h"
 #include "imgui/imgui.h"
 #include <math.h>
+#include <algorithm>
+#include "Renderer.h"
 
 GDIPlusManager gdipm;
 
 Game::Game(size_t width, size_t height)
-	: wnd(width, height), wManager(wnd.Gfx()), cameraRay(wManager)
+	: wnd(width, height), wManager(wnd.Gfx()), cameraRay(wManager), 
+	renderData(wnd.Gfx(), L"SelectionVS.cso", L"SelectionPS.cso", ied)
 {
+	std::vector<CrosshairVertex> tempVertices;
+	std::copy(Crosshair::NearSide.first.begin(), Crosshair::NearSide.first.end(), std::back_inserter(tempVertices));
+
+	std::vector<uint16_t> tempIndices;
+	std::copy(Crosshair::NearSide.second.begin(), Crosshair::NearSide.second.end(), std::back_inserter(tempIndices));
+
+	auto t = renderData.UpdateVertexBuffer(tempVertices);
+	auto t2 = renderData.UpdateIndexBuffer(tempIndices);
 
 	if (!showCursor) {
 		wnd.disableCursor();
@@ -35,6 +46,13 @@ Game::Game(size_t width, size_t height)
 
 	/*wManager.CreateChunk(0, 0, 0);
 	wManager.CreateChunk(0, 1, 0, true);*/
+
+	auto qwe = sizeof(DirectX::XMFLOAT3);
+	auto qweqwe = sizeof(DirectX::XMFLOAT2);
+
+	auto aqsadads = sizeof(CrosshairVertex);
+
+	int weqweeqw = 123;
 
 	wManager.GenerateMeshes();
 } 
@@ -156,6 +174,9 @@ void Game::doFrame()
 				placeTimer.mark();
 			}
 		}
+
+		Renderer::Render(wnd.Gfx(), renderData);
+
 		wnd.Gfx().endFrame();
 	}
 }

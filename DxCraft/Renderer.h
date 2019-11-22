@@ -2,11 +2,11 @@
 #include "RendererData.h"
 #include "Graphics.h"
 #include "ExceptionMacros.h"
-
+#include <type_traits>
 
 class Renderer {
 public:
-	template<typename vertexType, typename cBuf>
+	template<typename vertexType, typename cBuf = int>
 	static void Render(Graphics& gfx, const RendererData<typename vertexType, typename cBuf>& data,
 		D3D_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST) {
 #ifdef _DEBUG
@@ -34,7 +34,8 @@ public:
 			gfx.pContext->PSSetSamplers(0, 1, data.pSampler.GetAddressOf());
 		}
 
-		gfx.pContext->VSSetConstantBuffers(0, 1, data.pConstantBuffer.GetAddressOf());
+		if(!std::is_same<cBuf, int>::value)
+			gfx.pContext->VSSetConstantBuffers(0, 1, data.pConstantBuffer.GetAddressOf());
 
 		gfx.pContext->DrawIndexed(data.indexBufferSize, 0, 0);
 	}

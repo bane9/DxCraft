@@ -176,18 +176,21 @@
     <ClInclude Include="Renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Crosshair.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VertexShader.hlsl">
-      <Filter>shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="PixelShader.hlsl">
-      <Filter>shaders</Filter>
-    </FxCompile>
     <FxCompile Include="TexturePS.hlsl">
       <Filter>shaders</Filter>
     </FxCompile>
     <FxCompile Include="TextureVS.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="SelectionVS.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="SelectionPS.hlsl">
       <Filter>shaders</Filter>
     </FxCompile>
   </ItemGroup>

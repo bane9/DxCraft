@@ -192,13 +192,13 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 	
 	auto pVertex = renderData.UpdateVertexBuffer(chunk.vertices);
 	if (pVertex) {
-		chunk.pVertexBuffer = pVertex->first;
+		chunk.pVertexBuffer.Swap(pVertex->first);
 		chunk.vertexBufferSize = pVertex->second;
 	}
 
 	auto pIndex = renderData.UpdateIndexBuffer(chunk.indices);
 	if (pIndex) {
-		chunk.pIndexBuffer = pIndex->first;
+		chunk.pIndexBuffer.Swap(pIndex->first);
 		chunk.indexBufferSize = pIndex->second;
 	}
 	
