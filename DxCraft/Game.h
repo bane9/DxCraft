@@ -25,9 +25,7 @@ private:
 	bool showCursor = true;
 	float skyIntesity = 0.5f;
 	float cameraSpeed = 15.0f;
-	int destroyedZ = 0;
-	int off_y = 0;
 	WorldManager wManager;
 	Ray cameraRay;
-	Timer clickTimer;
+	Timer placeTimer, destroyTimer;
 };

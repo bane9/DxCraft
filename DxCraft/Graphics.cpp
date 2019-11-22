@@ -181,6 +181,16 @@ void Graphics::setResoultion(int width, int height) noexcept
 	temp_viewport = true;
 }
 
+Microsoft::WRL::ComPtr<ID3D11Device> Graphics::getDevice() noexcept
+{
+	return pDevice;
+}
+
+Microsoft::WRL::ComPtr<ID3D11DeviceContext> Graphics::getContext() noexcept
+{
+	return pContext;
+}
+
 void Graphics::beginFrame(float red, float green, float blue) noexcept
 {
 	const float color[] = { red,green,blue,1.0f };

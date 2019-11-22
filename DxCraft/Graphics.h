@@ -19,6 +19,7 @@
 class Graphics
 {
 	friend class MeshRenderer;
+	friend class Renderer;
 public:
 	Graphics(HWND hWnd, size_t width, size_t height);
 	Graphics(Graphics&) = delete;
@@ -32,6 +33,8 @@ public:
 	void beginFrame(float red, float green, float blue) noexcept;
 	DirectX::XMMATRIX getProjection() const noexcept;
 	void setResoultion(int width, int height) noexcept;
+	Microsoft::WRL::ComPtr<ID3D11Device> getDevice() noexcept;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> getContext() noexcept;
 #ifdef _DEBUG
 	DxgiInfoManager& getInfoManager();
 #endif
@@ -44,7 +47,7 @@ private:
 #ifdef _DEBUG
 	DxgiInfoManager infoManager;
 #endif
-private:
+public:
 	Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;

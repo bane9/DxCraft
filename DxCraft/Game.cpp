@@ -21,7 +21,7 @@ Game::Game(size_t width, size_t height)
 	cam.setTravelSpeed(cameraSpeed);
 
 	const int area = 4;
-	/*for (int x = -area / 2; x < area / 2; x++) {
+	for (int x = -area / 2; x < area / 2; x++) {
 		for (int z = -area / 2; z < area / 2; z++) {
 			wManager.CreateChunk(x, 0, z);
 		}
@@ -31,10 +31,10 @@ Game::Game(size_t width, size_t height)
 		for (int z = -area / 2; z < area / 2; z++) {
 			wManager.CreateChunk(x, 1, z, true);
 		}
-	}*/
+	}
 
-	wManager.CreateChunk(0, 0, 0);
-	wManager.CreateChunk(0, 1, 0, true);
+	/*wManager.CreateChunk(0, 0, 0);
+	wManager.CreateChunk(0, 1, 0, true);*/
 
 	wManager.GenerateMeshes();
 } 
@@ -77,9 +77,6 @@ void Game::doFrame()
 					wnd.mouse.DisableRaw();
 				}
 				break;
-			case 'L':
-				wManager.ModifyBlock(0, 15, destroyedZ);
-				++destroyedZ;
 			}
 
 		}
@@ -133,7 +130,7 @@ void Game::doFrame()
 			ImGui::End();
 		}
 
-		wManager.Draw();
+		wManager.Draw(wnd.Gfx());
 
 		cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw());
 		auto old = cameraRay.GetVector();
@@ -149,12 +146,15 @@ void Game::doFrame()
 			n = cameraRay.GetVector();
 		}
 
-		if (found && clickTimer.getTime() > 0.1f) {
-			if (wnd.mouse.LeftIsPressed())
+		if (found) {
+			if (wnd.mouse.LeftIsPressed() && destroyTimer.getTime() > 0.1f) {
 				wManager.ModifyBlock(n.x, n.y, n.z);
-			else if (wnd.mouse.RightIsPressed())
-				wManager.ModifyBlock(old.x, old.y, old.z, BlockType::Dirt);
-			clickTimer.mark();
+				destroyTimer.mark();
+			}
+			else if (wnd.mouse.RightIsPressed() && placeTimer.getTime() > 0.175f) {
+				wManager.ModifyBlock(old.x, old.y, old.z, BlockType::Wooden_Plank);
+				placeTimer.mark();
+			}
 		}
 		wnd.Gfx().endFrame();
 	}

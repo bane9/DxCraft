@@ -1,9 +1,11 @@
 #include "WorldManager.h"
 #include "MathFunctions.h"
 #include <algorithm>
+#include "Renderer.h"
+#include <optional>
 
 WorldManager::WorldManager(Graphics& gfx)
-	: renderer(gfx)
+	: renderData(gfx, L"TextureVS.cso", L"TexturePS.cso", ied, "images\\terrain.png")
 {
 }
 
@@ -22,6 +24,7 @@ void WorldManager::ModifyBlock(int x, int y, int z, BlockType type)
 	Position normalized = chunk->Normalize(x, y, z);
 	Block& block = chunk->blocks[chunk->FlatIndex(x, y, z)];
 	if (block.type == BlockType::Bedrock) return;
+	if (type != BlockType::Air && block.type != BlockType::Air) return;
 	block.type = type;
 	GenerateMesh(*chunk);
 	if (normalized.x + 1 >= BasicChunk::chunkSize) {
@@ -57,10 +60,23 @@ void WorldManager::GenerateMeshes() {
 	}
 }
 
-void WorldManager::Draw()
+void WorldManager::Draw(Graphics& gfx)
 {
 	for (auto& chunk : chunks) {
-		renderer.Draw(chunk.second);
+		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
+
+		const Transforms tf =
+		{
+			DirectX::XMMatrixTranspose(model * gfx.getCamera() * gfx.getProjection()),
+			DirectX::XMMatrixTranspose(model)
+		};
+
+		renderData.UpdateConstantBuffer(tf);
+		renderData.CopyVertexPtr(chunk.second.pVertexBuffer, chunk.second.vertexBufferSize);
+		renderData.CopyIndexPtr(chunk.second.pIndexBuffer, chunk.second.indexBufferSize);
+
+		Renderer::Render<Vertex, Transforms>(gfx, renderData);
+		renderData.Reset();
 	}
 }
 
@@ -173,5 +189,21 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 		chunk.indexBufferSize = 0;
 		return;
 	}
-	renderer.AppendData(chunk);
+	
+	auto pVertex = renderData.UpdateVertexBuffer(chunk.vertices);
+	if (pVertex) {
+		chunk.pVertexBuffer = pVertex->first;
+		chunk.vertexBufferSize = pVertex->second;
+	}
+
+	auto pIndex = renderData.UpdateIndexBuffer(chunk.indices);
+	if (pIndex) {
+		chunk.pIndexBuffer = pIndex->first;
+		chunk.indexBufferSize = pIndex->second;
+	}
+	
+	chunk.vertices.clear();
+	chunk.indices.clear();
+
+	renderData.Reset();
 }

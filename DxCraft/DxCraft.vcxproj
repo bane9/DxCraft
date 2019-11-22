@@ -167,7 +167,6 @@
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Keyboard.cpp" />
-    <ClCompile Include="MeshRenderer.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="Surface.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -195,9 +194,10 @@
     <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="MathFunctions.h" />
-    <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="Ray.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RendererData.h" />
     <ClInclude Include="robin_hood.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="ThreadSettings.h" />
@@ -264,6 +264,9 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
