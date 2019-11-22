@@ -47,7 +47,7 @@ private:
 #ifdef _DEBUG
 	DxgiInfoManager infoManager;
 #endif
-public:
+private:
 	Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> pSwap;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;

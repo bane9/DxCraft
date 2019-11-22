@@ -172,9 +172,9 @@ template<typename vertexType, typename cBuf>
 inline void RendererData<vertexType, cBuf>::UpdateConstantBuffer(const cBuf& constBuffer)
 {
 	D3D11_MAPPED_SUBRESOURCE msr;
-	gfx.pContext->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+	gfx.getContext()->Map(pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, &constBuffer, sizeof(cBuf));
-	gfx.pContext->Unmap(pConstantBuffer.Get(), 0);
+	gfx.getContext()->Unmap(pConstantBuffer.Get(), 0);
 }
 
 template<typename vertexType, typename cBuf>

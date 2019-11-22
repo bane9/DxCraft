@@ -11,9 +11,9 @@ public:
 
 	void SetPositionAndDirection(const DirectX::XMFLOAT3& startCoord, float pitch, float yaw, float startDisance = 2.0f) noexcept {
 		rayPos = startCoord;
-		rayPos.x += 1.0f * sgn(rayPos.x);
-		rayPos.y += 1.0f * sgn(rayPos.y);
-		rayPos.z += 1.0f * sgn(rayPos.z);
+		rayPos.x += 0.5f * sgn(rayPos.x);
+		rayPos.y += 0.5f * sgn(rayPos.y);
+		rayPos.z += 0.5f * sgn(rayPos.z);
 
 		dx = std::sin(yaw) * std::cos(pitch);
 		dy = std::sin(-pitch);
