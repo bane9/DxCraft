@@ -1,5 +1,7 @@
 #pragma once
 #include <array>
+#define TRANSPARENT_BLOCK(x) ((x == BlockType::Air) || (x == BlockType::Glass))
+
 
 enum class BlockType {
 	Air,
@@ -8,6 +10,7 @@ enum class BlockType {
 	Dirt,
 	Wooden_Plank,
 	Bedrock,
+	Glass,
 	/*Stone_Slab,
 	Brick,
 	TNT,
@@ -81,6 +84,14 @@ constexpr std::array<std::array<std::array<float, 2>, 6>, static_cast<int>(Block
 		{1, 1},
 		{1, 1},
 		{1, 1},
+	}},
+	{{ //Glass
+		{1, 3},
+		{1, 3},
+		{1, 3},
+		{1, 3},
+		{1, 3},
+		{1, 3},
 	}}
 
 }};

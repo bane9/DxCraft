@@ -24,7 +24,6 @@ void WorldManager::ModifyBlock(int x, int y, int z, BlockType type)
 	Position normalized = chunk->Normalize(x, y, z);
 	Block& block = chunk->blocks[chunk->FlatIndex(x, y, z)];
 	if (block.type == BlockType::Bedrock) return;
-	if (type != BlockType::Air && block.type != BlockType::Air) return;
 	block.type = type;
 	GenerateMesh(*chunk);
 	if (normalized.x + 1 >= BasicChunk::chunkSize) {
@@ -105,13 +104,13 @@ bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z)
 	if (x < BasicChunk::chunkSize - 1 && y < BasicChunk::chunkSize - 1 && z < BasicChunk::chunkSize - 1
 		&& x > 0 && y > 0 && z > 0)
 	{
-		if(chunk.blocks[chunk.FlatIndex(x, y, z)].type == BlockType::Air) return true;
+		if(TRANSPARENT_BLOCK(chunk.blocks[chunk.FlatIndex(x, y, z)].type)) return true;
 	}
 	else
 	{
 		auto block = GetBlock(x, y, z);
 		if (block == nullptr) return true;
-		return block->type == BlockType::Air;
+		return TRANSPARENT_BLOCK(block->type);
 	}
 	return false;
 }

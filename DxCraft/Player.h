@@ -47,7 +47,7 @@ private:
 	DirectX::XMFLOAT3 previousHitBlock;
 	Position hitBlockPos;
 	Ray cameraRay;
-	float velocity = 15.0f;
+	float velocity = 7.5f;
 	Timer placeTimer;
 	Timer destroyTimer;
 	Timer moveTimer;

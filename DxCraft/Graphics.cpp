@@ -133,6 +133,20 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 
 	pContext->RSSetState(pRasterDesc.Get());
 
+	D3D11_BLEND_DESC blendDesc = {};
+	auto& brt = blendDesc.RenderTarget[0];
+	brt.BlendEnable = TRUE;
+	brt.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	brt.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	brt.BlendOp = D3D11_BLEND_OP_ADD;
+	brt.SrcBlendAlpha = D3D11_BLEND_ZERO;
+	brt.DestBlendAlpha = D3D11_BLEND_ZERO;
+	brt.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	brt.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	GFX_EXCEPT_INFO(pDevice->CreateBlendState(&blendDesc, &pBlender));
+	pContext->OMSetBlendState(pBlender.Get(), nullptr, 0xFFFFFFFF);
+
 	ImGui_ImplDX11_Init(pDevice.Get(), pContext.Get());
 }
 

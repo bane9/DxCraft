@@ -61,4 +61,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> pRasterDesc;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDSState;
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pDepthStencil;
+	Microsoft::WRL::ComPtr<ID3D11BlendState> pBlender;
 };

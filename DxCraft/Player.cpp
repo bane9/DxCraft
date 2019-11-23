@@ -109,7 +109,7 @@ void Player::RotateCamera(float dx, float dy)
 void Player::RightClickEvent()
 {
 	if (found && placeTimer.getTime() > 0.175f) {
-		wManager.ModifyBlock(round(previousHitBlock.x), round(previousHitBlock.y), round(previousHitBlock.z), BlockType::Wooden_Plank);
+		wManager.ModifyBlock(round(previousHitBlock.x), round(previousHitBlock.y), round(previousHitBlock.z), BlockType::Glass);
 		placeTimer.mark();
 	}
 	else {
