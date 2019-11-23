@@ -33,5 +33,5 @@ private:
 		{ "TexCoord",0,DXGI_FORMAT_R32G32_FLOAT,0,24,D3D11_INPUT_PER_VERTEX_DATA,0 }
 	};
 
-	RendererData<Vertex, Transforms> renderData;
+	RendererData<Vertex, Transforms> chunkRenderData;
 };

@@ -5,7 +5,7 @@
 #include <optional>
 
 WorldManager::WorldManager(Graphics& gfx)
-	: renderData(gfx, L"TextureVS.cso", L"TexturePS.cso", ied, "images\\terrain.png")
+	: chunkRenderData(gfx, L"TextureVS.cso", L"TexturePS.cso", ied, "images\\terrain.png")
 {
 }
 
@@ -71,12 +71,12 @@ void WorldManager::Draw(Graphics& gfx)
 			DirectX::XMMatrixTranspose(model)
 		};
 
-		renderData.UpdateConstantBuffer(tf);
-		renderData.CopyVertexPtr(chunk.second.pVertexBuffer, chunk.second.vertexBufferSize);
-		renderData.CopyIndexPtr(chunk.second.pIndexBuffer, chunk.second.indexBufferSize);
+		chunkRenderData.UpdateConstantBuffer(tf);
+		chunkRenderData.CopyVertexPtr(chunk.second.pVertexBuffer, chunk.second.vertexBufferSize);
+		chunkRenderData.CopyIndexPtr(chunk.second.pIndexBuffer, chunk.second.indexBufferSize);
 
-		Renderer::Render<Vertex, Transforms>(gfx, renderData);
-		renderData.Reset();
+		Renderer::Render<Vertex, Transforms>(gfx, chunkRenderData);
+		chunkRenderData.Reset();
 	}
 }
 
@@ -190,13 +190,13 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 		return;
 	}
 	
-	auto pVertex = renderData.UpdateVertexBuffer(chunk.vertices);
+	auto pVertex = chunkRenderData.UpdateVertexBuffer(chunk.vertices);
 	if (pVertex) {
 		chunk.pVertexBuffer.Swap(pVertex->first);
 		chunk.vertexBufferSize = pVertex->second;
 	}
 
-	auto pIndex = renderData.UpdateIndexBuffer(chunk.indices);
+	auto pIndex = chunkRenderData.UpdateIndexBuffer(chunk.indices);
 	if (pIndex) {
 		chunk.pIndexBuffer.Swap(pIndex->first);
 		chunk.indexBufferSize = pIndex->second;
@@ -205,5 +205,5 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 	chunk.vertices.clear();
 	chunk.indices.clear();
 
-	renderData.Reset();
+	chunkRenderData.Reset();
 }

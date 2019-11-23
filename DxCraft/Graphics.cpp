@@ -113,7 +113,9 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	vp.MaxDepth = 1.0f;
 	vp.TopLeftX = 0.0f;
 	vp.TopLeftY = 0.0f;
-	pContext->RSSetViewports(1u, &vp);
+	pContext->RSSetViewports(1, &vp);
+
+	projection = DirectX::XMMatrixPerspectiveLH(1.0f, vp.Height / vp.Width, 0.5f, 200.0f);
 
 	DirectX::XMMatrixPerspectiveLH(1.0f, (float)height / (float)width, 0.5f, 200.0f);
 

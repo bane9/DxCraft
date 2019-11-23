@@ -13,7 +13,7 @@ GDIPlusManager gdipm;
 
 Game::Game(size_t width, size_t height)
 	: wnd(width, height), wManager(wnd.Gfx()), cameraRay(wManager), 
-	renderData(wnd.Gfx(), L"CrosshairVS.cso", L"CrossHairPS.cso", ied),
+	crosshair(wnd.Gfx(), L"CrosshairVS.cso", L"CrossHairPS.cso", ied),
 	blockSelector(wnd.Gfx(), L"SelectionVS.cso", L"SelectionPS.cso", ied)
 {
 	std::vector<DirectX::XMFLOAT3> tempVertices;
@@ -22,8 +22,8 @@ Game::Game(size_t width, size_t height)
 	std::vector<uint16_t> tempIndices;
 	std::copy(Crosshair::NearSide.second.begin(), Crosshair::NearSide.second.end(), std::back_inserter(tempIndices));
 
-	auto t = renderData.UpdateVertexBuffer(tempVertices);
-	auto t2 = renderData.UpdateIndexBuffer(tempIndices);
+	auto t = crosshair.UpdateVertexBuffer(tempVertices);
+	auto t2 = crosshair.UpdateIndexBuffer(tempIndices);
 
 	tempVertices.clear();
 	std::copy(BlockSelector::Cube.first.begin(), BlockSelector::Cube.first.end(), std::back_inserter(tempVertices));
@@ -58,6 +58,8 @@ Game::Game(size_t width, size_t height)
 	//wManager.CreateChunk(0, 0, 0);
 	//wManager.CreateChunk(0, 1, 0, true);
 	wManager.GenerateMeshes();
+
+	crosshair.UpdateConstantBuffer(DirectX::XMMatrixTranspose(wnd.Gfx().getProjection()));
 } 
 
 void Game::doFrame()
@@ -152,7 +154,7 @@ void Game::doFrame()
 		}
 
 
-		cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw(), 1.75f);
+		cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw());
 		auto old = cameraRay.GetVector();
 		auto n = old;
 		bool found = false;
@@ -171,7 +173,7 @@ void Game::doFrame()
 		}
 
 		if (found && !showCursor) {
-			if (wnd.mouse.LeftIsPressed() && destroyTimer.getTime() > 0.1f) {
+			if (wnd.mouse.LeftIsPressed() && destroyTimer.getTime() > 0.175f) {
 				wManager.ModifyBlock(round(n.x), round(n.y), round(n.z));
 				destroyTimer.mark();
 			}
@@ -189,18 +191,20 @@ void Game::doFrame()
 
 		const Transforms tf =
 		{
-			DirectX::XMMatrixTranspose(model * wnd.Gfx().getCamera() * wnd.Gfx().getProjection() * (pos.y < 0 ? 0 : 1)),
+			DirectX::XMMatrixTranspose(model * wnd.Gfx().getCamera() * wnd.Gfx().getProjection()),
 			DirectX::XMMatrixTranspose(model)
 		};
 
 		blockSelector.UpdateConstantBuffer(tf);
 		
 
-		Renderer::Render(wnd.Gfx(), renderData);
+		Renderer::Render(wnd.Gfx(), crosshair);
 
-		wnd.Gfx().RenderWireframe();
-		Renderer::Render(wnd.Gfx(), blockSelector);
-		wnd.Gfx().RenderSolid();
+		if (pos.y > -1) {
+			wnd.Gfx().RenderWireframe();
+			Renderer::Render(wnd.Gfx(), blockSelector);
+			wnd.Gfx().RenderSolid();
+		}
 
 		wManager.Draw(wnd.Gfx());
 
