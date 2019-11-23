@@ -37,6 +37,8 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> getContext() noexcept;
 	void RenderSolid();
 	void RenderWireframe();
+	void EnableZTest();
+	void DisableZTest();
 #ifdef _DEBUG
 	DxgiInfoManager& getInfoManager();
 #endif
@@ -57,4 +59,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDSV;
 	Microsoft::WRL::ComPtr<ID3D11Resource> pBackBuffer;
 	Microsoft::WRL::ComPtr<ID3D11RasterizerState> pRasterDesc;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDSState;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> pDepthStencil;
 };

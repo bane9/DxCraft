@@ -80,12 +80,11 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	dsDesc.DepthEnable = TRUE;
 	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
-	wrl::ComPtr<ID3D11DepthStencilState> pDSState;
 	GFX_EXCEPT_INFO(pDevice->CreateDepthStencilState(&dsDesc, &pDSState));
 
-	pContext->OMSetDepthStencilState(pDSState.Get(), 1u);
+	pContext->OMSetDepthStencilState(pDSState.Get(), 1);
 
-	wrl::ComPtr<ID3D11Texture2D> pDepthStencil;
+	
 	D3D11_TEXTURE2D_DESC descDepth = {};
 	descDepth.Width = width;
 	descDepth.Height = height;
@@ -117,7 +116,6 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 
 	projection = DirectX::XMMatrixPerspectiveLH(1.0f, vp.Height / vp.Width, 0.5f, 200.0f);
 
-	DirectX::XMMatrixPerspectiveLH(1.0f, (float)height / (float)width, 0.5f, 200.0f);
 
 	D3D11_RASTERIZER_DESC rasterDesc{};
 	rasterDesc.AntialiasedLineEnable = false;
@@ -231,6 +229,26 @@ void Graphics::RenderWireframe()
 	pDevice->CreateRasterizerState(&rDesc, &pRasterDesc);
 
 	pContext->RSSetState(pRasterDesc.Get());
+}
+
+void Graphics::EnableZTest()
+{
+	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
+	dsDesc.DepthEnable = TRUE;
+	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	GFX_EXCEPT_INFO(pDevice->CreateDepthStencilState(&dsDesc, &pDSState));
+	pContext->OMSetDepthStencilState(pDSState.Get(), 1);
+}
+
+void Graphics::DisableZTest()
+{
+	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
+	dsDesc.DepthEnable = false;
+	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	GFX_EXCEPT_INFO(pDevice->CreateDepthStencilState(&dsDesc, &pDSState));
+	pContext->OMSetDepthStencilState(pDSState.Get(), 1);
 }
 
 void Graphics::beginFrame(float red, float green, float blue) noexcept

@@ -139,15 +139,13 @@ void Player::Draw()
 
 	if (!flying) {
 		auto oldVelocity = velocity;
-		velocity = 25.0f * fallTimer.getTime();
+		velocity = 50.0f * fallTimer.getTime() * 0.5f;
 		std::clamp(velocity, 0.0f, 100.0f);
 		MoveDown(true);
 		velocity = oldVelocity;
 		if (cam.GetPos().y < -15) cam.SetPos(0.0f, 25.0f, 0.0f);
 	}
-	else {
-		fallTimer.mark();
-	}
+
 	if (!falling) fallTimer.mark();
 
 	dt = moveTimer.mark();
@@ -185,8 +183,17 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 	const float offsetYLower =  -1.25f * sgn(pos.y);
 	const float offsetZ =		0.5f   * sgn(delta.z);
 
+	bool check = true;
 	auto block = wManager.GetBlock(round(pos.x), round(pos.y + delta.y + offsetY), round(pos.z));
-	if (block != nullptr && block->type != BlockType::Air) delta.y = 0;
+	if (block != nullptr && block->type != BlockType::Air) {
+		delta.y = 0;
+		auto idk = modf(floor(pos.y), &pos.y);
+		if (modf(round(pos.y), &pos.y) < 0.1f) {
+			falling = false;
+			check = false;
+		}
+	}
+	else if (check) falling = true;
 
 	block = wManager.GetBlock(round(pos.x + delta.x + offsetX), round(pos.y), round(pos.z));
 	if (block != nullptr && block->type != BlockType::Air) delta.x = 0;
@@ -201,7 +208,7 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 	if (block != nullptr && block->type != BlockType::Air) delta.z = 0;
 
 
-	const float offset = sgn(pos.x) * 0.1f;
+	const float offset = sgn(pos.x) * 0.125f;
 
 	block = wManager.GetBlock(round(pos.x + delta.x + offsetX + offset), round(pos.y), round(pos.z + sgn(pos.z) * 0.25));
 	if (block != nullptr && block->type != BlockType::Air) delta.x = 0;
@@ -230,11 +237,4 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 	
 
 	cam.SetPos(pos.x + delta.x, pos.y + delta.y, pos.z + delta.z);
-	if (delta.y == 0.0f) {
-		fallTimer.mark();
-		falling = false;
-	}
-	else {
-		falling = true;
-	}
 }
