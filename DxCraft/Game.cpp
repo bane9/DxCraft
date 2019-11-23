@@ -153,7 +153,7 @@ void Game::doFrame()
 		}
 
 
-		cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw());
+		cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw(), 1.75f);
 		auto old = cameraRay.GetVector();
 		auto n = old;
 		bool found = false;
@@ -195,10 +195,13 @@ void Game::doFrame()
 		};
 
 		blockSelector.UpdateConstantBuffer(tf);
+		
 
 		Renderer::Render(wnd.Gfx(), renderData);
 
+		wnd.Gfx().RenderWireframe();
 		Renderer::Render(wnd.Gfx(), blockSelector);
+		wnd.Gfx().RenderSolid();
 
 		wManager.Draw(wnd.Gfx());
 

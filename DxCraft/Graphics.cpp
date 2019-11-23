@@ -12,7 +12,7 @@
 namespace wrl = Microsoft::WRL;
 namespace dx = DirectX;
 
-Graphics::Graphics(HWND hWnd, size_t width, size_t height) 
+Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	: width(width), height(height)
 {
 	DXGI_SWAP_CHAIN_DESC sd = {};
@@ -117,6 +117,22 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 
 	DirectX::XMMatrixPerspectiveLH(1.0f, (float)height / (float)width, 0.5f, 200.0f);
 
+	D3D11_RASTERIZER_DESC rasterDesc{};
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	GFX_EXCEPT_INFO(pDevice->CreateRasterizerState(&rasterDesc, &pRasterDesc));
+
+	pContext->RSSetState(pRasterDesc.Get());
+
 	ImGui_ImplDX11_Init(pDevice.Get(), pContext.Get());
 }
 
@@ -189,6 +205,30 @@ Microsoft::WRL::ComPtr<ID3D11Device> Graphics::getDevice() noexcept
 Microsoft::WRL::ComPtr<ID3D11DeviceContext> Graphics::getContext() noexcept
 {
 	return pContext;
+}
+
+void Graphics::RenderSolid()
+{
+	D3D11_RASTERIZER_DESC rDesc;
+
+	pRasterDesc->GetDesc(&rDesc);
+	rDesc.FillMode = D3D11_FILL_SOLID;
+
+	pDevice->CreateRasterizerState(&rDesc, &pRasterDesc);
+
+	pContext->RSSetState(pRasterDesc.Get());
+}
+
+void Graphics::RenderWireframe()
+{
+	D3D11_RASTERIZER_DESC rDesc;
+
+	pRasterDesc->GetDesc(&rDesc);
+	rDesc.FillMode = D3D11_FILL_WIREFRAME;
+
+	pDevice->CreateRasterizerState(&rDesc, &pRasterDesc);
+
+	pContext->RSSetState(pRasterDesc.Get());
 }
 
 void Graphics::beginFrame(float red, float green, float blue) noexcept

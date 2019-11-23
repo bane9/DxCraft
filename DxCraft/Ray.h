@@ -22,7 +22,7 @@ public:
 			Next(0.5f);
 	}
 
-	bool Next(float precision = 0.05f) noexcept
+	bool Next(float precision = 0.1f) noexcept
 	{
 		rayPos.x += dx * precision;
 		rayPos.y += dy * precision;
@@ -37,7 +37,6 @@ public:
 	}
 
 private:
-	bool once = false;
 	DirectX::XMFLOAT3 rayPos;
 	WorldManager& wManager;
 	float dx;

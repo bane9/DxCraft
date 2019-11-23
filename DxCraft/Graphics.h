@@ -35,6 +35,8 @@ public:
 	void setResoultion(int width, int height) noexcept;
 	Microsoft::WRL::ComPtr<ID3D11Device> getDevice() noexcept;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> getContext() noexcept;
+	void RenderSolid();
+	void RenderWireframe();
 #ifdef _DEBUG
 	DxgiInfoManager& getInfoManager();
 #endif
@@ -54,4 +56,5 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDSV;
 	Microsoft::WRL::ComPtr<ID3D11Resource> pBackBuffer;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> pRasterDesc;
 };

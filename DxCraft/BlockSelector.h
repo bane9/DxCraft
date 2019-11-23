@@ -2,7 +2,7 @@
 #include "XM_Structs.h"
 
 struct BlockSelector {
-	static constexpr float side = 0.5001f;
+	static constexpr float side = 0.51f;
 	static constexpr std::pair<std::array<DirectX::XMFLOAT3, 8>, std::array<uint16_t, 36>> Cube{
 		{
 			DirectX::XMFLOAT3(-side,-side,-side),
