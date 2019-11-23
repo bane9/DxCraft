@@ -17,7 +17,7 @@ struct Transforms
 };
 
 struct Faces {
-	static constexpr float side = 1.0f / 2.0f;
+	static constexpr float side = 0.5f;
 	static constexpr std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>> NearSide{
 		{
 		Vertex{DirectX::XMFLOAT3(-side ,-side,-side), DirectX::XMFLOAT3(), { 1, 2 }},
