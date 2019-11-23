@@ -25,6 +25,12 @@ enum class BlockType {
 	block_count
 };
 
+struct Block
+{
+	int x, y, z;
+	BlockType type;
+};
+
 constexpr std::array<std::array<std::array<float, 2>, 6>, static_cast<int>(BlockType::block_count)> BlockFaces
 {{
 	/*
@@ -78,9 +84,3 @@ constexpr std::array<std::array<std::array<float, 2>, 6>, static_cast<int>(Block
 	}}
 
 }};
-
-struct Block
-{
-	int x, y, z;
-	BlockType type;
-};

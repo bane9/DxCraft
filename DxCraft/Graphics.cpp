@@ -122,9 +122,9 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	D3D11_RASTERIZER_DESC rasterDesc{};
 	rasterDesc.AntialiasedLineEnable = false;
 	rasterDesc.CullMode = D3D11_CULL_BACK;
-	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBias = 0.0f;
 	rasterDesc.DepthBiasClamp = 0.0f;
-	rasterDesc.DepthClipEnable = true;
+	rasterDesc.DepthClipEnable = false;
 	rasterDesc.FillMode = D3D11_FILL_SOLID;
 	rasterDesc.FrontCounterClockwise = false;
 	rasterDesc.MultisampleEnable = false;

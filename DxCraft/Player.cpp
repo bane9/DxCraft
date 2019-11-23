@@ -1,4 +1,6 @@
 #include "Player.h"
+#include "MathFunctions.h"
+#include "imgui/imgui.h"
 
 Player::Player(Graphics& gfx, WorldManager& wManager)
 	: 
@@ -7,7 +9,8 @@ Player::Player(Graphics& gfx, WorldManager& wManager)
 	crosshair(gfx, L"CrosshairVS.cso", L"CrossHairPS.cso", ied),
 	blockSelector(gfx, L"SelectionVS.cso", L"SelectionPS.cso", ied),
 	playerBox({1.0f, 1.7f, 1.0f}),
-	hitBlockPos(-1, -1, -1)
+	hitBlockPos(-1, -1, -1),
+	blockBox({ 1.0f, 1.0f, 1.0f })
 {
 	std::vector<DirectX::XMFLOAT3> tempVertices;
 	std::copy(Crosshair::NearSide.first.begin(), Crosshair::NearSide.first.end(), std::back_inserter(tempVertices));
@@ -44,32 +47,34 @@ float Player::GetVelocity()
 
 void Player::MoveForward()
 {
-	cam.Translate({ 0.0f,0.0f,dt }, velocity);
+	ResolveCollision(cam.Translate({ 0.0f,0.0f,dt }, velocity, flying));
 }
 
 void Player::MoveBackward()
 {
-	cam.Translate({ 0.0f,0.0f,-dt }, velocity);
+	ResolveCollision(cam.Translate({ 0.0f,0.0f,-dt }, velocity, flying));
 }
 
 void Player::MoveLeft()
 {
-	cam.Translate({ -dt,0.0f,0.0f }, velocity);
+	ResolveCollision(cam.Translate({ -dt,0.0f,0.0f }, velocity, flying));
 }
 
 void Player::MoveRigth()
 {
-	cam.Translate({ dt,0.0f,0.0f }, velocity);
+	ResolveCollision(cam.Translate({ dt,0.0f,0.0f }, velocity, flying));
 }
 
 void Player::MoveUp()
 {
-	cam.Translate({ 0.0f,dt,0.0f }, velocity);
+	if (!flying) return;
+	ResolveCollision(cam.Translate({ 0.0f,dt,0.0f }, velocity));
 }
 
 void Player::MoveDown()
 {
-	cam.Translate({ 0.0f,dt,0.0f }, velocity);
+	if (!flying) return;
+	ResolveCollision(cam.Translate({ 0.0f,-dt,0.0f }, velocity));
 }
 
 void Player::CastRay()
@@ -122,6 +127,11 @@ void Player::LeftClickEvent()
 
 void Player::Draw()
 {
+	if (ImGui::Begin("Collision")) {
+		ImGui::Checkbox("Enable Collision", &collision);
+		ImGui::Checkbox("Enable Flying", &flying);
+		ImGui::End();
+	}
 	dt = moveTimer.mark();
 	gfx.setCamera(cam.GetMatrix());
 	auto model = DirectX::XMMatrixTranslation(hitBlockPos.x, hitBlockPos.y, hitBlockPos.z);
@@ -134,7 +144,6 @@ void Player::Draw()
 
 	blockSelector.UpdateConstantBuffer(tf);
 
-
 	Renderer::Render(gfx, crosshair);
 
 	if (hitBlockPos.y > -1) {
@@ -142,4 +151,36 @@ void Player::Draw()
 		Renderer::Render(gfx, blockSelector);
 		gfx.RenderSolid();
 	}
+}
+
+void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
+{
+	DirectX::XMFLOAT3 pos = cam.GetPos();
+
+	if (!collision) {
+		cam.SetPos(pos.x + delta.x, pos.y + delta.y, pos.z + delta.z);
+		return;
+	}
+
+	const float offsetX =		0.5f * sgn(delta.x);
+	const float offsetY =		1.5f * sgn(delta.y);
+	const float offsetYLower =  1.5f * sgn(delta.y);
+	const float offsetZ =		0.5f * sgn(delta.z);
+
+	auto block = wManager.GetBlock(round(pos.x), round(pos.y + delta.y + offsetY), round(pos.z));
+	if (block != nullptr && block->type != BlockType::Air) delta.y = 0;
+
+	block = wManager.GetBlock(round(pos.x + delta.x + offsetX), round(pos.y), round(pos.z));
+	if (block != nullptr && block->type != BlockType::Air) delta.x = 0;
+
+	block = wManager.GetBlock(round(pos.x + delta.x + offsetX), round(pos.y + offsetY), round(pos.z));
+	if (block != nullptr && block->type != BlockType::Air) delta.x = 0;
+
+	block = wManager.GetBlock(round(pos.x), round(pos.y), round(pos.z + delta.z + offsetZ));
+	if (block != nullptr && block->type != BlockType::Air) delta.z = 0;
+
+	block = wManager.GetBlock(round(pos.x), round(pos.y + offsetY), round(pos.z + delta.z + offsetZ));
+	if (block != nullptr && block->type != BlockType::Air) delta.z = 0;
+
+	cam.SetPos(pos.x + delta.x, pos.y + delta.y, pos.z + delta.z);
 }

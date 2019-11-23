@@ -33,6 +33,7 @@ public:
 	void Draw();
 
 private:
+	void ResolveCollision(DirectX::XMFLOAT3 delta);
 	Graphics& gfx;
 	WorldManager& wManager;
 	Camera cam;
@@ -48,11 +49,13 @@ private:
 	Position hitBlockPos;
 	Ray cameraRay;
 	AABB playerBox;
+	AABB blockBox;
 	float velocity = 15.0f;
 	Timer placeTimer;
 	Timer destroyTimer;
 	Timer moveTimer;
 	float dt = 0.01f;
-
+	bool collision = true;
+	bool flying = true;
 };
 

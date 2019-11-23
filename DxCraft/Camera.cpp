@@ -42,12 +42,12 @@ void Camera::Rotate(float dx, float dy) noexcept
 	pitch = std::clamp(pitch + dy * rotationSpeed, 0.995f * -PI / 2.0f, 0.995f * PI / 2.0f);
 }
 
-void Camera::Translate(DirectX::XMFLOAT3 translation, float travelSpeed) noexcept
+DirectX::XMFLOAT3 Camera::Translate(DirectX::XMFLOAT3 translation, float travelSpeed, bool flying) noexcept
 {
 	if (translation.y == 0) {
 		DirectX::XMStoreFloat3(&translation, DirectX::XMVector3Transform(
 			DirectX::XMLoadFloat3(&translation),
-			DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, 0.0f) *
+			DirectX::XMMatrixRotationRollPitchYaw(pitch * (flying ? 1 : 0), yaw, 0.0f) *
 			DirectX::XMMatrixScaling(travelSpeed, travelSpeed, travelSpeed)
 		));
 	}
@@ -58,10 +58,6 @@ void Camera::Translate(DirectX::XMFLOAT3 translation, float travelSpeed) noexcep
 		));
 	}
 
-	pos = {
-		pos.x + translation.x,
-		pos.y + translation.y,
-		pos.z + translation.z
-	};
+	return { translation.x, translation.y, translation.z };
 }
 
