@@ -179,6 +179,9 @@
     <ClInclude Include="Crosshair.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BlockSelector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="TexturePS.hlsl">
@@ -193,8 +196,15 @@
     <FxCompile Include="SelectionPS.hlsl">
       <Filter>shaders</Filter>
     </FxCompile>
+    <FxCompile Include="CrossHairPS.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="CrosshairVS.hlsl">
+      <Filter>shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
 </Project>

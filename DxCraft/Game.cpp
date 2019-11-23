@@ -7,14 +7,16 @@
 #include <math.h>
 #include <algorithm>
 #include "Renderer.h"
+#include "BlockSelector.h"
 
 GDIPlusManager gdipm;
 
 Game::Game(size_t width, size_t height)
 	: wnd(width, height), wManager(wnd.Gfx()), cameraRay(wManager), 
-	renderData(wnd.Gfx(), L"SelectionVS.cso", L"SelectionPS.cso", ied)
+	renderData(wnd.Gfx(), L"CrosshairVS.cso", L"CrossHairPS.cso", ied),
+	blockSelector(wnd.Gfx(), L"SelectionVS.cso", L"SelectionPS.cso", ied)
 {
-	std::vector<CrosshairVertex> tempVertices;
+	std::vector<DirectX::XMFLOAT3> tempVertices;
 	std::copy(Crosshair::NearSide.first.begin(), Crosshair::NearSide.first.end(), std::back_inserter(tempVertices));
 
 	std::vector<uint16_t> tempIndices;
@@ -22,6 +24,15 @@ Game::Game(size_t width, size_t height)
 
 	auto t = renderData.UpdateVertexBuffer(tempVertices);
 	auto t2 = renderData.UpdateIndexBuffer(tempIndices);
+
+	tempVertices.clear();
+	std::copy(BlockSelector::Cube.first.begin(), BlockSelector::Cube.first.end(), std::back_inserter(tempVertices));
+
+	tempIndices.clear();
+	std::copy(BlockSelector::Cube.second.begin(), BlockSelector::Cube.second.end(), std::back_inserter(tempIndices));
+
+	t = blockSelector.UpdateVertexBuffer(tempVertices);
+	t2 = blockSelector.UpdateIndexBuffer(tempIndices);
 
 	if (!showCursor) {
 		wnd.disableCursor();
@@ -44,15 +55,8 @@ Game::Game(size_t width, size_t height)
 		}
 	}
 
-	/*wManager.CreateChunk(0, 0, 0);
-	wManager.CreateChunk(0, 1, 0, true);*/
-
-	auto qwe = sizeof(DirectX::XMFLOAT3);
-	auto qweqwe = sizeof(DirectX::XMFLOAT2);
-
-	auto aqsadads = sizeof(CrosshairVertex);
-
-	int weqweeqw = 123;
+	//wManager.CreateChunk(0, 0, 0);
+	//wManager.CreateChunk(0, 1, 0, true);
 
 	wManager.GenerateMeshes();
 } 
@@ -148,15 +152,18 @@ void Game::doFrame()
 			ImGui::End();
 		}
 
-		wManager.Draw(wnd.Gfx());
 
 		cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw());
 		auto old = cameraRay.GetVector();
 		auto n = old;
 		bool found = false;
+
+		Position pos(0, 0, 0);
+
 		while (cameraRay.Next()) {
-			auto block = wManager.GetBlock(n.x, n.y, n.z);
+			auto block = wManager.GetBlock(round(n.x), round(n.y), round(n.z));
 			if (block != nullptr && block->type != BlockType::Air) {
+				pos = { block->x,block->y, block->z };
 				found = true;
 				break;
 			}
@@ -164,18 +171,36 @@ void Game::doFrame()
 			n = cameraRay.GetVector();
 		}
 
-		if (found) {
+		if (found && !showCursor) {
 			if (wnd.mouse.LeftIsPressed() && destroyTimer.getTime() > 0.1f) {
-				wManager.ModifyBlock(n.x, n.y, n.z);
+				wManager.ModifyBlock(round(n.x), round(n.y), round(n.z));
 				destroyTimer.mark();
 			}
 			else if (wnd.mouse.RightIsPressed() && placeTimer.getTime() > 0.175f) {
-				wManager.ModifyBlock(old.x, old.y, old.z, BlockType::Wooden_Plank);
+				wManager.ModifyBlock(round(old.x), round(old.y), round(old.z), BlockType::Wooden_Plank);
 				placeTimer.mark();
 			}
 		}
+		else {
+			destroyTimer.mark();
+			placeTimer.mark();
+		}
+
+		auto model = DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+
+		const Transforms tf =
+		{
+			DirectX::XMMatrixTranspose(model * wnd.Gfx().getCamera() * wnd.Gfx().getProjection()),
+			DirectX::XMMatrixTranspose(model)
+		};
+
+		blockSelector.UpdateConstantBuffer(tf);
 
 		Renderer::Render(wnd.Gfx(), renderData);
+
+		Renderer::Render(wnd.Gfx(), blockSelector);
+
+		wManager.Draw(wnd.Gfx());
 
 		wnd.Gfx().endFrame();
 	}
