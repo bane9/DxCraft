@@ -25,7 +25,7 @@ public:
 	void MoveLeft();
 	void MoveRigth();
 	void MoveUp();
-	void MoveDown();
+	void MoveDown(bool external = false);
 	void CastRay();
 	void RotateCamera(float dx, float dy);
 	void RightClickEvent();
@@ -56,6 +56,6 @@ private:
 	Timer moveTimer;
 	float dt = 0.01f;
 	bool collision = true;
-	bool flying = true;
+	bool flying = false;
 };
 
