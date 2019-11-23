@@ -4,7 +4,6 @@
 #include "Renderer.h"
 #include "Camera.h"
 #include "Ray.h"
-#include "AABB.h"
 #include "Timer.h"
 #include "WorldManager.h"
 #include "Position.h"
@@ -48,14 +47,14 @@ private:
 	DirectX::XMFLOAT3 previousHitBlock;
 	Position hitBlockPos;
 	Ray cameraRay;
-	AABB playerBox;
-	AABB blockBox;
 	float velocity = 15.0f;
 	Timer placeTimer;
 	Timer destroyTimer;
 	Timer moveTimer;
+	Timer fallTimer;
 	float dt = 0.01f;
 	bool collision = true;
 	bool flying = false;
+	bool falling = false;
 };
 

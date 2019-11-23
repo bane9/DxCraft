@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "MathFunctions.h"
 #include "imgui/imgui.h"
+#include <algorithm>
 
 Player::Player(Graphics& gfx, WorldManager& wManager)
 	: 
@@ -8,9 +9,7 @@ Player::Player(Graphics& gfx, WorldManager& wManager)
 	wManager(wManager),
 	crosshair(gfx, L"CrosshairVS.cso", L"CrossHairPS.cso", ied),
 	blockSelector(gfx, L"SelectionVS.cso", L"SelectionPS.cso", ied),
-	playerBox({1.0f, 1.7f, 1.0f}),
-	hitBlockPos(-1, -1, -1),
-	blockBox({ 1.0f, 1.0f, 1.0f })
+	hitBlockPos(-1, -1, -1)
 {
 	std::vector<DirectX::XMFLOAT3> tempVertices;
 	std::copy(Crosshair::NearSide.first.begin(), Crosshair::NearSide.first.end(), std::back_inserter(tempVertices));
@@ -47,22 +46,26 @@ float Player::GetVelocity()
 
 void Player::MoveForward()
 {
-	ResolveCollision(cam.Translate({ 0.0f,0.0f,dt }, velocity, flying));
+	if(!falling)
+		ResolveCollision(cam.Translate({ 0.0f,0.0f,dt }, velocity, flying));
 }
 
 void Player::MoveBackward()
 {
-	ResolveCollision(cam.Translate({ 0.0f,0.0f,-dt }, velocity, flying));
+	if (!falling)
+		ResolveCollision(cam.Translate({ 0.0f,0.0f,-dt }, velocity, flying));
 }
 
 void Player::MoveLeft()
 {
-	ResolveCollision(cam.Translate({ -dt,0.0f,0.0f }, velocity, flying));
+	if (!falling)
+		ResolveCollision(cam.Translate({ -dt,0.0f,0.0f }, velocity, flying));
 }
 
 void Player::MoveRigth()
 {
-	ResolveCollision(cam.Translate({ dt,0.0f,0.0f }, velocity, flying));
+	if (!falling)
+		ResolveCollision(cam.Translate({ dt,0.0f,0.0f }, velocity, flying));
 }
 
 void Player::MoveUp()
@@ -128,17 +131,24 @@ void Player::LeftClickEvent()
 void Player::Draw()
 {
 	if (ImGui::Begin("Collision")) {
-		ImGui::Checkbox("Enable Collision", &collision);
-		ImGui::Checkbox("Enable Flying", &flying);
+		if (ImGui::Checkbox("Noclip", &flying)) {
+			collision = !flying;
+		}
 		ImGui::End();
 	}
 
 	if (!flying) {
 		auto oldVelocity = velocity;
-		velocity = 10.0f;
+		velocity = 25.0f * fallTimer.getTime();
+		std::clamp(velocity, 0.0f, 100.0f);
 		MoveDown(true);
 		velocity = oldVelocity;
+		if (cam.GetPos().y < -15) cam.SetPos(0.0f, 25.0f, 0.0f);
 	}
+	else {
+		fallTimer.mark();
+	}
+	if (!falling) fallTimer.mark();
 
 	dt = moveTimer.mark();
 	gfx.setCamera(cam.GetMatrix());
@@ -191,7 +201,6 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 	if (block != nullptr && block->type != BlockType::Air) delta.z = 0;
 
 
-
 	const float offset = sgn(pos.x) * 0.1f;
 
 	block = wManager.GetBlock(round(pos.x + delta.x + offsetX + offset), round(pos.y), round(pos.z + sgn(pos.z) * 0.25));
@@ -205,7 +214,6 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 
 	block = wManager.GetBlock(round(pos.x + delta.x + offsetX - offset), round(pos.y), round(pos.z - sgn(pos.z) * 0.25));
 	if (block != nullptr && block->type != BlockType::Air) delta.x = 0;
-
 
 
 	block = wManager.GetBlock(round(pos.x + delta.x + offsetX + offset), round(pos.y + offsetYLower), round(pos.z + sgn(pos.z) * 0.25));
@@ -222,4 +230,11 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 	
 
 	cam.SetPos(pos.x + delta.x, pos.y + delta.y, pos.z + delta.z);
+	if (delta.y == 0.0f) {
+		fallTimer.mark();
+		falling = false;
+	}
+	else {
+		falling = true;
+	}
 }
