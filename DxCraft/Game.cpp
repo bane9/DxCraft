@@ -57,7 +57,6 @@ Game::Game(size_t width, size_t height)
 
 	//wManager.CreateChunk(0, 0, 0);
 	//wManager.CreateChunk(0, 1, 0, true);
-
 	wManager.GenerateMeshes();
 } 
 
@@ -158,7 +157,7 @@ void Game::doFrame()
 		auto n = old;
 		bool found = false;
 
-		Position pos(0, 0, 0);
+		Position pos(-1, -1, -1);
 
 		while (cameraRay.Next()) {
 			auto block = wManager.GetBlock(round(n.x), round(n.y), round(n.z));
@@ -190,7 +189,7 @@ void Game::doFrame()
 
 		const Transforms tf =
 		{
-			DirectX::XMMatrixTranspose(model * wnd.Gfx().getCamera() * wnd.Gfx().getProjection()),
+			DirectX::XMMatrixTranspose(model * wnd.Gfx().getCamera() * wnd.Gfx().getProjection() * (pos.y < 0 ? 0 : 1)),
 			DirectX::XMMatrixTranspose(model)
 		};
 
