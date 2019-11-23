@@ -12,35 +12,8 @@
 GDIPlusManager gdipm;
 
 Game::Game(size_t width, size_t height)
-	: wnd(width, height), wManager(wnd.Gfx()), cameraRay(wManager), 
-	crosshair(wnd.Gfx(), L"CrosshairVS.cso", L"CrossHairPS.cso", ied),
-	blockSelector(wnd.Gfx(), L"SelectionVS.cso", L"SelectionPS.cso", ied)
+	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager)
 {
-	std::vector<DirectX::XMFLOAT3> tempVertices;
-	std::copy(Crosshair::NearSide.first.begin(), Crosshair::NearSide.first.end(), std::back_inserter(tempVertices));
-
-	std::vector<uint16_t> tempIndices;
-	std::copy(Crosshair::NearSide.second.begin(), Crosshair::NearSide.second.end(), std::back_inserter(tempIndices));
-
-	auto t = crosshair.UpdateVertexBuffer(tempVertices);
-	auto t2 = crosshair.UpdateIndexBuffer(tempIndices);
-
-	tempVertices.clear();
-	std::copy(BlockSelector::Cube.first.begin(), BlockSelector::Cube.first.end(), std::back_inserter(tempVertices));
-
-	tempIndices.clear();
-	std::copy(BlockSelector::Cube.second.begin(), BlockSelector::Cube.second.end(), std::back_inserter(tempIndices));
-
-	t = blockSelector.UpdateVertexBuffer(tempVertices);
-	t2 = blockSelector.UpdateIndexBuffer(tempIndices);
-
-	if (!showCursor) {
-		wnd.disableCursor();
-		wnd.mouse.EnableRaw();
-	}
-
-	cam.SetPos(0.0f, 25.0f, 0.0f);
-	cam.setTravelSpeed(cameraSpeed);
 
 	const int area = 4;
 	for (int x = -area / 2; x < area / 2; x++) {
@@ -59,29 +32,20 @@ Game::Game(size_t width, size_t height)
 	//wManager.CreateChunk(0, 1, 0, true);
 	wManager.GenerateMeshes();
 
-	crosshair.UpdateConstantBuffer(DirectX::XMMatrixTranspose(wnd.Gfx().getProjection()));
 } 
 
 void Game::doFrame()
 {
 	while (!exit) {
-		const auto dt = timer.mark();
 		wnd.Gfx().beginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
-		wnd.Gfx().setCamera(cam.GetMatrix());
-
-		if (showCursor && ImGui::Begin("Settings")) {
-			if (ImGui::SliderFloat("Camera Speed", &cameraSpeed, 1.0f, 200.0f)) {
-				cam.setTravelSpeed(cameraSpeed);
-			}
-			ImGui::End();
-		}
 
 		while (auto e = wnd.kbd.ReadKey())
 		{
+
 			if (e->GetCode() == VK_SHIFT) {
 				if (e->isPress())
-					cam.setTravelSpeed(cameraSpeed * 2);
-				else cam.setTravelSpeed(cameraSpeed);
+					player.SetVelocity(30.0f);
+				else player.SetVelocity(15.0f);
 				continue;
 			}
 
@@ -108,27 +72,27 @@ void Game::doFrame()
 		{
 			if (wnd.kbd.KeyIsPressed('W'))
 			{
-				cam.Translate({ 0.0f,0.0f,dt });
+				player.MoveForward();
 			}
 			if (wnd.kbd.KeyIsPressed('A'))
 			{
-				cam.Translate({ -dt,0.0f,0.0f });
+				player.MoveLeft();
 			}
 			if (wnd.kbd.KeyIsPressed('S'))
 			{
-				cam.Translate({ 0.0f,0.0f,-dt });
+				player.MoveBackward();
 			}
 			if (wnd.kbd.KeyIsPressed('D'))
 			{
-				cam.Translate({ dt,0.0f,0.0f });
+				player.MoveRigth();
 			}
 			if (wnd.kbd.KeyIsPressed(VK_SPACE))
 			{
-				cam.Translate({ 0.0f,dt,0.0f });
+				player.MoveUp();
 			}
 			if (wnd.kbd.KeyIsPressed(VK_CONTROL))
 			{
-				cam.Translate({ 0.0f,-dt,0.0f });
+				player.MoveDown();
 			}
 		}
 		while (auto ms = wnd.mouse.Read()) {
@@ -143,7 +107,7 @@ void Game::doFrame()
 		{
 			if (!showCursor)
 			{
-				cam.Rotate(delta->x, delta->y);
+				player.RotateCamera(delta->x, delta->y);
 			}
 		}
 
@@ -154,57 +118,17 @@ void Game::doFrame()
 		}
 
 
-		cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw());
-		auto old = cameraRay.GetVector();
-		auto n = old;
-		bool found = false;
 
-		Position pos(-1, -1, -1);
-
-		while (cameraRay.Next()) {
-			auto block = wManager.GetBlock(round(n.x), round(n.y), round(n.z));
-			if (block != nullptr && block->type != BlockType::Air) {
-				pos = { block->x,block->y, block->z };
-				found = true;
-				break;
-			}
-			old = std::move(n);
-			n = cameraRay.GetVector();
+		if (wnd.mouse.LeftIsPressed()) {
+			player.LeftClickEvent();
+		}
+		else if (wnd.mouse.RightIsPressed()) {
+			player.RightClickEvent();
 		}
 
-		if (found && !showCursor) {
-			if (wnd.mouse.LeftIsPressed() && destroyTimer.getTime() > 0.175f) {
-				wManager.ModifyBlock(round(n.x), round(n.y), round(n.z));
-				destroyTimer.mark();
-			}
-			else if (wnd.mouse.RightIsPressed() && placeTimer.getTime() > 0.175f) {
-				wManager.ModifyBlock(round(old.x), round(old.y), round(old.z), BlockType::Wooden_Plank);
-				placeTimer.mark();
-			}
-		}
-		else {
-			destroyTimer.mark();
-			placeTimer.mark();
-		}
+		player.CastRay();
 
-		auto model = DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
-
-		const Transforms tf =
-		{
-			DirectX::XMMatrixTranspose(model * wnd.Gfx().getCamera() * wnd.Gfx().getProjection()),
-			DirectX::XMMatrixTranspose(model)
-		};
-
-		blockSelector.UpdateConstantBuffer(tf);
-		
-
-		Renderer::Render(wnd.Gfx(), crosshair);
-
-		if (pos.y > -1) {
-			wnd.Gfx().RenderWireframe();
-			Renderer::Render(wnd.Gfx(), blockSelector);
-			wnd.Gfx().RenderSolid();
-		}
+		player.Draw();
 
 		wManager.Draw(wnd.Gfx());
 

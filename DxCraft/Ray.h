@@ -5,8 +5,8 @@
 
 class Ray {
 public:
-	Ray(WorldManager& wManager, float limit = 8.0f)
-		: wManager(wManager), rayLimit(limit)
+	Ray(float limit = 8.0f)
+		: rayLimit(limit)
 	{}
 
 	void SetPositionAndDirection(const DirectX::XMFLOAT3& startCoord, float pitch, float yaw, float startDisance = 0.0f) noexcept {
@@ -22,7 +22,7 @@ public:
 			Next(0.5f);
 	}
 
-	bool Next(float precision = 0.1f) noexcept
+	bool Next(float precision = 0.05f) noexcept
 	{
 		rayPos.x += dx * precision;
 		rayPos.y += dy * precision;
@@ -38,7 +38,6 @@ public:
 
 private:
 	DirectX::XMFLOAT3 rayPos;
-	WorldManager& wManager;
 	float dx;
 	float dy;
 	float dz;
