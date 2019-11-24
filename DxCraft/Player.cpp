@@ -183,14 +183,14 @@ void Player::Draw()
 
 	if (!flying) {
 		fallVelocity += fallTimer.getTime() * 2.0f;
-		fallVelocity = std::clamp(fallVelocity, 0.0f, 75.0f);
+		fallVelocity = std::clamp(fallVelocity, 4.0f, 75.0f);
 		MoveDown(true);
 		if (cam.GetPos().y < -15) cam.SetPos(0.0f, 25.0f, 0.0f);
 	}
 	if (jumping) {
 		jumpVelocity -= fallTimer.getTime();
 
-		if (jumpVelocity < -jumpDistance) {
+		if (jumpVelocity < -jumpDistance/2.0f) {
 			jumping = false;
 			jumpVelocity = 0.0f;
 		}
@@ -214,7 +214,7 @@ void Player::Draw()
 		else momentum.x = 0.0f;
 
 		if (abs(modf(round(momentum.y), &momentum.y)) < 0.000175f)
-			momentum.y -= 0.00175f * sgn(momentum.y);
+			momentum.y -= 0.0015f * sgn(momentum.y);
 		else momentum.y = 0.0f;
 
 		if (abs(modf(round(momentum.z), &momentum.z)) < 0.000175f)
