@@ -41,3 +41,9 @@ inline constexpr int sgn(float n) noexcept
 {
 	return (0.0f < n) - (n < 0.0f);
 }
+
+template<typename T, typename V>
+inline constexpr float VectorDistance(T first, V second)
+{
+	return sqrtf(powf(second.x - first.x, 2.0f) + powf(second.y - first.y, 2.0f) + powf(second.z - first.z, 2.0f));
+}

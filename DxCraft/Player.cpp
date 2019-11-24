@@ -109,6 +109,11 @@ void Player::RotateCamera(float dx, float dy)
 void Player::RightClickEvent()
 {
 	if (found && placeTimer.getTime() > 0.175f) {
+		auto camPos = cam.GetPos();
+		auto camPosLower = camPos;
+		camPos.y -= 1 * sgn(camPos.y);
+		if(abs(VectorDistance(previousHitBlock, camPos) < 0.75f) ||
+			abs(VectorDistance(previousHitBlock, camPosLower) < 0.75f)) return;
 		wManager.ModifyBlock(round(previousHitBlock.x), round(previousHitBlock.y), round(previousHitBlock.z), BlockType::Glass);
 		placeTimer.mark();
 	}
