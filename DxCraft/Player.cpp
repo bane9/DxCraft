@@ -47,43 +47,59 @@ float Player::GetVelocity()
 
 void Player::MoveForward()
 {
-	if (!falling || jumping) {
-		moveVelocity += velocityIncreaseConstant;
-		moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-		ResolveCollision(cam.Translate({ 0.0f, 0.0f, dt }, velocity * moveVelocity, flying));
+	moveVelocity += velocityIncreaseConstant;
+	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
+	auto temp = cam.Translate({ 0.0f, 0.0f, dt }, velocity * moveVelocity, flying);
+	if (flying) {
+		temp.x *= 0.1f;
+		temp.y *= 0.1f;
+		temp.z *= 0.1f;
 	}
+	ResolveCollision(temp);
 }
 
 void Player::MoveBackward()
 {
-	if (!falling || jumping) {
-		moveVelocity += velocityIncreaseConstant;
-		moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-		ResolveCollision(cam.Translate({ 0.0f ,0.0f, -dt }, velocity * moveVelocity, flying));
+	moveVelocity += velocityIncreaseConstant;
+	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
+	auto temp = cam.Translate({ 0.0f ,0.0f, -dt }, velocity * moveVelocity, flying);
+	if (flying) {
+		temp.x *= 0.1f;
+		temp.y *= 0.1f;
+		temp.z *= 0.1f;
 	}
+	ResolveCollision(temp);
 }
 
 void Player::MoveLeft()
 {
-	if (!falling || jumping) {
-		moveVelocity += velocityIncreaseConstant;
-		moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-		ResolveCollision(cam.Translate({ -dt, 0.0f, 0.0f }, velocity * moveVelocity, flying));
+	moveVelocity += velocityIncreaseConstant;
+	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
+	auto temp = cam.Translate({ -dt, 0.0f, 0.0f }, velocity * moveVelocity, flying);
+	if (flying) {
+		temp.x *= 0.1f;
+		temp.y *= 0.1f;
+		temp.z *= 0.1f;
 	}
+	ResolveCollision(temp);
 }
 
 void Player::MoveRigth()
 {
-	if (!falling || jumping) {
-		moveVelocity += velocityIncreaseConstant;
-		moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-		ResolveCollision(cam.Translate({ dt, 0.0f, 0.0f }, velocity * moveVelocity, flying));
+	moveVelocity += velocityIncreaseConstant;
+	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
+	auto temp = cam.Translate({ dt, 0.0f, 0.0f }, velocity * moveVelocity, flying);
+	if (flying) {
+		temp.x *= 0.1f;
+		temp.y *= 0.1f;
+		temp.z *= 0.1f;
 	}
+	ResolveCollision(temp);
 }
 
 void Player::MoveUp(bool external)
 {
-	if (!flying || !flying) jumping = true;
+	if (!flying) jumping = true;
 	if (external) {
 		auto temp = cam.Translate({ 0.0f, dt, 0.0f }, jumpDistance - fallVelocity);
 		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * 0.1f;
@@ -191,17 +207,18 @@ void Player::Draw()
 		moveVelocity += velocityIncreaseConstant * 0.2f;
 		velocity = baseVelocity;
 	}
+
 	if (!falling && !jumping) {
-		if (abs(modf(round(momentum.x), &momentum.x)) < 0.00001f)
-			momentum.x -= 0.0001f * sgn(momentum.x);
+		if (abs(modf(round(momentum.x), &momentum.x)) < 0.000175f)
+			momentum.x -= 0.00175f * sgn(momentum.x);
 		else momentum.x = 0.0f;
 
-		if (abs(modf(round(momentum.y), &momentum.y)) < 0.00001f)
-			momentum.y -= 0.0001f * sgn(momentum.y);
+		if (abs(modf(round(momentum.y), &momentum.y)) < 0.000175f)
+			momentum.y -= 0.00175f * sgn(momentum.y);
 		else momentum.y = 0.0f;
 
-		if (abs(modf(round(momentum.z), &momentum.z)) < 0.00001f)
-			momentum.z -= 0.0001f * sgn(momentum.z);
+		if (abs(modf(round(momentum.z), &momentum.z)) < 0.000175f)
+			momentum.z -= 0.00175f * sgn(momentum.z);
 		else momentum.z = 0.0f;
 	}
 
