@@ -7,8 +7,7 @@ public:
 	Camera() noexcept;
 	DirectX::XMMATRIX GetMatrix() const noexcept;
 	void Rotate(float dx, float dy) noexcept;
-	DirectX::XMFLOAT3 Translate(DirectX::XMFLOAT3 translation, float travelSpeed = 12.0f, 
-		bool flying = false, bool midAir = false) noexcept;
+	DirectX::XMFLOAT3 Translate(DirectX::XMFLOAT3 translation, float travelSpeed = 12.0f, bool flying = false) noexcept;
 	void SetPos(float x, float y, float z) noexcept;
 	DirectX::XMFLOAT3 GetPos() noexcept;
 	float GetPitch() noexcept;

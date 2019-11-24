@@ -42,7 +42,7 @@ void Camera::Rotate(float dx, float dy) noexcept
 	pitch = std::clamp(pitch + dy * rotationSpeed, 0.995f * -PI / 2.0f, 0.995f * PI / 2.0f);
 }
 
-DirectX::XMFLOAT3 Camera::Translate(DirectX::XMFLOAT3 translation, float travelSpeed, bool flying, bool midAir) noexcept
+DirectX::XMFLOAT3 Camera::Translate(DirectX::XMFLOAT3 translation, float travelSpeed, bool flying) noexcept
 {
 	if (translation.y == 0) {
 		DirectX::XMStoreFloat3(&translation, DirectX::XMVector3Transform(

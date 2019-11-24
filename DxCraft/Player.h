@@ -23,7 +23,7 @@ public:
 	void MoveBackward();
 	void MoveLeft();
 	void MoveRigth();
-	void MoveUp();
+	void MoveUp(bool external = false);
 	void MoveDown(bool external = false);
 	void CastRay();
 	void RotateCamera(float dx, float dy);
@@ -61,8 +61,15 @@ private:
 	float fallVelocity;
 	float moveVelocity = 0.0f;
 
-	const float midAirMoveConstant = 0.0001f;
-
 	const float baseVelocity = velocity;
+
+	const float velocityIncreaseConstant = 0.02f;
+	const float velocityMaxBound = 1.0f;
+	const float velocityMinBound = 0.25f;
+
+	float jumpVelocity = 0.0f;
+	const float jumpDistance = 5.25f;
+
+	bool jumping = false;
 };
 
