@@ -165,13 +165,13 @@ void Player::Draw()
 		ImGui::End();
 	}
 
-	if (!flying && !jumping) {
-		fallVelocity += fallTimer.getTime() * 0.75f;
+	if (!flying) {
+		fallVelocity += fallTimer.getTime() * 2.0f;
 		fallVelocity = std::clamp(fallVelocity, 0.0f, 75.0f);
 		MoveDown(true);
 		if (cam.GetPos().y < -15) cam.SetPos(0.0f, 25.0f, 0.0f);
 	}
-	else if (jumping) {
+	if (jumping) {
 		jumpVelocity -= fallTimer.getTime();
 
 		if (jumpVelocity < -jumpDistance) {
@@ -192,15 +192,15 @@ void Player::Draw()
 		velocity = baseVelocity;
 	}
 	if (!falling && !jumping) {
-		if (modf(round(momentum.x), &momentum.x) < 0.00001f)
+		if (abs(modf(round(momentum.x), &momentum.x)) < 0.00001f)
 			momentum.x -= 0.0001f * sgn(momentum.x);
 		else momentum.x = 0.0f;
 
-		if (modf(round(momentum.y), &momentum.y) < 0.00001f)
+		if (abs(modf(round(momentum.y), &momentum.y)) < 0.00001f)
 			momentum.y -= 0.0001f * sgn(momentum.y);
 		else momentum.y = 0.0f;
 
-		if (modf(round(momentum.z), &momentum.z) < 0.00001f)
+		if (abs(modf(round(momentum.z), &momentum.z)) < 0.00001f)
 			momentum.z -= 0.0001f * sgn(momentum.z);
 		else momentum.z = 0.0f;
 	}
@@ -254,7 +254,6 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 		if (modf(round(pos.y), &pos.y) < 0.1f) {
 			falling = false;
 			check = false;
-			momentumReset = false;
 		}
 	}
 	else if (check) falling = true;

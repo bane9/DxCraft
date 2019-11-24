@@ -68,7 +68,7 @@ private:
 	const float velocityMinBound = 0.25f;
 
 	float jumpVelocity = 0.0f;
-	const float jumpDistance = 4.5f;
+	const float jumpDistance = 8.5f;
 
 	bool jumping = false;
 
