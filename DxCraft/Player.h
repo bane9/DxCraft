@@ -63,13 +63,15 @@ private:
 
 	const float baseVelocity = velocity;
 
-	const float velocityIncreaseConstant = 0.02f;
+	const float velocityIncreaseConstant = 0.01f;
 	const float velocityMaxBound = 1.0f;
 	const float velocityMinBound = 0.25f;
 
 	float jumpVelocity = 0.0f;
-	const float jumpDistance = 5.25f;
+	const float jumpDistance = 4.5f;
 
 	bool jumping = false;
+
+	bool momentumReset = false;
 };
 

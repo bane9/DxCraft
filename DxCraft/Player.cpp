@@ -83,11 +83,11 @@ void Player::MoveRigth()
 
 void Player::MoveUp(bool external)
 {
-	if (!flying || !falling) jumping = true;
+	if (!flying || !flying) jumping = true;
 	if (external) {
 		auto temp = cam.Translate({ 0.0f, dt, 0.0f }, jumpDistance - fallVelocity);
-		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * moveVelocity;
-		temp.z += momentum.z * (falling ? 1.0f : 0.0f) * moveVelocity;
+		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * 0.1f;
+		temp.z += momentum.z * (falling ? 1.0f : 0.0f) * 0.1f;
 		ResolveCollision(temp);
 	}
 }
@@ -97,8 +97,8 @@ void Player::MoveDown(bool external)
 	if (!flying && !external) return;
 	if (external) {
 		auto temp = cam.Translate({ 0.0f, -dt, 0.0f }, fallVelocity);
-		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * moveVelocity;
-		temp.z += momentum.z * (falling ? 1.0f : 0.0f) * moveVelocity;
+		temp.x += momentum.x * (falling ? 1.0f : 0.0f);
+		temp.z += momentum.z * (falling ? 1.0f : 0.0f);
 		ResolveCollision(temp);
 	}
 }
@@ -166,7 +166,7 @@ void Player::Draw()
 	}
 
 	if (!flying && !jumping) {
-		fallVelocity += fallTimer.getTime() * 0.5f;
+		fallVelocity += fallTimer.getTime() * 0.75f;
 		fallVelocity = std::clamp(fallVelocity, 0.0f, 75.0f);
 		MoveDown(true);
 		if (cam.GetPos().y < -15) cam.SetPos(0.0f, 25.0f, 0.0f);
@@ -179,7 +179,6 @@ void Player::Draw()
 			jumpVelocity = 0.0f;
 		}
 		else {
-			falling = false;
 			MoveUp(true);
 		}
 	}
@@ -191,6 +190,19 @@ void Player::Draw()
 	else {
 		moveVelocity += velocityIncreaseConstant * 0.2f;
 		velocity = baseVelocity;
+	}
+	if (!falling && !jumping) {
+		if (modf(round(momentum.x), &momentum.x) < 0.00001f)
+			momentum.x -= 0.0001f * sgn(momentum.x);
+		else momentum.x = 0.0f;
+
+		if (modf(round(momentum.y), &momentum.y) < 0.00001f)
+			momentum.y -= 0.0001f * sgn(momentum.y);
+		else momentum.y = 0.0f;
+
+		if (modf(round(momentum.z), &momentum.z) < 0.00001f)
+			momentum.z -= 0.0001f * sgn(momentum.z);
+		else momentum.z = 0.0f;
 	}
 
 	moveVelocity -= velocityIncreaseConstant * 0.2f;
@@ -226,7 +238,9 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 		return;
 	}
 
-	if(delta.x == 0 && delta.z == 0) moveVelocity = 0.0f;
+	if (delta.x == 0 && delta.z == 0) {
+		moveVelocity = 0.0f;
+	}
 
 	const float offsetX =		0.5f   * sgn(delta.x);
 	const float offsetY =		1.5f   * sgn(delta.y);
@@ -240,9 +254,7 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 		if (modf(round(pos.y), &pos.y) < 0.1f) {
 			falling = false;
 			check = false;
-		}
-		else {
-			moveVelocity = 0.0f;
+			momentumReset = false;
 		}
 	}
 	else if (check) falling = true;
@@ -290,7 +302,8 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 
 	cam.SetPos(pos.x + delta.x, pos.y + delta.y, pos.z + delta.z);
 	
-
-	if (delta.x) momentum.x = delta.x;
-	if (delta.z) momentum.z = delta.z;
+	if (!jumping) {
+		if (delta.x) momentum.x = delta.x;
+		if (delta.z) momentum.z = delta.z;
+	}
 }
