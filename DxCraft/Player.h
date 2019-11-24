@@ -71,7 +71,5 @@ private:
 	const float jumpDistance = 16.0f;
 
 	bool jumping = false;
-
-	bool momentumReset = false;
 };
 
