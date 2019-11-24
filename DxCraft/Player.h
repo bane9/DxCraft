@@ -45,6 +45,7 @@ private:
 	bool found = false;
 	DirectX::XMFLOAT3 hitBlock;
 	DirectX::XMFLOAT3 previousHitBlock;
+	DirectX::XMFLOAT3 momentum{0.0f, 0.0f, 0.0f};
 	Position hitBlockPos;
 	Ray cameraRay;
 	float velocity = 7.5f;
@@ -56,5 +57,12 @@ private:
 	bool collision = true;
 	bool flying = false;
 	bool falling = false;
+
+	float fallVelocity;
+	float moveVelocity = 0.0f;
+
+	const float midAirMoveConstant = 0.0001f;
+
+	const float baseVelocity = velocity;
 };
 

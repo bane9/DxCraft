@@ -37,6 +37,7 @@ Player::Player(Graphics& gfx, WorldManager& wManager)
 void Player::SetVelocity(float velocity)
 {
 	this->velocity = velocity;
+	
 }
 
 float Player::GetVelocity()
@@ -46,38 +47,79 @@ float Player::GetVelocity()
 
 void Player::MoveForward()
 {
-	if(!falling)
-		ResolveCollision(cam.Translate({ 0.0f,0.0f,dt }, velocity, flying));
+	if (!falling) {
+		moveVelocity += 0.1f;
+		moveVelocity = std::clamp(moveVelocity, 0.0f, 1.0f);
+		ResolveCollision(cam.Translate({ 0.0f, 0.0f, dt }, velocity * moveVelocity, flying));
+	}
+	else {
+		auto temp = cam.Translate({ 0.0f, 0.0f, dt }, velocity, flying);
+		momentum.x += temp.x;
+		momentum.z += temp.z;
+		ResolveCollision(temp);
+	}
 }
 
 void Player::MoveBackward()
 {
-	if (!falling)
-		ResolveCollision(cam.Translate({ 0.0f,0.0f,-dt }, velocity, flying));
+	if (!falling) {
+		moveVelocity += 0.1f;
+		moveVelocity = std::clamp(moveVelocity, 0.0f, 1.0f);
+		ResolveCollision(cam.Translate({ 0.0f ,0.0f, -dt }, velocity * moveVelocity, flying));
+	}
+	else {
+		auto temp = cam.Translate({ 0.0f, 0.0f ,dt }, velocity, flying);
+		momentum.x += temp.x;
+		momentum.z += temp.z;
+		ResolveCollision(temp);
+	}
 }
 
 void Player::MoveLeft()
 {
-	if (!falling)
-		ResolveCollision(cam.Translate({ -dt,0.0f,0.0f }, velocity, flying));
+	if (!falling) {
+		moveVelocity += 0.1f;
+		moveVelocity = std::clamp(moveVelocity, 0.0f, 1.0f);
+		ResolveCollision(cam.Translate({ -dt, 0.0f, 0.0f }, velocity * moveVelocity, flying));
+	}
+	else {
+		auto temp = cam.Translate({ 0.0f, 0.0f, dt }, velocity, flying);
+		momentum.x += temp.x;
+		momentum.z += temp.z;
+		ResolveCollision(temp);
+	}
 }
 
 void Player::MoveRigth()
 {
-	if (!falling)
-		ResolveCollision(cam.Translate({ dt,0.0f,0.0f }, velocity, flying));
+	if (!falling) {
+		moveVelocity += 0.1f;
+		moveVelocity = std::clamp(moveVelocity, 0.0f, 1.0f);
+		ResolveCollision(cam.Translate({ dt, 0.0f, 0.0f }, velocity * moveVelocity, flying));
+	}
+	else {
+		auto temp = cam.Translate({ 0.0f, 0.0f, dt }, velocity, flying);
+		momentum.x += temp.x;
+		momentum.z += temp.z;
+		ResolveCollision(temp);
+	}
 }
 
 void Player::MoveUp()
 {
 	if (!flying) return;
-	ResolveCollision(cam.Translate({ 0.0f,dt,0.0f }, velocity));
+	ResolveCollision(cam.Translate({ 0.0f, dt, 0.0f }, velocity));
 }
 
 void Player::MoveDown(bool external)
 {
 	if (!flying && !external) return;
-	ResolveCollision(cam.Translate({ 0.0f,-dt,0.0f }, velocity));
+	if (external) {
+		auto temp = cam.Translate({ 0.0f, -dt, 0.0f }, fallVelocity);
+		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * moveVelocity;
+		temp.z += momentum.z * (falling ? 1.0f : 0.0f) * moveVelocity;
+		ResolveCollision(temp);
+	}
 }
 
 void Player::CastRay()
@@ -92,7 +134,7 @@ void Player::CastRay()
 	while (cameraRay.Next()) {
 		auto block = wManager.GetBlock(round(hitBlock.x), round(hitBlock.y), round(hitBlock.z));
 		if (block != nullptr && block->type != BlockType::Air) {
-			hitBlockPos = { block->x,block->y, block->z };
+			hitBlockPos = { block->x, block->y, block->z };
 			found = true;
 			break;
 		}
@@ -143,15 +185,20 @@ void Player::Draw()
 	}
 
 	if (!flying) {
-		auto oldVelocity = velocity;
-		velocity = 50.0f * fallTimer.getTime() * 0.5f;
-		std::clamp(velocity, 0.0f, 100.0f);
+		fallVelocity = 50.0f * fallTimer.getTime() * 0.5f;
+		fallVelocity = std::clamp(fallVelocity, 0.0f, 100.0f);
 		MoveDown(true);
-		velocity = oldVelocity;
 		if (cam.GetPos().y < -15) cam.SetPos(0.0f, 25.0f, 0.0f);
 	}
 
 	if (!falling) fallTimer.mark();
+	else {
+		moveVelocity += 0.05f;
+		velocity = baseVelocity;
+	}
+
+	moveVelocity -= 0.05f;
+	moveVelocity = std::clamp(moveVelocity, 0.0f, 1.0f);
 
 	dt = moveTimer.mark();
 	gfx.setCamera(cam.GetMatrix());
@@ -242,4 +289,8 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 	
 
 	cam.SetPos(pos.x + delta.x, pos.y + delta.y, pos.z + delta.z);
+	
+
+	if (delta.x) momentum.x = delta.x;
+	if (delta.z) momentum.z = delta.z;
 }
