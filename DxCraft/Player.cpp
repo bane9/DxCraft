@@ -50,9 +50,9 @@ void Player::MoveForward()
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 	auto temp = cam.Translate({ 0.0f, 0.0f, dt }, speed * moveVelocity, flying);
 	if (falling) {
-		temp.x *= 0.5f;
-		temp.y *= 0.5f;
-		temp.z *= 0.5f;
+		temp.x *= 0.35f;
+		temp.y *= 0.35f;
+		temp.z *= 0.35f;
 	}
 	ResolveCollision(temp);
 }
@@ -63,9 +63,9 @@ void Player::MoveBackward()
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 	auto temp = cam.Translate({ 0.0f ,0.0f, -dt }, speed * moveVelocity, flying);
 	if (falling) {
-		temp.x *= 0.5f;
-		temp.y *= 0.5f;
-		temp.z *= 0.5f;
+		temp.x *= 0.35f;
+		temp.y *= 0.35f;
+		temp.z *= 0.35f;
 	}
 	ResolveCollision(temp);
 }
@@ -76,9 +76,9 @@ void Player::MoveLeft()
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 	auto temp = cam.Translate({ -dt, 0.0f, 0.0f }, speed * moveVelocity, flying);
 	if (falling) {
-		temp.x *= 0.5f;
-		temp.y *= 0.5f;
-		temp.z *= 0.5f;
+		temp.x *= 0.35f;
+		temp.y *= 0.35f;
+		temp.z *= 0.35f;
 	}
 	ResolveCollision(temp);
 }
@@ -89,9 +89,9 @@ void Player::MoveRigth()
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 	auto temp = cam.Translate({ dt, 0.0f, 0.0f }, speed * moveVelocity, flying);
 	if (falling) {
-		temp.x *= 0.5f;
-		temp.y *= 0.5f;
-		temp.z *= 0.5f;
+		temp.x *= 0.35f;
+		temp.y *= 0.35f;
+		temp.z *= 0.35f;
 	}
 	ResolveCollision(temp);
 }
@@ -149,7 +149,7 @@ void Player::RightClickEvent()
 	if (found && placeTimer.getTime() > 0.075f) {
 		auto camPos = cam.GetPos();
 		auto camPosLower = camPos;
-		camPos.y -= 1 * sgn(camPos.y);
+		camPosLower.y -= 1.15f * sgn(camPosLower.y);
 		if(abs(VectorDistance(previousHitBlock, camPos) < 0.75f) ||
 			abs(VectorDistance(previousHitBlock, camPosLower) < 0.75f)) return;
 		wManager.ModifyBlock(round(previousHitBlock.x), round(previousHitBlock.y), round(previousHitBlock.z), BlockType::Wooden_Plank);
@@ -171,7 +171,7 @@ void Player::LeftClickEvent()
 	}
 }
 
-void Player::Draw()
+void Player::LoopThenDraw()
 {
 	if (ImGui::Begin("Collision")) {
 		if (ImGui::Checkbox("Noclip", &flying)) {
@@ -180,18 +180,21 @@ void Player::Draw()
 		ImGui::End();
 	}
 
+	CastRay();
+
 	if (!flying) {
-		fallVelocity += fallTimer.getTime() * 1.5f;
-		fallVelocity = std::clamp(fallVelocity, 0.0f, 20.0f);
+		fallVelocity += fallTimer.getTime();
+		fallVelocity = std::clamp(fallVelocity, 0.75f, 20.0f);
 		MoveDown(true);
 		if (cam.GetPos().y < -15) cam.SetPos(0.0f, 25.0f, 0.0f);
 	}
 	if (jumping) {
 		jumpVelocity -= fallTimer.getTime();
 
-		if (jumpVelocity < -jumpDistance / 2.0f) {
+		if (jumpVelocity < -jumpDistance) {
 			jumping = false;
 			jumpVelocity = 0.0f;
+			fallTimer.mark();
 		}
 		else {
 			MoveUp(true);
@@ -200,7 +203,7 @@ void Player::Draw()
 
 	if (!falling && !jumping) {
 		fallTimer.mark();
-		fallVelocity = 4.0f;
+		fallVelocity = 0.75f;
 
 		if (abs(modf(round(momentum.x), &momentum.x)) < 0.000175f)
 			momentum.x -= 0.00175f * sgn(momentum.x);
@@ -270,6 +273,7 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 			delta.y = 0;
 			jumping = false;
 			jumpVelocity = 0.0f;
+			fallTimer.mark();
 		}
 	}
 

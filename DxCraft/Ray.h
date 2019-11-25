@@ -2,6 +2,7 @@
 #include <DirectXMath.h>
 #include <math.h>
 #include "MathFunctions.h"
+#include <algorithm>
 
 class Ray {
 public:
@@ -9,7 +10,7 @@ public:
 		: rayLimit(limit)
 	{}
 
-	void SetPositionAndDirection(const DirectX::XMFLOAT3& startCoord, float pitch, float yaw, float startDisance = 0.0f) noexcept {
+	void SetPositionAndDirection(const DirectX::XMFLOAT3& startCoord, float pitch, float yaw) noexcept {
 		rayPos = startCoord;
 
 		dx = std::sin(yaw) * std::cos(pitch);
@@ -18,21 +19,23 @@ public:
 		
 		rayDistance = 0.0f;
 
-		while(rayDistance < startDisance)
-			Next(0.5f);
+		falloff = 0.75f;
 	}
 
-	bool Next(float precision = 0.05f) noexcept
+	bool Next() noexcept
 	{
-		rayPos.x += dx * precision;
-		rayPos.y += dy * precision;
-		rayPos.z += dz * precision;
-		rayDistance += precision;
+		rayPos.x += dx * falloff;
+		rayPos.y += dy * falloff;
+		rayPos.z += dz * falloff;
+		rayDistance += falloff;
+		falloff *= 0.75f;
+		falloff = std::clamp(falloff, 0.05f, 0.75f);
 		return rayDistance < rayLimit;
 	}
 
 
-	DirectX::XMFLOAT3 GetVector() {
+	DirectX::XMFLOAT3 GetVector() const noexcept 
+	{
 		return rayPos;
 	}
 
@@ -42,6 +45,7 @@ private:
 	float dy;
 	float dz;
 	float rayLength;
-	float rayDistance = 0.0f;
+	float rayDistance;
 	float rayLimit;
+	float falloff;
 };

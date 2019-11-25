@@ -25,13 +25,13 @@ public:
 	void MoveRigth();
 	void MoveUp(bool external = false);
 	void MoveDown(bool external = false);
-	void CastRay();
 	void RotateCamera(float dx, float dy);
 	void RightClickEvent();
 	void LeftClickEvent();
-	void Draw();
+	void LoopThenDraw();
 
 private:
+	void CastRay();
 	void ResolveCollision(DirectX::XMFLOAT3 delta);
 	Graphics& gfx;
 	WorldManager& wManager;
@@ -68,7 +68,7 @@ private:
 	const float velocityMinBound = 0.25f;
 
 	float jumpVelocity = 0.0f;
-	const float jumpDistance = 15.0f;
+	const float jumpDistance = 8.0f;
 
 	bool jumping = false;
 };

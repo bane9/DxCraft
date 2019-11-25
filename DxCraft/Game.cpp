@@ -126,11 +126,9 @@ void Game::doFrame()
 			player.RightClickEvent();
 		}
 
-		player.CastRay();
+		player.LoopThenDraw();
 
 		wManager.Draw(wnd.Gfx());
-	
-		player.Draw();
 
 		wnd.Gfx().endFrame();
 	}
