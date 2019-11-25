@@ -34,26 +34,25 @@ Player::Player(Graphics& gfx, WorldManager& wManager)
 	cam.SetPos(0.0f, 25.0f, 0.0f);
 }
 
-void Player::SetVelocity(float velocity)
+void Player::SetVelocity(float speed)
 {
-	this->velocity = velocity;
-	
+	this->speed = speed;
 }
 
 float Player::GetVelocity()
 {
-	return velocity;
+	return speed;
 }
 
 void Player::MoveForward()
 {
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ 0.0f, 0.0f, dt }, velocity * moveVelocity, flying);
-	if (flying) {
-		temp.x *= 0.1f;
-		temp.y *= 0.1f;
-		temp.z *= 0.1f;
+	auto temp = cam.Translate({ 0.0f, 0.0f, dt }, speed * moveVelocity, flying);
+	if (falling) {
+		temp.x *= 0.5f;
+		temp.y *= 0.5f;
+		temp.z *= 0.5f;
 	}
 	ResolveCollision(temp);
 }
@@ -62,11 +61,11 @@ void Player::MoveBackward()
 {
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ 0.0f ,0.0f, -dt }, velocity * moveVelocity, flying);
-	if (flying) {
-		temp.x *= 0.1f;
-		temp.y *= 0.1f;
-		temp.z *= 0.1f;
+	auto temp = cam.Translate({ 0.0f ,0.0f, -dt }, speed * moveVelocity, flying);
+	if (falling) {
+		temp.x *= 0.5f;
+		temp.y *= 0.5f;
+		temp.z *= 0.5f;
 	}
 	ResolveCollision(temp);
 }
@@ -75,11 +74,11 @@ void Player::MoveLeft()
 {
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ -dt, 0.0f, 0.0f }, velocity * moveVelocity, flying);
-	if (flying) {
-		temp.x *= 0.1f;
-		temp.y *= 0.1f;
-		temp.z *= 0.1f;
+	auto temp = cam.Translate({ -dt, 0.0f, 0.0f }, speed * moveVelocity, flying);
+	if (falling) {
+		temp.x *= 0.5f;
+		temp.y *= 0.5f;
+		temp.z *= 0.5f;
 	}
 	ResolveCollision(temp);
 }
@@ -88,11 +87,11 @@ void Player::MoveRigth()
 {
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ dt, 0.0f, 0.0f }, velocity * moveVelocity, flying);
-	if (flying) {
-		temp.x *= 0.1f;
-		temp.y *= 0.1f;
-		temp.z *= 0.1f;
+	auto temp = cam.Translate({ dt, 0.0f, 0.0f }, speed * moveVelocity, flying);
+	if (falling) {
+		temp.x *= 0.5f;
+		temp.y *= 0.5f;
+		temp.z *= 0.5f;
 	}
 	ResolveCollision(temp);
 }
@@ -102,8 +101,8 @@ void Player::MoveUp(bool external)
 	if (!flying) jumping = true;
 	if (external) {
 		auto temp = cam.Translate({ 0.0f, dt, 0.0f }, jumpDistance - fallVelocity);
-		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * 0.1f;
-		temp.z += momentum.z * (falling ? 1.0f : 0.0f) * 0.1f;
+		temp.x += momentum.x * 0.1f;
+		temp.z += momentum.z * 0.1f;
 		ResolveCollision(temp);
 	}
 }
@@ -113,8 +112,8 @@ void Player::MoveDown(bool external)
 	if (!flying && !external) return;
 	if (external) {
 		auto temp = cam.Translate({ 0.0f, -dt, 0.0f }, fallVelocity);
-		temp.x += momentum.x * (falling ? 1.0f : 0.0f);
-		temp.z += momentum.z * (falling ? 1.0f : 0.0f);
+		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * 0.1f;
+		temp.z += momentum.z * (falling ? 1.0f : 0.0f) * 0.1f;
 		ResolveCollision(temp);
 	}
 }
@@ -182,8 +181,8 @@ void Player::Draw()
 	}
 
 	if (!flying) {
-		fallVelocity += fallTimer.getTime() * 2.0f;
-		fallVelocity = std::clamp(fallVelocity, 4.0f, 20.0f);
+		fallVelocity += fallTimer.getTime() * 1.5f;
+		fallVelocity = std::clamp(fallVelocity, 0.0f, 20.0f);
 		MoveDown(true);
 		if (cam.GetPos().y < -15) cam.SetPos(0.0f, 25.0f, 0.0f);
 	}
@@ -202,13 +201,7 @@ void Player::Draw()
 	if (!falling && !jumping) {
 		fallTimer.mark();
 		fallVelocity = 4.0f;
-	}
-	else {
-		moveVelocity += velocityIncreaseConstant * 0.2f;
-		velocity = baseVelocity;
-	}
 
-	if (!falling && !jumping) {
 		if (abs(modf(round(momentum.x), &momentum.x)) < 0.000175f)
 			momentum.x -= 0.00175f * sgn(momentum.x);
 		else momentum.x = 0.0f;
@@ -255,10 +248,10 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 		moveVelocity = 0.0f;
 	}
 
-	const float offsetX =		 0.5f  * sgn(delta.x);
+	const float offsetX =		 0.35f  * sgn(delta.x);
 	const float offsetY =		 1.5f  * sgn(delta.y);
-	const float offsetYLower =  -1.25f  * sgn(pos.y);
-	const float offsetZ =		 0.5f  * sgn(delta.z);
+	const float offsetYLower =  -1.15f * sgn(pos.y);
+	const float offsetZ =		 0.35f  * sgn(delta.z);
 
 	bool check = true;
 	auto block = wManager.GetBlock(round(pos.x), round(pos.y + delta.y + offsetY), round(pos.z));
