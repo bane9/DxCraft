@@ -64,6 +64,9 @@ void Game::doFrame()
 					wnd.mouse.DisableRaw();
 				}
 				break;
+			case 'N':
+				player.ChangeBlock();
+				break;
 			}
 
 		}

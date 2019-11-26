@@ -152,7 +152,7 @@ void Player::RightClickEvent()
 		camPosLower.y -= 1.15f * sgn(camPosLower.y);
 		if(fabs(VectorDistance(previousHitBlock, camPos) < 0.578f) ||
 			fabs(VectorDistance(previousHitBlock, camPosLower) < 0.578f)) return;
-		wManager.ModifyBlock(round(previousHitBlock.x), round(previousHitBlock.y), round(previousHitBlock.z), BlockType::Wooden_Plank);
+		wManager.ModifyBlock(round(previousHitBlock.x), round(previousHitBlock.y), round(previousHitBlock.z), type);
 		placeTimer.mark();
 	}
 	else {
@@ -177,6 +177,11 @@ void Player::LoopThenDraw()
 		if (ImGui::Checkbox("Noclip", &flying)) {
 			collision = !flying;
 		}
+		ImGui::End();
+	}
+
+	if (ImGui::Begin("Selected block")) {
+		ImGui::Text("%s", blockName.c_str());
 		ImGui::End();
 	}
 
@@ -235,6 +240,34 @@ void Player::LoopThenDraw()
 		gfx.RenderWireframe();
 		Renderer::Render(gfx, blockSelector);
 		gfx.RenderSolid();
+	}
+}
+
+void Player::ChangeBlock()
+{
+	++blockIndex;
+	if (blockIndex > 5) blockIndex = 1;
+	switch (blockIndex) {
+		case 1:
+			type = BlockType::Stone;
+			blockName = "Stone";
+			break;
+		case 2:
+			type = BlockType::Grass;
+			blockName = "Grass";
+			break;
+		case 3:
+			type = BlockType::Dirt;
+			blockName = "Dirt";
+			break;
+		case 4:
+			type = BlockType::Wooden_Plank;
+			blockName = "Wooden Plank";
+			break;
+		case 5:
+			type = BlockType::Glass;
+			blockName = "Glass";
+			break;
 	}
 }
 

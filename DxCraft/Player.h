@@ -29,10 +29,14 @@ public:
 	void RightClickEvent();
 	void LeftClickEvent();
 	void LoopThenDraw();
+	void ChangeBlock();
 
 private:
 	void CastRay();
 	void ResolveCollision(DirectX::XMFLOAT3 delta);
+	int blockIndex = 1;
+	std::string blockName = "Stone";
+	BlockType type = BlockType::Stone;
 	Graphics& gfx;
 	WorldManager& wManager;
 	Camera cam;
@@ -68,7 +72,7 @@ private:
 	const float velocityMinBound = 0.25f;
 
 	float jumpVelocity = 0.0f;
-	const float jumpDistance = 7.3f;
+	const float jumpDistance = 7.5f;
 
 	bool jumping = false;
 };
