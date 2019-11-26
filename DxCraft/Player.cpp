@@ -251,10 +251,10 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 		moveVelocity = 0.0f;
 	}
 
-	const float offsetX =		 0.251f  * sgn(delta.x);
-	const float offsetY =		 1.5f  * sgn(delta.y);
+	const float offsetX =		 0.3f * sgn(delta.x);
+	const float offsetY =		 1.5f * sgn(delta.y);
 	const float offsetYLower =  -1.0f * sgn(pos.y);
-	const float offsetZ =		 0.251f  * sgn(delta.z);
+	const float offsetZ =		 0.3f * sgn(delta.z);
 
 	bool check = true;
 	auto block = wManager.GetBlock(round(pos.x), round(pos.y + delta.y + offsetY), round(pos.z));

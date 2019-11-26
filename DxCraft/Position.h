@@ -12,7 +12,7 @@ struct Position {
 
 struct PositionHash {
 	std::size_t operator()(const Position& position) const {
-		robin_hood::hash<int> hash;
+		static robin_hood::hash<int> hash;
 		return hash(position.x) ^ hash(position.y) ^ hash(position.z);
 	}
 };
