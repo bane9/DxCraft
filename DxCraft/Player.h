@@ -48,7 +48,7 @@ private:
 	DirectX::XMFLOAT3 momentum{0.0f, 0.0f, 0.0f};
 	Position hitBlockPos;
 	Ray cameraRay;
-	float speed = 10.0f;
+	float speed = 7.0f;
 	Timer placeTimer;
 	Timer destroyTimer;
 	Timer moveTimer;
@@ -63,12 +63,12 @@ private:
 
 	const float baseSpeed = speed;
 
-	const float velocityIncreaseConstant = 0.01f;
+	const float velocityIncreaseConstant = 0.025f;
 	const float velocityMaxBound = 1.0f;
 	const float velocityMinBound = 0.25f;
 
 	float jumpVelocity = 0.0f;
-	const float jumpDistance = 7.1f;
+	const float jumpDistance = 7.3f;
 
 	bool jumping = false;
 };

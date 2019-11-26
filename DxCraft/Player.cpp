@@ -101,8 +101,8 @@ void Player::MoveUp(bool external)
 	if (!flying) jumping = true;
 	if (external) {
 		auto temp = cam.Translate({ 0.0f, dt, 0.0f }, jumpDistance - fallVelocity);
-		temp.x += momentum.x * 0.25f;
-		temp.z += momentum.z * 0.25f;
+		temp.x += momentum.x * 0.1f;
+		temp.z += momentum.z * 0.1f;
 		ResolveCollision(temp);
 	}
 }
@@ -112,8 +112,8 @@ void Player::MoveDown(bool external)
 	if (!flying && !external) return;
 	if (external) {
 		auto temp = cam.Translate({ 0.0f, -dt, 0.0f }, fallVelocity);
-		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * 0.25f;
-		temp.z += momentum.z * (falling ? 1.0f : 0.0f) * 0.25f;
+		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * 0.1f;
+		temp.z += momentum.z * (falling ? 1.0f : 0.0f) * 0.1f;
 		ResolveCollision(temp);
 	}
 }
@@ -251,10 +251,10 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 		moveVelocity = 0.0f;
 	}
 
-	const float offsetX =		 0.25f  * sgn(delta.x);
+	const float offsetX =		 0.251f  * sgn(delta.x);
 	const float offsetY =		 1.5f  * sgn(delta.y);
-	const float offsetYLower =  -1.35f * sgn(pos.y);
-	const float offsetZ =		 0.25f  * sgn(delta.z);
+	const float offsetYLower =  -1.0f * sgn(pos.y);
+	const float offsetZ =		 0.251f  * sgn(delta.z);
 
 	bool check = true;
 	auto block = wManager.GetBlock(round(pos.x), round(pos.y + delta.y + offsetY), round(pos.z));
@@ -290,7 +290,7 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 	if (block != nullptr && block->type != BlockType::Air) delta.z = 0;
 
 
-	const float offset = sgn(pos.x) * 0.1f;
+	const float offset = sgn(pos.x) * 0.0f;
 
 	block = wManager.GetBlock(round(pos.x + delta.x + offsetX + offset), round(pos.y + offsetY), round(pos.z + sgn(pos.z) * 0.25f));
 	if (block != nullptr && block->type != BlockType::Air) delta.x = 0;

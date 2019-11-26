@@ -44,8 +44,8 @@ void Game::doFrame()
 
 			if (e->GetCode() == VK_SHIFT) {
 				if (e->isPress())
-					player.SetVelocity(20.0f);
-				else player.SetVelocity(10.0f);
+					player.SetVelocity(12.5f);
+				else player.SetVelocity(7.0f);
 				continue;
 			}
 
