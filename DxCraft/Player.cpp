@@ -101,8 +101,8 @@ void Player::MoveUp(bool external)
 	if (!flying) jumping = true;
 	if (external) {
 		auto temp = cam.Translate({ 0.0f, dt, 0.0f }, jumpDistance - fallVelocity);
-		temp.x += momentum.x * 0.1f;
-		temp.z += momentum.z * 0.1f;
+		temp.x += momentum.x * 0.25f;
+		temp.z += momentum.z * 0.25f;
 		ResolveCollision(temp);
 	}
 }
@@ -112,8 +112,8 @@ void Player::MoveDown(bool external)
 	if (!flying && !external) return;
 	if (external) {
 		auto temp = cam.Translate({ 0.0f, -dt, 0.0f }, fallVelocity);
-		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * 0.1f;
-		temp.z += momentum.z * (falling ? 1.0f : 0.0f) * 0.1f;
+		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * 0.25f;
+		temp.z += momentum.z * (falling ? 1.0f : 0.0f) * 0.25f;
 		ResolveCollision(temp);
 	}
 }
@@ -150,8 +150,8 @@ void Player::RightClickEvent()
 		auto camPos = cam.GetPos();
 		auto camPosLower = camPos;
 		camPosLower.y -= 1.15f * sgn(camPosLower.y);
-		if(abs(VectorDistance(previousHitBlock, camPos) < 0.75f) ||
-			abs(VectorDistance(previousHitBlock, camPosLower) < 0.75f)) return;
+		if(fabs(VectorDistance(previousHitBlock, camPos) < 0.578f) ||
+			fabs(VectorDistance(previousHitBlock, camPosLower) < 0.578f)) return;
 		wManager.ModifyBlock(round(previousHitBlock.x), round(previousHitBlock.y), round(previousHitBlock.z), BlockType::Wooden_Plank);
 		placeTimer.mark();
 	}
@@ -184,9 +184,9 @@ void Player::LoopThenDraw()
 
 	if (!flying) {
 		fallVelocity += fallTimer.getTime();
-		fallVelocity = std::clamp(fallVelocity, 0.75f, 20.0f);
+		fallVelocity = std::clamp(fallVelocity, 0.25f, 20.0f);
 		MoveDown(true);
-		if (cam.GetPos().y < -15) cam.SetPos(0.0f, 25.0f, 0.0f);
+		if (cam.GetPos().y < -15.0f) cam.SetPos(0.0f, 25.0f, 0.0f);
 	}
 	if (jumping) {
 		jumpVelocity -= fallTimer.getTime();
@@ -203,13 +203,13 @@ void Player::LoopThenDraw()
 
 	if (!falling && !jumping) {
 		fallTimer.mark();
-		fallVelocity = 0.75f;
+		fallVelocity = 0.25f;
 
-		if (abs(modf(round(momentum.x), &momentum.x)) < 0.000175f)
+		if (fabs(modf(round(momentum.x), &momentum.x)) < 0.000175f)
 			momentum.x -= 0.00175f * sgn(momentum.x);
 		else momentum.x = 0.0f;
 
-		if (abs(modf(round(momentum.z), &momentum.z)) < 0.000175f)
+		if (fabs(modf(round(momentum.z), &momentum.z)) < 0.000175f)
 			momentum.z -= 0.00175f * sgn(momentum.z);
 		else momentum.z = 0.0f;
 	}
@@ -251,24 +251,24 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 		moveVelocity = 0.0f;
 	}
 
-	const float offsetX =		 0.35f  * sgn(delta.x);
+	const float offsetX =		 0.25f  * sgn(delta.x);
 	const float offsetY =		 1.5f  * sgn(delta.y);
-	const float offsetYLower =  -1.15f * sgn(pos.y);
-	const float offsetZ =		 0.35f  * sgn(delta.z);
+	const float offsetYLower =  -1.35f * sgn(pos.y);
+	const float offsetZ =		 0.25f  * sgn(delta.z);
 
 	bool check = true;
 	auto block = wManager.GetBlock(round(pos.x), round(pos.y + delta.y + offsetY), round(pos.z));
 	if (block != nullptr && block->type != BlockType::Air && delta.y < 0.0f) {
 		delta.y = 0;
-		if (modf(round(pos.y), &pos.y) < 0.001f) {
+		if (modf(round(pos.y), &pos.y) < 0.00001f) {
 			falling = false;
 			check = false;
 		}
 	}
 	else if (check) falling = true;
 
-	if (delta.y > 0) {
-		block = wManager.GetBlock(round(pos.x), round(pos.y - (offsetYLower * 0.5f)), round(pos.z));
+	if (delta.y > 0.0f) {
+		block = wManager.GetBlock(round(pos.x), round(pos.y - (offsetYLower * 0.75f)), round(pos.z));
 		if (block != nullptr && block->type != BlockType::Air) {
 			delta.y = 0;
 			jumping = false;
@@ -290,7 +290,7 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 	if (block != nullptr && block->type != BlockType::Air) delta.z = 0;
 
 
-	const float offset = sgn(pos.x) * 0.125f;
+	const float offset = sgn(pos.x) * 0.1f;
 
 	block = wManager.GetBlock(round(pos.x + delta.x + offsetX + offset), round(pos.y + offsetY), round(pos.z + sgn(pos.z) * 0.25f));
 	if (block != nullptr && block->type != BlockType::Air) delta.x = 0;
