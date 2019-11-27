@@ -284,10 +284,10 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 		moveVelocity = 0.0f;
 	}
 
-	const float offsetX =		 0.3f * sgn(delta.x);
+	const float offsetX =		 0.251f * sgn(delta.x);
 	const float offsetY =		 1.5f * sgn(delta.y);
 	const float offsetYLower =  -1.0f * sgn(pos.y);
-	const float offsetZ =		 0.3f * sgn(delta.z);
+	const float offsetZ =		 0.251f * sgn(delta.z);
 
 	bool check = true;
 	auto block = wManager.GetBlock(round(pos.x), round(pos.y + delta.y + offsetY), round(pos.z));
@@ -301,7 +301,7 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 	else if (check) falling = true;
 
 	if (delta.y > 0.0f) {
-		block = wManager.GetBlock(round(pos.x), round(pos.y - (offsetYLower * 0.75f)), round(pos.z));
+		block = wManager.GetBlock(round(pos.x), round(pos.y - (offsetYLower * 0.25f)), round(pos.z));
 		if (block != nullptr && block->type != BlockType::Air) {
 			delta.y = 0;
 			jumping = false;
