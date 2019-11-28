@@ -170,6 +170,7 @@
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Surface.cpp" />
+    <ClCompile Include="ViewFrustum.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WinMain.cpp" />
     <ClCompile Include="WorldManager.cpp" />
@@ -207,6 +208,7 @@
     <ClInclude Include="Surface.h" />
     <ClInclude Include="ThreadSettings.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="ViewFrustum.h" />
     <ClInclude Include="WinConfig.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="WorldManager.h" />

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "Renderer.h"
 #include <optional>
+#include "Camera.h"
 
 WorldManager::WorldManager(Graphics& gfx)
 	: chunkRenderData(gfx, L"TextureVS.cso", L"TexturePS.cso", ied, "images\\terrain.png")
@@ -59,9 +60,10 @@ void WorldManager::GenerateMeshes() {
 	}
 }
 
-void WorldManager::Draw(Graphics& gfx)
+void WorldManager::Draw(Graphics& gfx, Camera& cam)
 {
 	for (auto& chunk : chunks) {
+		if(!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
 
 		const Transforms tf =

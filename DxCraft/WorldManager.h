@@ -6,6 +6,7 @@
 #include "XM_Structs.h"
 #include "robin_hood.h"
 #include "RendererData.h"
+#include "Camera.h"
 
 class WorldManager
 {
@@ -16,7 +17,7 @@ public:
 	void CreateChunk(int x, int y, int z, bool empty = false);
 	void ModifyBlock(int x, int y, int z, BlockType type = BlockType::Air);
 	void GenerateMeshes();
-	void Draw(Graphics& gfx);
+	void Draw(Graphics& gfx, Camera& cam);
 	Block* GetBlock(int x, int y, int z);
 private:
 	void GenerateMesh(BasicChunk& chunk);

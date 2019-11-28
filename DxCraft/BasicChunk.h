@@ -6,7 +6,7 @@
 #include <d3d11.h>
 #include "robin_hood.h"
 #include "Position.h"
-
+#include "AABB.h"
 
 class BasicChunk
 {
@@ -27,5 +27,6 @@ private:
 	int x, y, z;
 	size_t vertexBufferSize = 0;
 	size_t indexBufferSize = 0;
+	AABB aabb;
 };
 

@@ -43,7 +43,26 @@ inline constexpr int sgn(float n) noexcept
 }
 
 template<typename T, typename V>
-inline constexpr float VectorDistance(T first, V second)
+inline constexpr float VectorDistance(T first, V second) noexcept
 {
 	return sqrtf(powf(second.x - first.x, 2.0f) + powf(second.y - first.y, 2.0f) + powf(second.z - first.z, 2.0f));
+}
+
+template<typename T>
+inline constexpr float VectorLength(T n) noexcept
+{
+	return sqrtf(n.x * n.x + n.y * n.y + n.z * n.z);
+}
+
+template<typename T>
+inline constexpr T Normalize3D(T n) noexcept
+{
+	float length = VectorLength(n);
+	return { n.x / length, n.y / length, n.z / length };
+}
+
+template<typename T, typename V>
+inline constexpr float Dot3D(T n1, V n2) noexcept
+{
+	return n1.x * n2.x + n1.y * n2.y + n1.z * n2.z;
 }

@@ -36,10 +36,16 @@ float Camera::GetYaw() noexcept
 	return yaw;
 }
 
+ViewFrustum Camera::GetFrustum() noexcept
+{
+	return frustum;
+}
+
 void Camera::Rotate(float dx, float dy) noexcept
 {
 	yaw = wrap_angle(yaw + dx * rotationSpeed);
 	pitch = std::clamp(pitch + dy * rotationSpeed, 0.995f * -PI / 2.0f, 0.995f * PI / 2.0f);
+	frustum.Update(GetMatrix());
 }
 
 DirectX::XMFLOAT3 Camera::Translate(DirectX::XMFLOAT3 translation, float travelSpeed, bool flying) noexcept
@@ -58,6 +64,7 @@ DirectX::XMFLOAT3 Camera::Translate(DirectX::XMFLOAT3 translation, float travelS
 		));
 	}
 
+	frustum.Update(GetMatrix());
+
 	return { translation.x, translation.y, translation.z };
 }
-

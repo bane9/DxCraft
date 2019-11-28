@@ -15,7 +15,7 @@ Game::Game(size_t width, size_t height)
 	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager)
 {
 
-	const int area = 4;
+	const int area = 20;
 	for (int x = -area / 2; x < area / 2; x++) {
 		for (int z = -area / 2; z < area / 2; z++) {
 			wManager.CreateChunk(x, 0, z);
@@ -131,7 +131,7 @@ void Game::doFrame()
 
 		player.LoopThenDraw();
 
-		wManager.Draw(wnd.Gfx());
+		wManager.Draw(wnd.Gfx(), player.GetCamera());
 
 		wnd.Gfx().endFrame();
 	}

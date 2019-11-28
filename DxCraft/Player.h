@@ -30,7 +30,7 @@ public:
 	void LeftClickEvent();
 	void LoopThenDraw();
 	void ChangeBlock();
-
+	Camera& GetCamera() noexcept;
 private:
 	void CastRay();
 	void ResolveCollision(DirectX::XMFLOAT3 delta);

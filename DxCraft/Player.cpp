@@ -271,6 +271,11 @@ void Player::ChangeBlock()
 	}
 }
 
+Camera& Player::GetCamera() noexcept
+{
+	return cam;
+}
+
 void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 {
 	DirectX::XMFLOAT3 pos = cam.GetPos();
