@@ -17,7 +17,7 @@ public:
 	Player(Graphics& gfx, WorldManager& wManager);
 	Player(const Player&) = delete;
 	Player& operator=(const Player&) = delete;
-	void SetVelocity(float velocity);
+	void SetSpeed(float velocity);
 	float GetVelocity();
 	void MoveForward();
 	void MoveBackward();
@@ -31,6 +31,8 @@ public:
 	void LoopThenDraw();
 	void ChangeBlock();
 	Camera& GetCamera() noexcept;
+	void ToggleFlying() noexcept;
+
 private:
 	void CastRay();
 	void ResolveCollision(DirectX::XMFLOAT3 delta);
@@ -75,5 +77,7 @@ private:
 	const float jumpDistance = 7.3f;
 
 	bool jumping = false;
+
+	const float flyingSpeedModifier = 4.0f;
 };
 

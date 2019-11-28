@@ -34,7 +34,7 @@ Player::Player(Graphics& gfx, WorldManager& wManager)
 	cam.SetPos(0.0f, 25.0f, 0.0f);
 }
 
-void Player::SetVelocity(float speed)
+void Player::SetSpeed(float speed)
 {
 	this->speed = speed;
 }
@@ -46,9 +46,15 @@ float Player::GetVelocity()
 
 void Player::MoveForward()
 {
+	if (flying) {
+		auto t = cam.Translate({ 0.0f, 0.0f, dt }, speed * flyingSpeedModifier, flying);
+		auto camPos = cam.GetPos();
+		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
+		return;
+	}
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ 0.0f, 0.0f, dt }, speed * moveVelocity, flying);
+	auto temp = cam.Translate({ 0.0f, 0.0f, dt }, speed * (flying ? flyingSpeedModifier : moveVelocity), flying);
 	if (falling) {
 		temp.x *= 0.35f;
 		temp.y *= 0.35f;
@@ -59,9 +65,15 @@ void Player::MoveForward()
 
 void Player::MoveBackward()
 {
+	if (flying) {
+		auto t = cam.Translate({ 0.0f, 0.0f, -dt }, speed * flyingSpeedModifier, flying);
+		auto camPos = cam.GetPos();
+		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
+		return;
+	}
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ 0.0f ,0.0f, -dt }, speed * moveVelocity, flying);
+	auto temp = cam.Translate({ 0.0f ,0.0f, -dt }, speed * (flying ? flyingSpeedModifier : moveVelocity), flying);
 	if (falling) {
 		temp.x *= 0.35f;
 		temp.y *= 0.35f;
@@ -72,9 +84,15 @@ void Player::MoveBackward()
 
 void Player::MoveLeft()
 {
+	if (flying) {
+		auto t = cam.Translate({ -dt, 0.0f, 0.0f }, speed * flyingSpeedModifier, flying);
+		auto camPos = cam.GetPos();
+		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
+		return;
+	}
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ -dt, 0.0f, 0.0f }, speed * moveVelocity, flying);
+	auto temp = cam.Translate({ -dt, 0.0f, 0.0f }, speed * (flying ? flyingSpeedModifier : moveVelocity), flying);
 	if (falling) {
 		temp.x *= 0.35f;
 		temp.y *= 0.35f;
@@ -85,9 +103,15 @@ void Player::MoveLeft()
 
 void Player::MoveRigth()
 {
+	if (flying) {
+		auto t = cam.Translate({ dt, 0.0f, 0.0f }, speed * flyingSpeedModifier, flying);
+		auto camPos = cam.GetPos();
+		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
+		return;
+	}
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ dt, 0.0f, 0.0f }, speed * moveVelocity, flying);
+	auto temp = cam.Translate({ dt, 0.0f, 0.0f }, speed * (flying ? flyingSpeedModifier : moveVelocity), flying);
 	if (falling) {
 		temp.x *= 0.35f;
 		temp.y *= 0.35f;
@@ -99,7 +123,12 @@ void Player::MoveRigth()
 void Player::MoveUp(bool external)
 {
 	if (!flying) jumping = true;
-	if (external) {
+	if (!external && flying) {
+		auto t = cam.Translate({ 0.0f, dt, 0.0f }, speed * flyingSpeedModifier, flying);
+		auto camPos = cam.GetPos();
+		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
+	}
+	else if (external) {
 		auto temp = cam.Translate({ 0.0f, dt, 0.0f }, jumpDistance - fallVelocity);
 		temp.x += momentum.x * 0.1f;
 		temp.z += momentum.z * 0.1f;
@@ -110,7 +139,12 @@ void Player::MoveUp(bool external)
 void Player::MoveDown(bool external)
 {
 	if (!flying && !external) return;
-	if (external) {
+	else if (!external) {
+		auto t = cam.Translate({ 0.0f, -dt, 0.0f }, speed * flyingSpeedModifier, flying);
+		auto camPos = cam.GetPos();
+		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
+	}
+	else {
 		auto temp = cam.Translate({ 0.0f, -dt, 0.0f }, fallVelocity);
 		temp.x += momentum.x * (falling ? 1.0f : 0.0f) * 0.1f;
 		temp.z += momentum.z * (falling ? 1.0f : 0.0f) * 0.1f;
@@ -274,6 +308,17 @@ void Player::ChangeBlock()
 Camera& Player::GetCamera() noexcept
 {
 	return cam;
+}
+
+void Player::ToggleFlying() noexcept
+{
+	flying = !flying;
+	collision = !collision;
+	if (!flying) {
+		fallVelocity = 0.25f;
+		jumpVelocity = 0.0f;
+		fallTimer.mark();
+	}
 }
 
 void Player::ResolveCollision(DirectX::XMFLOAT3 delta)

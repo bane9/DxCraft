@@ -15,7 +15,7 @@ Game::Game(size_t width, size_t height)
 	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager)
 {
 
-	const int area = 20;
+	const int area = 6;
 	for (int x = -area / 2; x < area / 2; x++) {
 		for (int z = -area / 2; z < area / 2; z++) {
 			wManager.CreateChunk(x, 0, z);
@@ -42,11 +42,16 @@ void Game::doFrame()
 		while (auto e = wnd.kbd.ReadKey())
 		{
 
-			if (e->GetCode() == VK_SHIFT) {
-				if (e->isPress())
-					player.SetVelocity(12.5f);
-				else player.SetVelocity(7.0f);
-				continue;
+			if (e->GetCode() == 'W') {
+				if (e->isPress()) {
+					if (sprintTimer.getTime() < 0.3f)
+						player.SetSpeed(30.0f);
+					else player.SetSpeed(7.0f);
+				}
+				else {
+					player.SetSpeed(7.0f);
+				}
+				sprintTimer.mark();
 			}
 
 			if (!e->isPress())
@@ -67,8 +72,11 @@ void Game::doFrame()
 			case 'N':
 				player.ChangeBlock();
 				break;
+			case VK_SPACE:
+				if (jumpTimer.getTime() < 0.5f) player.ToggleFlying();
+				jumpTimer.mark();
+				break;
 			}
-
 		}
 
 		if (!showCursor)
@@ -93,7 +101,7 @@ void Game::doFrame()
 			{
 				player.MoveUp();
 			}
-			if (wnd.kbd.KeyIsPressed(VK_CONTROL))
+			if (wnd.kbd.KeyIsPressed(VK_SHIFT))
 			{
 				player.MoveDown();
 			}

@@ -21,4 +21,6 @@ private:
 	float skyIntesity = 0.5f;
 	WorldManager wManager;
 	Player player;
+	Timer jumpTimer;
+	Timer sprintTimer;
 };
