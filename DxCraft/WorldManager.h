@@ -5,7 +5,6 @@
 #include <vector>
 #include "XM_Structs.h"
 #include "robin_hood.h"
-#include "RendererData.h"
 #include "Camera.h"
 
 class WorldManager
@@ -34,5 +33,5 @@ private:
 		{ "TexCoord",0,DXGI_FORMAT_R32G32_FLOAT,0,24,D3D11_INPUT_PER_VERTEX_DATA,0 }
 	};
 
-	RendererData<Vertex, Transforms> chunkRenderData;
+	//RendererData<Vertex, Transforms> chunkRenderData;
 };

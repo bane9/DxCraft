@@ -2,34 +2,28 @@
 #include "MathFunctions.h"
 #include "imgui/imgui.h"
 #include <algorithm>
+#include "RenderDataFactory.h"
 
 Player::Player(Graphics& gfx, WorldManager& wManager)
 	: 
 	gfx(gfx),
 	wManager(wManager),
-	crosshair(gfx, L"CrosshairVS.cso", L"CrossHairPS.cso", ied),
-	blockSelector(gfx, L"SelectionVS.cso", L"SelectionPS.cso", ied),
 	hitBlockPos(-1, -1, -1)
 {
-	std::vector<DirectX::XMFLOAT3> tempVertices;
-	std::copy(Crosshair::NearSide.first.begin(), Crosshair::NearSide.first.end(), std::back_inserter(tempVertices));
+	crosshair.AppendVertexBuffer(RenderDataFactory::CreateVertexBuffer(gfx, Crosshair::NearSide.first));
+	crosshair.AppendIndexBuffer(RenderDataFactory::CreateIndexBuffer(gfx, Crosshair::NearSide.second));
+	crosshair.indexBufferSize = Crosshair::NearSide.second.size();
+	crosshair.Append(RenderDataFactory::CreateVertexShader(gfx, L"CrosshairVS.cso", ied.data(), ied.size()));
+	crosshair.Append(RenderDataFactory::CreatePixelShader(gfx, L"CrossHairPS.cso"));
+	crosshair.stride = sizeof(DirectX::XMFLOAT3);
+	RenderDataFactory::UpdateVScBuf(gfx, crosshair.pConstantBuffer, DirectX::XMMatrixTranspose(gfx.getProjection()));
 
-	std::vector<uint16_t> tempIndices;
-	std::copy(Crosshair::NearSide.second.begin(), Crosshair::NearSide.second.end(), std::back_inserter(tempIndices));
-
-	auto t = crosshair.UpdateVertexBuffer(tempVertices);
-	auto t2 = crosshair.UpdateIndexBuffer(tempIndices);
-
-	tempVertices.clear();
-	std::copy(BlockSelector::Cube.first.begin(), BlockSelector::Cube.first.end(), std::back_inserter(tempVertices));
-
-	tempIndices.clear();
-	std::copy(BlockSelector::Cube.second.begin(), BlockSelector::Cube.second.end(), std::back_inserter(tempIndices));
-
-	t = blockSelector.UpdateVertexBuffer(tempVertices);
-	t2 = blockSelector.UpdateIndexBuffer(tempIndices);
-
-	crosshair.UpdateConstantBuffer(DirectX::XMMatrixTranspose(gfx.getProjection()));
+	blockSelector.AppendVertexBuffer(RenderDataFactory::CreateVertexBuffer(gfx, BlockSelector::Cube.first));
+	blockSelector.AppendIndexBuffer(RenderDataFactory::CreateIndexBuffer(gfx, BlockSelector::Cube.second));
+	blockSelector.stride = sizeof(DirectX::XMFLOAT3);
+	blockSelector.indexBufferSize = BlockSelector::Cube.second.size();
+	blockSelector.Append(RenderDataFactory::CreateVertexShader(gfx, L"SelectionVS.cso", ied.data(), ied.size()));
+	blockSelector.Append(RenderDataFactory::CreatePixelShader(gfx, L"SelectionPS.cso"));
 
 	cam.SetPos(0.0f, 25.0f, 0.0f);
 }
@@ -259,13 +253,13 @@ void Player::LoopThenDraw()
 		DirectX::XMMatrixTranspose(model)
 	};
 
-	blockSelector.UpdateConstantBuffer(tf);
+	RenderDataFactory::UpdateVScBuf(gfx, blockSelector.pConstantBuffer, tf);
 
-	Renderer::Render(gfx, crosshair);
+	Renderer::DrawIndexed(gfx, crosshair);
 
 	if (hitBlockPos.y > -1) {
 		gfx.RenderWireframe();
-		Renderer::Render(gfx, blockSelector);
+		Renderer::DrawIndexed(gfx, blockSelector);
 		gfx.RenderSolid();
 	}
 }

@@ -2,33 +2,41 @@
 #include "Surface.h"
 
 std::pair<Microsoft::WRL::ComPtr<ID3D11VertexShader>, Microsoft::WRL::ComPtr<ID3D11InputLayout>>
-	RenderDataFactory::CreateVSBlob(Graphics& gfx, const wchar_t* filePath, D3D11_INPUT_ELEMENT_DESC* ied, UINT ied_size)
+	RenderDataFactory::CreateVertexShader(Graphics& gfx, const wchar_t* filePath, const D3D11_INPUT_ELEMENT_DESC* ied, UINT ied_size)
 {
 	INFOMAN(gfx);
 	Microsoft::WRL::ComPtr<ID3DBlob> pBytecodeBlob;
-	D3DReadFileToBlob(filePath, &pBytecodeBlob);
+	D3DReadFileToBlob(filePath, pBytecodeBlob.ReleaseAndGetAddressOf());
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader;
 	GFX_EXCEPT_INFO(gfx.getDevice()->CreateVertexShader(
 		pBytecodeBlob->GetBufferPointer(), 
 		pBytecodeBlob->GetBufferSize(), 
-		nullptr, 
-		&pVertexShader));
+		nullptr,
+		pVertexShader.GetAddressOf()));
 
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateInputLayout(ied,
-		ied_size, pBytecodeBlob->GetBufferPointer(), pBytecodeBlob->GetBufferSize(), &pInputLayout));
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreateInputLayout(
+		ied,
+		ied_size, 
+		pBytecodeBlob.Get()->GetBufferPointer(), 
+		pBytecodeBlob.Get()->GetBufferSize(), 
+		pInputLayout.GetAddressOf()));
 
 	return {pVertexShader, pInputLayout};
 }
 
-Microsoft::WRL::ComPtr<ID3D11PixelShader> RenderDataFactory::CreatePSBlob(Graphics& gfx, const wchar_t* filePath)
+Microsoft::WRL::ComPtr<ID3D11PixelShader> RenderDataFactory::CreatePixelShader(Graphics& gfx, const wchar_t* filePath)
 {
 	INFOMAN(gfx);
 	Microsoft::WRL::ComPtr<ID3DBlob> pBytecodeBlob;
-	D3DReadFileToBlob(filePath, &pBytecodeBlob);
+	D3DReadFileToBlob(filePath, pBytecodeBlob.ReleaseAndGetAddressOf());
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreatePixelShader(pBytecodeBlob->GetBufferPointer(), 
-		pBytecodeBlob->GetBufferSize(), nullptr, &pPixelShader));
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreatePixelShader(
+		pBytecodeBlob.Get()->GetBufferPointer(),
+		pBytecodeBlob.Get()->GetBufferSize(), 
+		nullptr, 
+		pPixelShader.GetAddressOf()));
+
 	return pPixelShader;
 }
 
@@ -66,7 +74,7 @@ std::tuple<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>,
 	sd1.pSysMem = s.GetBufferPtr();
 	sd1.SysMemPitch = s.GetWidth() * sizeof(Surface::Color);
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateTexture2D(&textureDesc, &sd1, &pTexture));
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreateTexture2D(&textureDesc, &sd1, pTexture.ReleaseAndGetAddressOf()));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = textureDesc.Format;
@@ -74,7 +82,7 @@ std::tuple<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>,
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = 1;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateShaderResourceView(pTexture.Get(), &srvDesc, &pTextureView));
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreateShaderResourceView(pTexture.Get(), &srvDesc, pTextureView.ReleaseAndGetAddressOf()));
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
@@ -83,7 +91,7 @@ std::tuple<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>,
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> pSampler;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateSamplerState(&samplerDesc, &pSampler));
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreateSamplerState(&samplerDesc, pSampler.ReleaseAndGetAddressOf()));
 
 	return { pTextureView, pTexture, pSampler };
 

@@ -4,17 +4,20 @@
 #include "Renderer.h"
 #include <optional>
 #include "Camera.h"
+#include "RenderData.h"
 
 WorldManager::WorldManager(Graphics& gfx)
-	: chunkRenderData(gfx, L"TextureVS.cso", L"TexturePS.cso", ied, "images\\terrain.png")
+	//: chunkRenderData(gfx, L"TextureVS.cso", L"TexturePS.cso", ied, "images\\terrain.png")
 {
 }
 
 void WorldManager::CreateChunk(int x, int y, int z, bool empty)
 {
 	if (y < 0) return;
-	chunks.emplace(Position(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize),
-		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize, empty));
+	Position pos(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize);
+	chunks.emplace(pos, BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize, empty));
+	auto& chunk = chunks.at(pos);
+	//chunk.opaqueBlocks
 }
 
 void WorldManager::ModifyBlock(int x, int y, int z, BlockType type)
@@ -62,7 +65,7 @@ void WorldManager::GenerateMeshes() {
 
 void WorldManager::Draw(Graphics& gfx, Camera& cam)
 {
-	for (auto& chunk : chunks) {
+	/*for (auto& chunk : chunks) {
 		if(!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
 
@@ -78,7 +81,7 @@ void WorldManager::Draw(Graphics& gfx, Camera& cam)
 
 		Renderer::Render<Vertex, Transforms>(gfx, chunkRenderData);
 		chunkRenderData.Reset();
-	}
+	}*/
 }
 
 void WorldManager::AppendFace(const std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>>& face, 
@@ -191,7 +194,7 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 		return;
 	}
 	
-	auto pVertex = chunkRenderData.UpdateVertexBuffer(chunk.vertices);
+	/*auto pVertex = chunkRenderData.UpdateVertexBuffer(chunk.vertices);
 	if (pVertex) {
 		chunk.pVertexBuffer.Swap(pVertex->first);
 		chunk.vertexBufferSize = pVertex->second;
@@ -206,5 +209,5 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 	chunk.vertices.clear();
 	chunk.indices.clear();
 
-	chunkRenderData.Reset();
+	chunkRenderData.Reset();*/
 }

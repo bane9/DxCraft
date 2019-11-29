@@ -1,6 +1,6 @@
 #pragma once
 #include "Graphics.h"
-#include "RendererData.h"
+#include "RenderData.h"
 #include "Renderer.h"
 #include "Camera.h"
 #include "Ray.h"
@@ -46,8 +46,8 @@ private:
 	{
 		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 }
 	};
-	RendererData<DirectX::XMFLOAT3, DirectX::XMMATRIX> crosshair;
-	RendererData<DirectX::XMFLOAT3, Transforms> blockSelector;
+	RenderData crosshair;
+	RenderData blockSelector;
 	bool found = false;
 	DirectX::XMFLOAT3 hitBlock;
 	DirectX::XMFLOAT3 previousHitBlock;

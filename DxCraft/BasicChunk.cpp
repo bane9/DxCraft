@@ -1,5 +1,6 @@
 #include "BasicChunk.h"
 #include "MathFunctions.h"
+#include "RenderDataFactory.h"
 
 BasicChunk::BasicChunk(int x, int y, int z, bool empty)
 	: x(x), y(y), z(z), aabb({16.0f, 16.0f, 16.0f})

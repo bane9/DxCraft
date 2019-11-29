@@ -7,6 +7,7 @@
 #include "robin_hood.h"
 #include "Position.h"
 #include "AABB.h"
+#include "RenderData.h"
 
 class BasicChunk
 {
