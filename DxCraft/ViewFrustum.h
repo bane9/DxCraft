@@ -19,5 +19,5 @@ public:
 	bool IsBoxInFrustum(const AABB& box) const noexcept;
 
 private:
-	std::array<Plane, 6> m_planes;
+	std::array<Plane, 6> planes;
 };

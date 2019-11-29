@@ -12,6 +12,8 @@ public:
 	static void DrawIndexed(Graphics& gfx, const RenderData& data, Microsoft::WRL::ComPtr<ID3D11Buffer> optVertexBuffer = nullptr,
 		Microsoft::WRL::ComPtr<ID3D11Buffer> optIndexBuffer = nullptr, UINT indexBufferSize = 0, UINT stride = 0) {
 
+		if ((indexBufferSize != 0 ? indexBufferSize : data.indexBufferSize) == 0) return;
+
 		if(optVertexBuffer.Get() != nullptr)
 			gfx.pContext->IASetVertexBuffers(0, 1, optVertexBuffer.GetAddressOf(), stride != 0 ? &stride : &data.stride, &data.offset);
 		else
@@ -42,7 +44,7 @@ public:
 		if (data.pConstantBuffer.Get() != nullptr)
 			gfx.pContext->VSSetConstantBuffers(0, 1, data.pConstantBuffer.GetAddressOf());
 
-		if((indexBufferSize != 0 ? indexBufferSize : data.indexBufferSize) != 0)
-			gfx.pContext->DrawIndexed(indexBufferSize != 0 ? indexBufferSize : data.indexBufferSize, 0, 0);
+		
+		gfx.pContext->DrawIndexed(indexBufferSize != 0 ? indexBufferSize : data.indexBufferSize, 0, 0);
 	}
 };

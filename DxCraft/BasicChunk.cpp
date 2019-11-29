@@ -26,6 +26,8 @@ BasicChunk::BasicChunk(int x, int y, int z, bool empty)
 
 				//block.type = static_cast<BlockType>(rand() % static_cast<int>(BlockType::block_count));
 
+				//block.type = BlockType::Glass;
+
 				/*if ((ix + iy + iz) % 2 == 0) block.type = BlockType::Air;
 				else block.type = BlockType::Grass;*/
 			}

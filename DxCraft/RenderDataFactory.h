@@ -1,5 +1,4 @@
 #pragma once
-#include <DirectXMath.h>
 #include <wrl.h>
 #include <d3d11.h>
 #include "Graphics.h"
@@ -15,34 +14,34 @@ class RenderDataFactory
 public:
 
 	template<typename Container>
-	static void CreateVertexBuffer(Graphics& gfx, RenderData& data, const Container ct);
+	static void CreateVertexBuffer(Graphics& gfx, RenderData& data, const Container& ct);
 
 	template<typename Container>
-	static void CreateIndexBuffer(Graphics& gfx, RenderData& data, const Container ct);
+	static void CreateIndexBuffer(Graphics& gfx, RenderData& data, const Container& ct);
 
 	template<typename Container>
-	static Microsoft::WRL::ComPtr<ID3D11Buffer> CreateVertexBuffer(Graphics& gfx, const Container ct);
+	static Microsoft::WRL::ComPtr<ID3D11Buffer> CreateVertexBuffer(Graphics& gfx, const Container& ct);
 
 	template<typename Container>
-	static Microsoft::WRL::ComPtr<ID3D11Buffer> CreateIndexBuffer(Graphics& gfx, const Container ct);
+	static Microsoft::WRL::ComPtr<ID3D11Buffer> CreateIndexBuffer(Graphics& gfx, const Container& ct);
 
 	template<typename Container>
 	static void CreateVertexShader(Graphics& gfx, RenderData& data, const wchar_t* filePath, const Container& ied);
 
 	static void CreatePixelShader(Graphics& gfx, RenderData& data, const wchar_t* filePath);
 
-	static void CreateFSBlob(Graphics& gfx, RenderData& data, const wchar_t* filePath);
+	static void CreateFragmentShader(Graphics& gfx, RenderData& data, const wchar_t* filePath);
 
-	static void CreateGSBlob(Graphics& gfx, RenderData& data, const wchar_t* filePath);
+	static void CreateGeometryShader(Graphics& gfx, RenderData& data, const wchar_t* filePath);
 
 	static void Create2DTexture(Graphics& gfx, RenderData& data, const char* filePath);
 
 	template<typename T>
-	static void UpdateVScBuf(Graphics& gfx, RenderData& data, T cBuf);
+	static void UpdateVScBuf(Graphics& gfx, RenderData& data, const T& cBuf);
 };
 
 template<typename Container>
-inline void RenderDataFactory::CreateVertexBuffer(Graphics& gfx, RenderData& data, const Container ct)
+inline void RenderDataFactory::CreateVertexBuffer(Graphics& gfx, RenderData& data, const Container& ct)
 {
 	assert(ct.size() > 0 && "Vertex buffer is empty");
 	INFOMAN(gfx);
@@ -62,7 +61,7 @@ inline void RenderDataFactory::CreateVertexBuffer(Graphics& gfx, RenderData& dat
 }
 
 template<typename Container>
-inline void RenderDataFactory::CreateIndexBuffer(Graphics& gfx, RenderData& data, const Container ct)
+inline void RenderDataFactory::CreateIndexBuffer(Graphics& gfx, RenderData& data, const Container& ct)
 {
 	assert(ct.size() > 0 && "Index buffer is empty");
 	INFOMAN(gfx);
@@ -80,7 +79,7 @@ inline void RenderDataFactory::CreateIndexBuffer(Graphics& gfx, RenderData& data
 }
 
 template<typename Container>
-inline Microsoft::WRL::ComPtr<ID3D11Buffer> RenderDataFactory::CreateVertexBuffer(Graphics& gfx, const Container ct)
+inline Microsoft::WRL::ComPtr<ID3D11Buffer> RenderDataFactory::CreateVertexBuffer(Graphics& gfx, const Container& ct)
 {
 	assert(ct.size() > 0 && "Vertex buffer is empty");
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
@@ -102,7 +101,7 @@ inline Microsoft::WRL::ComPtr<ID3D11Buffer> RenderDataFactory::CreateVertexBuffe
 }
 
 template<typename Container>
-inline Microsoft::WRL::ComPtr<ID3D11Buffer> RenderDataFactory::CreateIndexBuffer(Graphics& gfx, const Container ct)
+inline Microsoft::WRL::ComPtr<ID3D11Buffer> RenderDataFactory::CreateIndexBuffer(Graphics& gfx, const Container& ct)
 {
 	assert(ct.size() > 0 && "Index buffer is empty");
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
@@ -143,7 +142,7 @@ inline void RenderDataFactory::CreateVertexShader(Graphics& gfx, RenderData& dat
 }
 
 template<typename T>
-inline void RenderDataFactory::UpdateVScBuf(Graphics& gfx, RenderData& data, T cBuf)
+inline void RenderDataFactory::UpdateVScBuf(Graphics& gfx, RenderData& data, const T& cBuf)
 {
 	INFOMAN(gfx);
 	if (data.pConstantBuffer.Get() == nullptr) {

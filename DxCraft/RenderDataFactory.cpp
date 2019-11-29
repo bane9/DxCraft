@@ -14,12 +14,12 @@ void RenderDataFactory::CreatePixelShader(Graphics& gfx, RenderData& data, const
 
 }
 
-void RenderDataFactory::CreateFSBlob(Graphics& gfx, RenderData& data, const wchar_t* filePath)
+void RenderDataFactory::CreateFragmentShader(Graphics& gfx, RenderData& data, const wchar_t* filePath)
 {
 
 }
 
-void RenderDataFactory::CreateGSBlob(Graphics& gfx, RenderData& data, const wchar_t* filePath)
+void RenderDataFactory::CreateGeometryShader(Graphics& gfx, RenderData& data, const wchar_t* filePath)
 {
 
 }

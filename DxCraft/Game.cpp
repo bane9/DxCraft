@@ -44,7 +44,7 @@ void Game::doFrame()
 
 			if (e->GetCode() == 'W') {
 				if (e->isPress()) {
-					if (sprintTimer.getTime() < 0.3f)
+					if (sprintTimer.getTime() < 0.2f)
 						player.SetSpeed(30.0f);
 					else player.SetSpeed(7.0f);
 				}
@@ -73,7 +73,7 @@ void Game::doFrame()
 				player.ChangeBlock();
 				break;
 			case VK_SPACE:
-				if (jumpTimer.getTime() < 0.5f) player.ToggleFlying();
+				if (jumpTimer.getTime() < 0.2f) player.ToggleFlying();
 				jumpTimer.mark();
 				break;
 			}

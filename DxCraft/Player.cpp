@@ -268,6 +268,7 @@ void Player::ChangeBlock(bool decrement)
 		--blockIndex;
 	if (blockIndex > 5) blockIndex = 1;
 	else if (blockIndex < 1) blockIndex = 5;
+	
 	switch (blockIndex) {
 		case 1:
 			type = BlockType::Stone;
