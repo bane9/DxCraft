@@ -19,8 +19,6 @@ void WorldManager::CreateChunk(int x, int y, int z, bool empty)
 	if (y < 0) return;
 	Position pos(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize);
 	chunks.emplace(pos, BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize, empty));
-	auto& chunk = chunks.at(pos);
-	//chunk.opaqueBlocks
 }
 
 void WorldManager::ModifyBlock(int x, int y, int z, BlockType type)
@@ -256,7 +254,7 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 	if (transparentVertex.size() > 0 && transparentIndex.size() > 0) {
 		chunk.transparentVertexBuffer = RenderDataFactory::CreateVertexBuffer(gfx, transparentVertex);
 		chunk.transparentIndexBuffer = RenderDataFactory::CreateIndexBuffer(gfx, transparentIndex);
-		chunk.transparentIndexBufferSize = opaqueIndex.size();
+		chunk.transparentIndexBufferSize = transparentIndex.size();
 	}
 	else chunk.transparentIndexBufferSize = 0;
 
