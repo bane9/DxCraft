@@ -21,13 +21,15 @@ private:
 	Position Normalize(int x, int y, int z) const noexcept;
 	inline int FlatIndex(int x, int y, int z) const noexcept;
 	std::vector<Block> blocks;
-	std::vector<Vertex> vertices;
-	std::vector<uint16_t> indices;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
+	
+	Microsoft::WRL::ComPtr<ID3D11Buffer> opaqueVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> opaqueIndexBuffer;
+	UINT opaqueIndexBufferSize = 0;
+
+	Microsoft::WRL::ComPtr<ID3D11Buffer> transparentVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> transparentIndexBuffer;
+	UINT transparentIndexBufferSize = 0;
+
 	int x, y, z;
-	size_t vertexBufferSize = 0;
-	size_t indexBufferSize = 0;
 	AABB aabb;
 };
-
