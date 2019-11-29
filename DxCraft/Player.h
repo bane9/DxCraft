@@ -29,7 +29,7 @@ public:
 	void RightClickEvent();
 	void LeftClickEvent();
 	void LoopThenDraw();
-	void ChangeBlock();
+	void ChangeBlock(bool decrement = false);
 	Camera& GetCamera() noexcept;
 	void ToggleFlying() noexcept;
 

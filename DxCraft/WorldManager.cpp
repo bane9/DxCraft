@@ -64,7 +64,7 @@ void WorldManager::GenerateMeshes() {
 	}
 }
 
-void WorldManager::Draw(Graphics& gfx, Camera& cam)
+void WorldManager::DrawOpaque(Graphics& gfx, Camera& cam)
 {
 	for (auto& chunk : chunks) {
 		if(!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
@@ -82,7 +82,10 @@ void WorldManager::Draw(Graphics& gfx, Camera& cam)
 			Renderer::DrawIndexed(gfx, renderData, chunk.second.opaqueVertexBuffer, chunk.second.opaqueIndexBuffer,
 				chunk.second.opaqueIndexBufferSize, sizeof(Vertex));
 	}
+}
 
+void WorldManager::DrawTransparent(Graphics& gfx, Camera& cam)
+{
 	for (auto& chunk : chunks) {
 		if (!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);

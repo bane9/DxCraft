@@ -105,7 +105,13 @@ void Game::doFrame()
 			{
 				player.MoveDown();
 			}
+			
+			while (auto wd = wnd.mouse.Read()) {
+				if(wd->GetType() == Mouse::Event::Type::WheelUp) player.ChangeBlock();
+				else if (wd->GetType() == Mouse::Event::Type::WheelDown) player.ChangeBlock(true);
+			}
 		}
+
 		while (auto ms = wnd.mouse.Read()) {
 			if (showCursor && ms->GetType() == Mouse::Event::Type::LPress && wnd.mouse.IsInWindow()) {
 				wnd.disableCursor();
@@ -139,7 +145,9 @@ void Game::doFrame()
 
 		player.LoopThenDraw();
 
-		wManager.Draw(wnd.Gfx(), player.GetCamera());
+		wManager.DrawOpaque(wnd.Gfx(), player.GetCamera());
+
+		wManager.DrawTransparent(wnd.Gfx(), player.GetCamera());
 
 		wnd.Gfx().endFrame();
 	}

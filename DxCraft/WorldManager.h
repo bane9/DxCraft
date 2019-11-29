@@ -23,7 +23,8 @@ public:
 	void CreateChunk(int x, int y, int z, bool empty = false);
 	void ModifyBlock(int x, int y, int z, BlockType type = BlockType::Air);
 	void GenerateMeshes();
-	void Draw(Graphics& gfx, Camera& cam);
+	void DrawOpaque(Graphics& gfx, Camera& cam);
+	void DrawTransparent(Graphics& gfx, Camera& cam);
 	Block* GetBlock(int x, int y, int z);
 private:
 	void GenerateMesh(BasicChunk& chunk);
