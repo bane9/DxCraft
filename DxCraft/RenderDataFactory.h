@@ -7,6 +7,7 @@
 #include "Graphics.h"
 #include "ExceptionMacros.h"
 #include "DxgiInfoManager.h"
+#include "RenderData.h"
 
 class RenderDataFactory
 {
@@ -16,31 +17,28 @@ class RenderDataFactory
 public:
 
 	template<typename Container>
-	static Microsoft::WRL::ComPtr<ID3D11Buffer> CreateVertexBuffer(Graphics& gfx, const Container ct);
+	static void CreateVertexBuffer(Graphics& gfx, RenderData& data, const Container ct);
 
 	template<typename Container>
-	static Microsoft::WRL::ComPtr<ID3D11Buffer> CreateIndexBuffer(Graphics& gfx, const Container ct);
+	static void CreateIndexBuffer(Graphics& gfx, RenderData& data, const Container ct);
 
-	static std::pair<Microsoft::WRL::ComPtr<ID3D11VertexShader>, Microsoft::WRL::ComPtr<ID3D11InputLayout>>
-		CreateVertexShader(Graphics& gfx, const wchar_t* filePath, const D3D11_INPUT_ELEMENT_DESC* ied, UINT ied_size);
+	template<typename Container>
+	static void CreateVertexShader(Graphics& gfx, RenderData& data, const wchar_t* filePath, const Container ied);
 
-	static Microsoft::WRL::ComPtr<ID3D11PixelShader> CreatePixelShader(Graphics& gfx, const wchar_t* filePath);
+	static void CreatePixelShader(Graphics& gfx, RenderData& data, const wchar_t* filePath);
 
-	static Microsoft::WRL::ComPtr<ID3D11Buffer> CreateFSBlob(Graphics& gfx, const wchar_t* filePath);
+	static void CreateFSBlob(Graphics& gfx, RenderData& data, const wchar_t* filePath);
 
-	static Microsoft::WRL::ComPtr<ID3D11Buffer> CreateGSBlob(Graphics& gfx, const wchar_t* filePath);
+	static void CreateGSBlob(Graphics& gfx, RenderData& data, const wchar_t* filePath);
 
-	static std::tuple<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>, Microsoft::WRL::ComPtr<ID3D11Texture2D>,
-		Microsoft::WRL::ComPtr<ID3D11SamplerState>>
-		Create2DTexture(Graphics& gfx, const char* filePath);
+	static void Create2DTexture(Graphics& gfx, RenderData& data, const char* filePath);
 
 	template<typename T>
-	static void UpdateVScBuf(Graphics& gfx, Microsoft::WRL::ComPtr<ID3D11Buffer>& ptr, T cBuf);
+	static void UpdateVScBuf(Graphics& gfx, RenderData& data, T cBuf);
 };
 
 template<typename Container>
-inline Microsoft::WRL::ComPtr<ID3D11Buffer>
-	RenderDataFactory::CreateVertexBuffer(Graphics& gfx, const Container ct)
+inline void RenderDataFactory::CreateVertexBuffer(Graphics& gfx, RenderData& data, const Container ct)
 {
 	assert(ct.size() > 0 && "Vertex buffer is empty");
 	INFOMAN(gfx);
@@ -52,16 +50,15 @@ inline Microsoft::WRL::ComPtr<ID3D11Buffer>
 	auto asd = sizeof(Container::value_type);
 	bd.ByteWidth = static_cast<UINT>(ct.size() * sizeof(Container::value_type));
 	bd.StructureByteStride = sizeof(Container::value_type);
+	data.stride = sizeof(Container::value_type);
 	D3D11_SUBRESOURCE_DATA sd = {};
 	sd.pSysMem = ct.data();
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateBuffer(&bd, &sd, &pVertexBuffer));
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreateBuffer(&bd, &sd, &data.pVertexBuffer));
 
-	return pVertexBuffer;
 }
 
 template<typename Container>
-inline Microsoft::WRL::ComPtr<ID3D11Buffer> RenderDataFactory::CreateIndexBuffer(Graphics& gfx, const Container ct)
+inline void RenderDataFactory::CreateIndexBuffer(Graphics& gfx, RenderData& data, const Container ct)
 {
 	assert(ct.size() > 0 && "Index buffer is empty");
 	INFOMAN(gfx);
@@ -74,18 +71,35 @@ inline Microsoft::WRL::ComPtr<ID3D11Buffer> RenderDataFactory::CreateIndexBuffer
 	ibd.StructureByteStride = sizeof(unsigned short);
 	D3D11_SUBRESOURCE_DATA isd = {};
 	isd.pSysMem = ct.data();
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateBuffer(&ibd, &isd, &pIndexBuffer));
+	data.indexBufferSize = ct.size();
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreateBuffer(&ibd, &isd, &data.pIndexBuffer));
+}
 
-	return pIndexBuffer;
+template<typename Container>
+inline void RenderDataFactory::CreateVertexShader(Graphics& gfx, RenderData& data, const wchar_t* filePath, const Container ied)
+{
+	INFOMAN(gfx);
+	Microsoft::WRL::ComPtr<ID3DBlob> pBytecodeBlob;
+	D3DReadFileToBlob(filePath, pBytecodeBlob.ReleaseAndGetAddressOf());
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreateVertexShader(
+		pBytecodeBlob->GetBufferPointer(),
+		pBytecodeBlob->GetBufferSize(),
+		nullptr,
+		data.pVertexShader.GetAddressOf()));
+
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreateInputLayout(
+		ied.data(),
+		ied.size(),
+		pBytecodeBlob.Get()->GetBufferPointer(),
+		pBytecodeBlob.Get()->GetBufferSize(),
+		data.pVertexInputLayout.GetAddressOf()));
 }
 
 template<typename T>
-inline void RenderDataFactory::UpdateVScBuf(Graphics& gfx, Microsoft::WRL::ComPtr<ID3D11Buffer>& ptr, T cBuf)
+inline void RenderDataFactory::UpdateVScBuf(Graphics& gfx, RenderData& data, T cBuf)
 {
 	INFOMAN(gfx);
-	auto asd = ptr.Get();
-	if (ptr.Get() == nullptr) {
+	if (data.pConstantBuffer.Get() == nullptr) {
 		D3D11_BUFFER_DESC cbd;
 		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		cbd.Usage = D3D11_USAGE_DYNAMIC;
@@ -94,11 +108,11 @@ inline void RenderDataFactory::UpdateVScBuf(Graphics& gfx, Microsoft::WRL::ComPt
 		cbd.ByteWidth = sizeof(cBuf);
 		cbd.StructureByteStride = 0;
 
-		GFX_EXCEPT_INFO(gfx.getDevice()->CreateBuffer(&cbd, nullptr, ptr.ReleaseAndGetAddressOf()));
+		GFX_EXCEPT_INFO(gfx.getDevice()->CreateBuffer(&cbd, nullptr, data.pConstantBuffer.ReleaseAndGetAddressOf()));
 	}
 
 	D3D11_MAPPED_SUBRESOURCE msr;
-	gfx.getContext()->Map(ptr.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
+	gfx.getContext()->Map(data.pConstantBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
 	memcpy(msr.pData, &cBuf, sizeof(cBuf));
-	gfx.getContext()->Unmap(ptr.Get(), 0);
+	gfx.getContext()->Unmap(data.pConstantBuffer.Get(), 0);
 }

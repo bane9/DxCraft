@@ -1,59 +1,30 @@
 #include "RenderDataFactory.h"
 #include "Surface.h"
 
-std::pair<Microsoft::WRL::ComPtr<ID3D11VertexShader>, Microsoft::WRL::ComPtr<ID3D11InputLayout>>
-	RenderDataFactory::CreateVertexShader(Graphics& gfx, const wchar_t* filePath, const D3D11_INPUT_ELEMENT_DESC* ied, UINT ied_size)
+void RenderDataFactory::CreatePixelShader(Graphics& gfx, RenderData& data, const wchar_t* filePath)
 {
 	INFOMAN(gfx);
 	Microsoft::WRL::ComPtr<ID3DBlob> pBytecodeBlob;
 	D3DReadFileToBlob(filePath, pBytecodeBlob.ReleaseAndGetAddressOf());
-	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateVertexShader(
-		pBytecodeBlob->GetBufferPointer(), 
-		pBytecodeBlob->GetBufferSize(), 
-		nullptr,
-		pVertexShader.GetAddressOf()));
-
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateInputLayout(
-		ied,
-		ied_size, 
-		pBytecodeBlob.Get()->GetBufferPointer(), 
-		pBytecodeBlob.Get()->GetBufferSize(), 
-		pInputLayout.GetAddressOf()));
-
-	return {pVertexShader, pInputLayout};
-}
-
-Microsoft::WRL::ComPtr<ID3D11PixelShader> RenderDataFactory::CreatePixelShader(Graphics& gfx, const wchar_t* filePath)
-{
-	INFOMAN(gfx);
-	Microsoft::WRL::ComPtr<ID3DBlob> pBytecodeBlob;
-	D3DReadFileToBlob(filePath, pBytecodeBlob.ReleaseAndGetAddressOf());
-	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;
 	GFX_EXCEPT_INFO(gfx.getDevice()->CreatePixelShader(
 		pBytecodeBlob.Get()->GetBufferPointer(),
 		pBytecodeBlob.Get()->GetBufferSize(), 
 		nullptr, 
-		pPixelShader.GetAddressOf()));
+		data.pPixelShader.GetAddressOf()));
 
-	return pPixelShader;
 }
 
-Microsoft::WRL::ComPtr<ID3D11Buffer> RenderDataFactory::CreateFSBlob(Graphics& gfx, const wchar_t* filePath)
+void RenderDataFactory::CreateFSBlob(Graphics& gfx, RenderData& data, const wchar_t* filePath)
 {
-	return Microsoft::WRL::ComPtr<ID3D11Buffer>();
+
 }
 
-Microsoft::WRL::ComPtr<ID3D11Buffer> RenderDataFactory::CreateGSBlob(Graphics& gfx, const wchar_t* filePath)
+void RenderDataFactory::CreateGSBlob(Graphics& gfx, RenderData& data, const wchar_t* filePath)
 {
-	return Microsoft::WRL::ComPtr<ID3D11Buffer>();
+
 }
 
-std::tuple<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>, 
-	Microsoft::WRL::ComPtr<ID3D11Texture2D>, 
-	Microsoft::WRL::ComPtr<ID3D11SamplerState>> 
-	RenderDataFactory::Create2DTexture(Graphics& gfx, const char* filePath)
+void RenderDataFactory::Create2DTexture(Graphics& gfx, RenderData& data, const char* filePath)
 {
 	INFOMAN(gfx);
 	Surface s = Surface::FromFile(filePath);
@@ -73,16 +44,16 @@ std::tuple<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>,
 	D3D11_SUBRESOURCE_DATA sd1 = {};
 	sd1.pSysMem = s.GetBufferPtr();
 	sd1.SysMemPitch = s.GetWidth() * sizeof(Surface::Color);
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> pTexture;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateTexture2D(&textureDesc, &sd1, pTexture.ReleaseAndGetAddressOf()));
+
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreateTexture2D(&textureDesc, &sd1, data.pTexture.ReleaseAndGetAddressOf()));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = textureDesc.Format;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = 1;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateShaderResourceView(pTexture.Get(), &srvDesc, pTextureView.ReleaseAndGetAddressOf()));
+
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreateShaderResourceView(data.pTexture.Get(), &srvDesc, data.pTextureView.ReleaseAndGetAddressOf()));
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
@@ -90,9 +61,6 @@ std::tuple<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>,
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> pSampler;
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateSamplerState(&samplerDesc, pSampler.ReleaseAndGetAddressOf()));
 
-	return { pTextureView, pTexture, pSampler };
-
+	GFX_EXCEPT_INFO(gfx.getDevice()->CreateSamplerState(&samplerDesc, data.pSampler.ReleaseAndGetAddressOf()));
 }
