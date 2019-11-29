@@ -6,7 +6,7 @@ void RenderDataFactory::CreatePixelShader(Graphics& gfx, RenderData& data, const
 	INFOMAN(gfx);
 	Microsoft::WRL::ComPtr<ID3DBlob> pBytecodeBlob;
 	D3DReadFileToBlob(filePath, pBytecodeBlob.ReleaseAndGetAddressOf());
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreatePixelShader(
+	GFX_EXCEPT_INFO(gfx.pDevice->CreatePixelShader(
 		pBytecodeBlob.Get()->GetBufferPointer(),
 		pBytecodeBlob.Get()->GetBufferSize(), 
 		nullptr, 
@@ -45,7 +45,7 @@ void RenderDataFactory::Create2DTexture(Graphics& gfx, RenderData& data, const c
 	sd1.pSysMem = s.GetBufferPtr();
 	sd1.SysMemPitch = s.GetWidth() * sizeof(Surface::Color);
 
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateTexture2D(&textureDesc, &sd1, data.pTexture.ReleaseAndGetAddressOf()));
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateTexture2D(&textureDesc, &sd1, data.pTexture.ReleaseAndGetAddressOf()));
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = textureDesc.Format;
@@ -53,7 +53,7 @@ void RenderDataFactory::Create2DTexture(Graphics& gfx, RenderData& data, const c
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = 1;
 
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateShaderResourceView(data.pTexture.Get(), &srvDesc, data.pTextureView.ReleaseAndGetAddressOf()));
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateShaderResourceView(data.pTexture.Get(), &srvDesc, data.pTextureView.ReleaseAndGetAddressOf()));
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
@@ -62,5 +62,5 @@ void RenderDataFactory::Create2DTexture(Graphics& gfx, RenderData& data, const c
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 
 
-	GFX_EXCEPT_INFO(gfx.getDevice()->CreateSamplerState(&samplerDesc, data.pSampler.ReleaseAndGetAddressOf()));
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateSamplerState(&samplerDesc, data.pSampler.ReleaseAndGetAddressOf()));
 }

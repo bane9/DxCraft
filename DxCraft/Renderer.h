@@ -9,14 +9,22 @@ class Renderer {
 	Renderer(const Renderer&) = delete;
 	Renderer& operator=(const Renderer&) = delete;
 public:
-	static void DrawIndexed(Graphics& gfx, const RenderData& data) {
+	static void DrawIndexed(Graphics& gfx, const RenderData& data, Microsoft::WRL::ComPtr<ID3D11Buffer> optVertexBuffer = nullptr,
+		Microsoft::WRL::ComPtr<ID3D11Buffer> optIndexBuffer = nullptr, UINT indexBufferSize = 0, UINT stride = 0) {
 
 		assert(data.pVertexBuffer.Get() != nullptr && data.pIndexBuffer.Get() != nullptr && data.indexBufferSize > 0 &&
 			"Vertex or Index buffer is empty");
 
-		gfx.pContext->IASetVertexBuffers(0, 1, data.pVertexBuffer.GetAddressOf(), &data.stride, &data.offset);
+		if(optVertexBuffer != nullptr)
+			gfx.pContext->IASetVertexBuffers(0, 1, optVertexBuffer.GetAddressOf(), stride != 0 ? &stride : &data.stride, &data.offset);
+		else
+			gfx.pContext->IASetVertexBuffers(0, 1, data.pVertexBuffer.GetAddressOf(), stride != 0 ? &stride : &data.stride, &data.offset);
 
-		gfx.pContext->IASetIndexBuffer(data.pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+		if (optIndexBuffer != nullptr)
+			gfx.pContext->IASetIndexBuffer(optIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+		else
+			gfx.pContext->IASetIndexBuffer(data.pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+		
 
 		if(data.pVertexShader.Get() != nullptr)
 			gfx.pContext->VSSetShader(data.pVertexShader.Get(), nullptr, 0);
@@ -37,6 +45,6 @@ public:
 		if (data.pConstantBuffer.Get() != nullptr)
 			gfx.pContext->VSSetConstantBuffers(0, 1, data.pConstantBuffer.GetAddressOf());
 
-		gfx.pContext->DrawIndexed(data.indexBufferSize, 0, 0);
+		gfx.pContext->DrawIndexed(indexBufferSize != 0 ? indexBufferSize : data.indexBufferSize, 0, 0);
 	}
 };

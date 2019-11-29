@@ -318,8 +318,8 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 	}
 
 	const float offsetX =		 0.251f * sgn(delta.x);
-	const float offsetY =		 1.5f * sgn(delta.y);
-	const float offsetYLower =  -1.0f * sgn(pos.y);
+	const float offsetY =		 1.5f   * sgn(delta.y);
+	const float offsetYLower =  -1.0f   * sgn(pos.y);
 	const float offsetZ =		 0.251f * sgn(delta.z);
 
 	bool check = true;

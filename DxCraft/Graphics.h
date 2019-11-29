@@ -18,7 +18,7 @@
 
 class Graphics
 {
-	friend class MeshRenderer;
+	friend class RenderDataFactory;
 	friend class Renderer;
 public:
 	Graphics(HWND hWnd, size_t width, size_t height);
@@ -33,8 +33,6 @@ public:
 	void beginFrame(float red, float green, float blue) noexcept;
 	DirectX::XMMATRIX getProjection() const noexcept;
 	void setResoultion(int width, int height) noexcept;
-	Microsoft::WRL::ComPtr<ID3D11Device> getDevice() noexcept;
-	Microsoft::WRL::ComPtr<ID3D11DeviceContext> getContext() noexcept;
 	void RenderSolid();
 	void RenderWireframe();
 	void EnableZTest();

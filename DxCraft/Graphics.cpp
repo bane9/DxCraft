@@ -211,16 +211,6 @@ void Graphics::setResoultion(int width, int height) noexcept
 	temp_viewport = true;
 }
 
-Microsoft::WRL::ComPtr<ID3D11Device> Graphics::getDevice() noexcept
-{
-	return pDevice;
-}
-
-Microsoft::WRL::ComPtr<ID3D11DeviceContext> Graphics::getContext() noexcept
-{
-	return pContext;
-}
-
 void Graphics::RenderSolid()
 {
 	D3D11_RASTERIZER_DESC rDesc;

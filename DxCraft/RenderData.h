@@ -3,6 +3,11 @@
 #include <wrl.h>
 
 struct RenderData {
+	friend class RenderDataFactory;
+	friend class Renderer;
+public:
+	D3D_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pTextureView;
@@ -17,6 +22,5 @@ struct RenderData {
 	UINT stride = 0;
 	
 	UINT indexBufferSize = 0;
-
-	D3D_PRIMITIVE_TOPOLOGY topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	
 };
