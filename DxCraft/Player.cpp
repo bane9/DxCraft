@@ -207,13 +207,6 @@ void Player::LeftClickEvent()
 
 void Player::LoopThenDraw()
 {
-	if (ImGui::Begin("Collision")) {
-		if (ImGui::Checkbox("Noclip", &flying)) {
-			collision = !flying;
-		}
-		ImGui::End();
-	}
-
 	if (ImGui::Begin("Selected block")) {
 		ImGui::Text("%s", blockName.c_str());
 		ImGui::End();

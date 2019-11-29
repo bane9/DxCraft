@@ -22,7 +22,7 @@
 #endif
 
 #ifdef _DEBUG
-#define INFOMAN(gfx) DxgiInfoManager infoManager& = gfx.getInfoManager()
+#define INFOMAN(gfx) DxgiInfoManager& infoManager = gfx.getInfoManager()
 #else
 #define INFOMAN(gfx)
 #endif
