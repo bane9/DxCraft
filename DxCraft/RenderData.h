@@ -15,12 +15,15 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> pSampler;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> pVertexInputLayout;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexCBuff;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pPixelCBuff;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pGeometryCBuff;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelInputLayout;
+	Microsoft::WRL::ComPtr<ID3D11GeometryShader> pGeometryShader;
 
 	UINT offset = 0;
 	UINT stride = 0;
 	
 	UINT indexBufferSize = 0;
-	
 };

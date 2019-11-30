@@ -31,6 +31,9 @@ public:
 		if (data.pPixelShader.Get() != nullptr)
 			gfx.pContext->PSSetShader(data.pPixelShader.Get(), nullptr, 0);
 
+		if (data.pGeometryShader.Get() != nullptr)
+			gfx.pContext->GSSetShader(data.pGeometryShader.Get(), nullptr, 0);
+
 		if(data.pVertexInputLayout.Get() != nullptr)
 			gfx.pContext->IASetInputLayout(data.pVertexInputLayout.Get());
 
@@ -41,8 +44,14 @@ public:
 			gfx.pContext->PSSetSamplers(0, 1, data.pSampler.GetAddressOf());
 		}
 
-		if (data.pConstantBuffer.Get() != nullptr)
-			gfx.pContext->VSSetConstantBuffers(0, 1, data.pConstantBuffer.GetAddressOf());
+		if (data.pVertexCBuff.Get() != nullptr)
+			gfx.pContext->VSSetConstantBuffers(0, 1, data.pVertexCBuff.GetAddressOf());
+
+		if (data.pPixelCBuff.Get() != nullptr)
+			gfx.pContext->PSSetConstantBuffers(0, 1, data.pPixelCBuff.GetAddressOf());
+
+		if (data.pGeometryCBuff.Get() != nullptr)
+			gfx.pContext->GSSetConstantBuffers(0, 1, data.pGeometryCBuff.GetAddressOf());
 
 		
 		gfx.pContext->DrawIndexed(indexBufferSize != 0 ? indexBufferSize : data.indexBufferSize, 0, 0);

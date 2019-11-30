@@ -1,6 +1,18 @@
 #include "RenderDataFactory.h"
 #include "Surface.h"
 
+void RenderDataFactory::CreateVertexShader(Graphics& gfx, RenderData& data, const wchar_t* filePath)
+{
+	INFOMAN(gfx);
+	Microsoft::WRL::ComPtr<ID3DBlob> pBytecodeBlob;
+	D3DReadFileToBlob(filePath, pBytecodeBlob.ReleaseAndGetAddressOf());
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateVertexShader(
+		pBytecodeBlob->GetBufferPointer(),
+		pBytecodeBlob->GetBufferSize(),
+		nullptr,
+		data.pVertexShader.GetAddressOf()));
+}
+
 void RenderDataFactory::CreatePixelShader(Graphics& gfx, RenderData& data, const wchar_t* filePath)
 {
 	INFOMAN(gfx);
@@ -14,14 +26,16 @@ void RenderDataFactory::CreatePixelShader(Graphics& gfx, RenderData& data, const
 
 }
 
-void RenderDataFactory::CreateFragmentShader(Graphics& gfx, RenderData& data, const wchar_t* filePath)
-{
-
-}
-
 void RenderDataFactory::CreateGeometryShader(Graphics& gfx, RenderData& data, const wchar_t* filePath)
 {
-
+	INFOMAN(gfx);
+	Microsoft::WRL::ComPtr<ID3DBlob> pBytecodeBlob;
+	D3DReadFileToBlob(filePath, pBytecodeBlob.ReleaseAndGetAddressOf());
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateGeometryShader(
+		pBytecodeBlob.Get()->GetBufferPointer(),
+		pBytecodeBlob.Get()->GetBufferSize(),
+		nullptr,
+		data.pGeometryShader.GetAddressOf()));
 }
 
 void RenderDataFactory::Create2DTexture(Graphics& gfx, RenderData& data, const char* filePath)
