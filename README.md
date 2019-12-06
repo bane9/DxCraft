@@ -4,7 +4,6 @@
 
 DxCraft is a work in progress Minecraft clone made in C++17 and DirectX11
 # To-do list
-  - [x] Implemented rendering system
   - [x] Chunk meshing
   - [x] Block Texturing
   - [x] Block placing/destruction

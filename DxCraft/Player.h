@@ -70,11 +70,12 @@ private:
 	const float baseSpeed = speed;
 
 	const float velocityIncreaseConstant = 0.025f;
-	const float velocityMaxBound = 1.0f;
+	float velocityMaxBound = 1.0f;
 	const float velocityMinBound = 0.25f;
+	const float collisionMaxBoud = 0.7f;
 
 	float jumpVelocity = 0.0f;
-	const float jumpDistance = 7.3f;
+	const float jumpDistance = 5.25f;
 
 	bool jumping = false;
 

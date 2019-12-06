@@ -44,8 +44,8 @@ void Game::doFrame()
 
 			if (e->GetCode() == 'W') {
 				if (e->isPress()) {
-					if (sprintTimer.getTime() < 0.2f)
-						player.SetSpeed(30.0f);
+					if (sprintTimer.getTime() < 0.15f)
+						player.SetSpeed(15.0f);
 					else player.SetSpeed(7.0f);
 				}
 				else {

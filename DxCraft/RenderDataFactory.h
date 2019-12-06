@@ -136,14 +136,14 @@ inline void RenderDataFactory::CreateVertexShader(Graphics& gfx, RenderData& dat
 		pBytecodeBlob->GetBufferPointer(),
 		pBytecodeBlob->GetBufferSize(),
 		nullptr,
-		data.pVertexShader.GetAddressOf()));
+		data.pVertexShader.ReleaseAndGetAddressOf()));
 
 	GFX_EXCEPT_INFO(gfx.pDevice->CreateInputLayout(
 		ied.data(),
 		ied.size(),
 		pBytecodeBlob.Get()->GetBufferPointer(),
 		pBytecodeBlob.Get()->GetBufferSize(),
-		data.pVertexInputLayout.GetAddressOf()));
+		data.pVertexInputLayout.ReleaseAndGetAddressOf()));
 }
 
 template<typename T>

@@ -10,7 +10,7 @@ void RenderDataFactory::CreateVertexShader(Graphics& gfx, RenderData& data, cons
 		pBytecodeBlob->GetBufferPointer(),
 		pBytecodeBlob->GetBufferSize(),
 		nullptr,
-		data.pVertexShader.GetAddressOf()));
+		data.pVertexShader.ReleaseAndGetAddressOf()));
 }
 
 void RenderDataFactory::CreatePixelShader(Graphics& gfx, RenderData& data, const wchar_t* filePath)
@@ -22,7 +22,7 @@ void RenderDataFactory::CreatePixelShader(Graphics& gfx, RenderData& data, const
 		pBytecodeBlob.Get()->GetBufferPointer(),
 		pBytecodeBlob.Get()->GetBufferSize(), 
 		nullptr, 
-		data.pPixelShader.GetAddressOf()));
+		data.pPixelShader.ReleaseAndGetAddressOf()));
 
 }
 
@@ -35,7 +35,7 @@ void RenderDataFactory::CreateGeometryShader(Graphics& gfx, RenderData& data, co
 		pBytecodeBlob.Get()->GetBufferPointer(),
 		pBytecodeBlob.Get()->GetBufferSize(),
 		nullptr,
-		data.pGeometryShader.GetAddressOf()));
+		data.pGeometryShader.ReleaseAndGetAddressOf()));
 }
 
 void RenderDataFactory::Create2DTexture(Graphics& gfx, RenderData& data, const char* filePath)
