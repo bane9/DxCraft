@@ -120,7 +120,7 @@ void WorldManager::AppendFace(const std::pair<std::array<Vertex, 4>, std::array<
 		vertex.tc.y = vertex.tc.y == 1 ? startTexY : endTexY;
 		return std::move(vertex);
 		});
-	const int offset = (vertexBuffer.size() / 4 - 1) * 4;
+	const int offset = vertexBuffer.size() > 0 ? (vertexBuffer.size() / 4 - 1) * 4 : 0;
 	std::transform(face.second.begin(), face.second.end(), std::back_inserter(indexBuffer), [offset](int a) {return offset + a;});
 }
 

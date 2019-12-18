@@ -63,7 +63,7 @@ void Player::MoveBackward()
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 	auto temp = cam.Translate({ 0.0f ,0.0f, -dt }, speed * moveVelocity, flying);
-	if (falling) {
+	if (falling || jumping) {
 		temp.x *= 0.35f;
 		temp.z *= 0.35f;
 	}
@@ -81,7 +81,7 @@ void Player::MoveLeft()
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 	auto temp = cam.Translate({ -dt, 0.0f, 0.0f }, speed * moveVelocity, flying);
-	if (falling) {
+	if (falling || jumping) {
 		temp.x *= 0.35f;
 		temp.z *= 0.35f;
 	}
@@ -99,7 +99,7 @@ void Player::MoveRigth()
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 	auto temp = cam.Translate({ dt, 0.0f, 0.0f }, speed * moveVelocity, flying);
-	if (falling) {
+	if (falling || jumping) {
 		temp.x *= 0.35f;
 		temp.z *= 0.35f;
 	}
@@ -203,11 +203,19 @@ void Player::LoopThenDraw()
 		ImGui::End();
 	}
 
+	/*if (ImGui::Begin("asd")) {
+		ImGui::SliderFloat("fallMinBound", &fallMinBound, 0.25f, 10.0f, "%.1f");
+		ImGui::SliderFloat("jumpDistance", &jumpDistance, 0.25f, 100.0f, "%.1f");
+		ImGui::SliderFloat("jumpSpeedModifier", &jumpSpeedModifier, 0.25f, 100.0f, "%.1f");
+		ImGui::SliderFloat("fallSpeedModifier", &fallSpeedModifier, 0.25f, 100.0f, "%.1f");
+		ImGui::End();
+	}*/
+
 	CastRay();
 	
 	if (!flying && !jumping) {
-		fallVelocity += fallTimer.getTime() * 1.5f;
-		fallVelocity = std::clamp(fallVelocity, 0.25f, 100.0f);
+		fallVelocity += fallTimer.getTime() * fallSpeedModifier;
+		fallVelocity = std::clamp(fallVelocity, fallMinBound, 100.0f);
 		auto cPos = cam.GetPos();
 		auto block = wManager.GetBlock(static_cast<int>(round(cPos.x)), static_cast<int>(round(cPos.y - 1.0f)), static_cast<int>(round(cPos.z)));
 		if(block == nullptr || block->type == BlockType::Air)
@@ -215,11 +223,13 @@ void Player::LoopThenDraw()
 		if (cam.GetPos().y < -15.0f) cam.SetPos(0.0f, 25.0f, 0.0f);
 	}
 	if (jumping && !falling) {
-		jumpVelocity -= fallTimer.getTime() * 2.0f;
+		jumpVelocity -= fallTimer.getTime() * jumpSpeedModifier;
 
 		if (jumpVelocity < -jumpDistance) {
 			jumping = false;
 			jumpVelocity = 0.0f;
+			fallVelocity = 0.0f;
+			fallTimer.mark();
 			falling = true;
 		}
 		else {
@@ -229,7 +239,7 @@ void Player::LoopThenDraw()
 
 	if (!falling && !jumping) {
 		fallTimer.mark();
-		fallVelocity = 0.25f;
+		fallVelocity = fallMinBound;
 
 		if (fabs(modf(round(momentum.x), &momentum.x)) < 0.000175f)
 			momentum.x -= 0.00175f * sgn(momentum.x);

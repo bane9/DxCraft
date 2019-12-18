@@ -75,10 +75,14 @@ private:
 	const float collisionMaxBoud = 0.7f;
 
 	float jumpVelocity = 0.0f;
-	const float jumpDistance = 5.25f;
+	float jumpDistance = 10.0f;
+
+	float jumpSpeedModifier = 4.5f;
+	float fallSpeedModifier = 2.0f;
+
+	float fallMinBound = 4.0f;
 
 	bool jumping = false;
 
 	const float flyingSpeedModifier = 4.0f;
 };
-
