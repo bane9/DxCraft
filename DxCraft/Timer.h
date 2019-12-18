@@ -6,13 +6,13 @@ class Timer
 public:
 	Timer() noexcept : now(std::chrono::high_resolution_clock::now()) {}
 
-	float mark() noexcept {
-		float old = getTime();
+	float Mark() noexcept {
+		float old = GetTime();
 		now = std::chrono::high_resolution_clock::now();
 		return old;
 	}
 
-	float getTime() const noexcept {
+	float GetTime() const noexcept {
 		return std::chrono::duration<float>(std::chrono::steady_clock::now() - now).count();
 	}
 private:

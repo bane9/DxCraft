@@ -12,6 +12,7 @@
 #include "DxgiInfoManager.h"
 #include "Surface.h"
 #include <optional>
+#include "Timer.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "D3DCompiler.lib")
@@ -27,16 +28,17 @@ public:
 	Graphics operator=(Graphics&) = delete;
 	void setCamera(DirectX::FXMMATRIX cam) noexcept;
 	DirectX::XMMATRIX getCamera() const noexcept;
-	void endFrame();
+	void EndFrame();
 	void drawIndexed(UINT count) noexcept;
 	void setProjection(DirectX::FXMMATRIX proj) noexcept;
-	void beginFrame(float red, float green, float blue) noexcept;
+	void BeginFrame(float red, float green, float blue) noexcept;
 	DirectX::XMMATRIX getProjection() const noexcept;
-	void setResoultion(int width, int height) noexcept;
+	void SetResoultion(int width, int height) noexcept;
 	void RenderSolid();
 	void RenderWireframe();
 	void EnableZTest();
 	void DisableZTest();
+	float GetFrametime();
 #ifdef _DEBUG
 	DxgiInfoManager& getInfoManager();
 #endif
@@ -46,6 +48,9 @@ private:
 	size_t width;
 	size_t height;
 	bool temp_viewport = false;
+
+	Timer frameTimer;
+	float frameTime = 0.0f;
 #ifdef _DEBUG
 	DxgiInfoManager infoManager;
 #endif

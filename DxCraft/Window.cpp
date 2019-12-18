@@ -156,7 +156,7 @@ LRESULT WINAPI Window::HandleMessage(HWND hWnd, UINT msg, WPARAM wParam, LPARAM 
 		
 		int width = static_cast<int>(lParam) & 0xffff;
 		int height = (static_cast<int>(lParam) & 0xffff0000) >> 16;
-		wnd->Gfx().setResoultion(width, height);
+		wnd->Gfx().SetResoultion(width, height);
 		wnd->width = width;
 		wnd->height = height;
 	}

@@ -175,12 +175,12 @@ DirectX::XMMATRIX Graphics::getProjection() const noexcept
 	return projection;
 }
 
-void Graphics::endFrame()
+void Graphics::EndFrame()
 {
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	HRESULT hr;
-	if (FAILED(hr = pSwap->Present(1, 0))) {
+	if (FAILED(hr = pSwap->Present(0, 0))) {
 		if (hr == DXGI_ERROR_DEVICE_REMOVED) {
 			GFX_EXCEPT_THROW(pDevice->GetDeviceRemovedReason());
 		}
@@ -197,14 +197,15 @@ void Graphics::endFrame()
 		vp.MaxDepth = 1.0f;
 		vp.TopLeftX = 0.0f;
 		vp.TopLeftY = 0.0f;
-		pContext->RSSetViewports(1u, &vp);
+		pContext->RSSetViewports(1, &vp);
 		projection = DirectX::XMMatrixPerspectiveLH(1.0f, vp.Height / vp.Width, 0.5f, 100.0f);
 		temp_viewport = false;
 	}
 	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDSV.Get());
+	frameTime = frameTimer.GetTime();
 }
 
-void Graphics::setResoultion(int width, int height) noexcept
+void Graphics::SetResoultion(int width, int height) noexcept
 {
 	this->width = width;
 	this->height = height;
@@ -248,14 +249,19 @@ void Graphics::EnableZTest()
 void Graphics::DisableZTest()
 {
 	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
-	dsDesc.DepthEnable = false;
+	dsDesc.DepthEnable = FALSE;
 	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
 	GFX_EXCEPT_INFO(pDevice->CreateDepthStencilState(&dsDesc, &pDSState));
 	pContext->OMSetDepthStencilState(pDSState.Get(), 1);
 }
 
-void Graphics::beginFrame(float red, float green, float blue) noexcept
+float Graphics::GetFrametime()
+{
+	return frameTime;
+}
+
+void Graphics::BeginFrame(float red, float green, float blue) noexcept
 {
 	const float color[] = { red,green,blue,1.0f };
 	pContext->ClearRenderTargetView(pTarget.Get(), color);
@@ -263,6 +269,7 @@ void Graphics::beginFrame(float red, float green, float blue) noexcept
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
+	frameTimer.Mark();
 }
 
 void Graphics::setCamera(DirectX::FXMMATRIX cam) noexcept

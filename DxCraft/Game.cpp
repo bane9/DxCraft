@@ -37,21 +37,21 @@ Game::Game(size_t width, size_t height)
 void Game::doFrame()
 {
 	while (!exit) {
-		wnd.Gfx().beginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
+		wnd.Gfx().BeginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
 
 		while (auto e = wnd.kbd.ReadKey())
 		{
 
 			if (e->GetCode() == 'W') {
 				if (e->isPress()) {
-					if (sprintTimer.getTime() < 0.15f)
+					if (sprintTimer.GetTime() < 0.15f)
 						player.SetSpeed(8.0f);
 					else player.SetSpeed(4.0f);
 				}
 				else {
-					player.SetSpeed(7.0f);
+					player.SetSpeed(4.0f);
 				}
-				sprintTimer.mark();
+				sprintTimer.Mark();
 			}
 
 			if (!e->isPress())
@@ -73,8 +73,8 @@ void Game::doFrame()
 				player.ChangeBlock();
 				break;
 			case VK_SPACE:
-				if (jumpTimer.getTime() < 0.2f) player.ToggleFlying();
-				jumpTimer.mark();
+				if (jumpTimer.GetTime() < 0.2f) player.ToggleFlying();
+				jumpTimer.Mark();
 				break;
 			}
 		}
@@ -149,7 +149,7 @@ void Game::doFrame()
 
 		wManager.DrawTransparent(wnd.Gfx(), player.GetCamera());
 
-		wnd.Gfx().endFrame();
+		wnd.Gfx().EndFrame();
 	}
 }
 

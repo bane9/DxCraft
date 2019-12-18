@@ -4,6 +4,8 @@
 #include <algorithm>
 #include "RenderDataFactory.h"
 
+#define FRAMETIME_COMPESATED(x) ((x) * (gfx.GetFrametime() / 0.016667f))
+
 Player::Player(Graphics& gfx, WorldManager& wManager)
 	: 
 	gfx(gfx),
@@ -37,14 +39,14 @@ float Player::GetVelocity()
 void Player::MoveForward()
 {
 	if (flying) {
-		auto t = cam.Translate({ 0.0f, 0.0f, dt }, speed * flyingSpeedModifier, flying);
+		auto t = cam.Translate({ 0.0f, 0.0f, FRAMETIME_COMPESATED(moveConstant) }, speed * flyingSpeedModifier, flying);
 		auto camPos = cam.GetPos();
 		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
 		return;
 	}
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ 0.0f, 0.0f, dt }, speed * moveVelocity, flying);
+	auto temp = cam.Translate({ 0.0f, 0.0f, FRAMETIME_COMPESATED(moveConstant) }, speed * moveVelocity , flying);
 	if (falling || jumping) {
 		temp.x *= 0.35f;
 		temp.z *= 0.35f;
@@ -55,14 +57,14 @@ void Player::MoveForward()
 void Player::MoveBackward()
 {
 	if (flying) {
-		auto t = cam.Translate({ 0.0f, 0.0f, -dt }, speed * flyingSpeedModifier, flying);
+		auto t = cam.Translate({ 0.0f, 0.0f, FRAMETIME_COMPESATED(-moveConstant) }, speed * flyingSpeedModifier, flying);
 		auto camPos = cam.GetPos();
 		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
 		return;
 	}
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ 0.0f ,0.0f, -dt }, speed * moveVelocity, flying);
+	auto temp = cam.Translate({ 0.0f , 0.0f, FRAMETIME_COMPESATED(-moveConstant) }, speed * moveVelocity, flying);
 	if (falling || jumping) {
 		temp.x *= 0.35f;
 		temp.z *= 0.35f;
@@ -73,14 +75,14 @@ void Player::MoveBackward()
 void Player::MoveLeft()
 {
 	if (flying) {
-		auto t = cam.Translate({ -dt, 0.0f, 0.0f }, speed * flyingSpeedModifier, flying);
+		auto t = cam.Translate({ FRAMETIME_COMPESATED(-moveConstant), 0.0f, 0.0f }, speed * flyingSpeedModifier, flying);
 		auto camPos = cam.GetPos();
 		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
 		return;
 	}
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ -dt, 0.0f, 0.0f }, speed * moveVelocity, flying);
+	auto temp = cam.Translate({ FRAMETIME_COMPESATED(-moveConstant), 0.0f, 0.0f }, speed * moveVelocity, flying);
 	if (falling || jumping) {
 		temp.x *= 0.35f;
 		temp.z *= 0.35f;
@@ -91,14 +93,14 @@ void Player::MoveLeft()
 void Player::MoveRigth()
 {
 	if (flying) {
-		auto t = cam.Translate({ dt, 0.0f, 0.0f }, speed * flyingSpeedModifier, flying);
+		auto t = cam.Translate({ FRAMETIME_COMPESATED(moveConstant), 0.0f, 0.0f }, speed * flyingSpeedModifier, flying);
 		auto camPos = cam.GetPos();
 		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
 		return;
 	}
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
-	auto temp = cam.Translate({ dt, 0.0f, 0.0f }, speed * moveVelocity, flying);
+	auto temp = cam.Translate({ FRAMETIME_COMPESATED(moveConstant), 0.0f, 0.0f }, speed * moveVelocity, flying);
 	if (falling || jumping) {
 		temp.x *= 0.35f;
 		temp.z *= 0.35f;
@@ -110,12 +112,12 @@ void Player::MoveUp(bool external)
 {
 	if (!flying) jumping = true;
 	if (!external && flying) {
-		auto t = cam.Translate({ 0.0f, dt, 0.0f }, speed * flyingSpeedModifier, flying);
+		auto t = cam.Translate({ 0.0f, FRAMETIME_COMPESATED(jumpFallConstant), 0.0f }, speed * flyingSpeedModifier, flying);
 		auto camPos = cam.GetPos();
 		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
 	}
 	else if (external) {
-		auto temp = cam.Translate({ 0.0f, dt, 0.0f }, jumpDistance - fallVelocity);
+		auto temp = cam.Translate({ 0.0f, FRAMETIME_COMPESATED(jumpFallConstant), 0.0f }, jumpDistance - fallVelocity);
 		temp.x += momentum.x;
 		temp.z += momentum.z;
 		ResolveCollision(temp);
@@ -126,12 +128,12 @@ void Player::MoveDown(bool external)
 {
 	if (!flying && !external) return;
 	else if (!external) {
-		auto t = cam.Translate({ 0.0f, -dt, 0.0f }, speed * flyingSpeedModifier, flying);
+		auto t = cam.Translate({ 0.0f, FRAMETIME_COMPESATED(-jumpFallConstant), 0.0f }, speed * flyingSpeedModifier, flying);
 		auto camPos = cam.GetPos();
 		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
 	}
 	else {
-		auto temp = cam.Translate({ 0.0f, -dt, 0.0f }, fallVelocity);
+		auto temp = cam.Translate({ 0.0f, FRAMETIME_COMPESATED(-jumpFallConstant), 0.0f }, fallVelocity);
 		temp.x += momentum.x;
 		temp.z += momentum.z;
 		ResolveCollision(temp);
@@ -166,28 +168,28 @@ void Player::RotateCamera(float dx, float dy)
 
 void Player::RightClickEvent()
 {
-	if (found && placeTimer.getTime() > 0.075f) {
+	if (found && placeTimer.GetTime() > 0.075f) {
 		auto camPos = cam.GetPos();
 		auto camPosLower = camPos;
 		camPosLower.y -= 1.15f * sgn(camPosLower.y);
 		if(fabs(VectorDistance(previousHitBlock, camPos) < 0.578f) ||
 			fabs(VectorDistance(previousHitBlock, camPosLower) < 0.578f)) return;
 		wManager.ModifyBlock(round(previousHitBlock.x), round(previousHitBlock.y), round(previousHitBlock.z), type);
-		placeTimer.mark();
+		placeTimer.Mark();
 	}
 	else {
-		placeTimer.mark();
+		placeTimer.Mark();
 	}
 }
 
 void Player::LeftClickEvent()
 {
-	if (found && destroyTimer.getTime() > 0.075f) {
+	if (found && destroyTimer.GetTime() > 0.075f) {
 		wManager.ModifyBlock(hitBlockPos.x, hitBlockPos.y, hitBlockPos.z);
-		destroyTimer.mark();
+		destroyTimer.Mark();
 	}
 	else {
-		destroyTimer.mark();
+		destroyTimer.Mark();
 	}
 }
 
@@ -212,9 +214,9 @@ void Player::LoopThenDraw()
 	}*/
 
 	CastRay();
-	
+#define idk 0.001f
 	if (!flying && !jumping) {
-		fallVelocity += fallTimer.getTime() * fallSpeedModifier;
+		fallVelocity += FRAMETIME_COMPESATED(0.125f * fallSpeedModifier);
 		fallVelocity = std::clamp(fallVelocity, fallMinBound, 100.0f);
 		auto cPos = cam.GetPos();
 		auto block = wManager.GetBlock(static_cast<int>(round(cPos.x)), static_cast<int>(round(cPos.y - 1.0f)), static_cast<int>(round(cPos.z)));
@@ -223,13 +225,14 @@ void Player::LoopThenDraw()
 		if (cam.GetPos().y < -15.0f) cam.SetPos(0.0f, 25.0f, 0.0f);
 	}
 	if (jumping && !falling) {
-		jumpVelocity -= fallTimer.getTime() * jumpSpeedModifier;
+		auto asd = FRAMETIME_COMPESATED(0.125f * jumpSpeedModifier);
+		jumpVelocity -= asd;
 
 		if (jumpVelocity < -jumpDistance) {
 			jumping = false;
 			jumpVelocity = 0.0f;
 			fallVelocity = 0.0f;
-			fallTimer.mark();
+			fallTimer.Mark();
 			falling = true;
 		}
 		else {
@@ -238,7 +241,7 @@ void Player::LoopThenDraw()
 	}
 
 	if (!falling && !jumping) {
-		fallTimer.mark();
+		fallTimer.Mark();
 		fallVelocity = fallMinBound;
 
 		if (fabs(modf(round(momentum.x), &momentum.x)) < 0.000175f)
@@ -253,7 +256,7 @@ void Player::LoopThenDraw()
 	moveVelocity -= velocityIncreaseConstant * 0.2f;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 
-	dt = moveTimer.mark();
+	dt = moveTimer.Mark();
 	gfx.setCamera(cam.GetMatrix());
 	auto model = DirectX::XMMatrixTranslation(hitBlockPos.x, hitBlockPos.y, hitBlockPos.z);
 
@@ -321,7 +324,7 @@ void Player::ToggleFlying() noexcept
 	if (!flying) {
 		fallVelocity = 0.25f;
 		jumpVelocity = 0.0f;
-		fallTimer.mark();
+		fallTimer.Mark();
 	}
 }
 
