@@ -29,8 +29,8 @@ public:
 	void setCamera(DirectX::FXMMATRIX cam) noexcept;
 	DirectX::XMMATRIX getCamera() const noexcept;
 	void EndFrame();
-	void drawIndexed(UINT count) noexcept;
-	void setProjection(DirectX::FXMMATRIX proj) noexcept;
+	void DrawIndexed(UINT count) noexcept;
+	void SetProjection(DirectX::FXMMATRIX proj) noexcept;
 	void BeginFrame(float red, float green, float blue) noexcept;
 	DirectX::XMMATRIX getProjection() const noexcept;
 	void SetResoultion(int width, int height) noexcept;

@@ -10,6 +10,7 @@
 #include "Crosshair.h"
 #include "BlockSelector.h"
 #include <DirectXMath.h>
+#include "XM_Structs.h"
 
 class Player
 {
@@ -57,9 +58,6 @@ private:
 	float speed = 7.0f;
 	Timer placeTimer;
 	Timer destroyTimer;
-	Timer moveTimer;
-	Timer fallTimer;
-	float dt = 0.01f;
 	bool collision = true;
 	bool flying = false;
 	bool falling = false;
@@ -89,4 +87,6 @@ private:
 	const float jumpFallConstant = 0.02f;
 
 	const float flyingSpeedModifier = 4.0f;
+
+	const float blockFace = Faces::side * 0.5f;
 };

@@ -5,6 +5,7 @@
 #include <optional>
 #include "Camera.h"
 #include "RenderDataFactory.h"
+#include <math.h>
 
 WorldManager::WorldManager(Graphics& gfx)
 	: gfx(gfx)
@@ -174,6 +175,11 @@ Block* WorldManager::GetBlock(int x, int y, int z)
 		return nullptr;
 
 	return &chunk->blocks[chunk->FlatIndex(x, y, z)];
+}
+
+Block* WorldManager::GetBlock(const DirectX::XMFLOAT3& pos)
+{
+	return GetBlock(round(pos.x), round(pos.y), round(pos.z));
 }
 
 void WorldManager::GenerateMesh(BasicChunk& chunk)

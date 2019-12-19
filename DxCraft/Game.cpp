@@ -128,9 +128,11 @@ void Game::doFrame()
 			}
 		}
 
+		auto asd = wnd.Gfx().GetFrametime();
+
 		if (ImGui::Begin("Performance")) {
-			ImGui::Text("Framerate: %.3f fps", ImGui::GetIO().Framerate);
-			ImGui::Text("Frametime: %.3f ms", 1000.0f / ImGui::GetIO().Framerate);
+			ImGui::Text("Framerate: %.3f fps", 1000.0f / wnd.Gfx().GetFrametime());
+			ImGui::Text("Frametime: %.3f ms",  wnd.Gfx().GetFrametime());
 			ImGui::End();
 		}
 

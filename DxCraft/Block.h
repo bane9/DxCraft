@@ -1,7 +1,8 @@
 #pragma once
 #include <array>
 #define TRANSPARENT_BLOCK(x) ((x == BlockType::Air) || (x == BlockType::Glass))
-
+#define VALID_BLOCK(x) (x != nullptr && x->type != BlockType::Air)
+#define INVALID_BLOCK(x) (!VALID_BLOCK(x))
 
 enum class BlockType {
 	Air,

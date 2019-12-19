@@ -7,6 +7,7 @@
 #include "robin_hood.h"
 #include "Camera.h"
 #include "RenderData.h"
+#include <DirectXMath.h>
 
 enum class BlockVisibility {
 	Opaque,
@@ -26,6 +27,7 @@ public:
 	void DrawOpaque(Graphics& gfx, Camera& cam);
 	void DrawTransparent(Graphics& gfx, Camera& cam);
 	Block* GetBlock(int x, int y, int z);
+	Block* GetBlock(const DirectX::XMFLOAT3& pos);
 private:
 	void GenerateMesh(BasicChunk& chunk);
 	void AppendFace(const std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>>& face,

@@ -160,12 +160,12 @@ DxgiInfoManager& Graphics::getInfoManager() {
 }
 #endif
 
-void Graphics::drawIndexed(UINT count) noexcept
+void Graphics::DrawIndexed(UINT count) noexcept
 {
 	pContext->DrawIndexed(count, 0, 0);
 }
 
-void Graphics::setProjection(DirectX::FXMMATRIX proj) noexcept
+void Graphics::SetProjection(DirectX::FXMMATRIX proj) noexcept
 {
 	projection = proj;
 }
@@ -180,7 +180,7 @@ void Graphics::EndFrame()
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	HRESULT hr;
-	if (FAILED(hr = pSwap->Present(0, 0))) {
+	if (FAILED(hr = pSwap->Present(2, 0))) {
 		if (hr == DXGI_ERROR_DEVICE_REMOVED) {
 			GFX_EXCEPT_THROW(pDevice->GetDeviceRemovedReason());
 		}
@@ -202,7 +202,7 @@ void Graphics::EndFrame()
 		temp_viewport = false;
 	}
 	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDSV.Get());
-	frameTime = frameTimer.GetTime();
+	frameTime = frameTimer.GetTime() * 1000.0f;
 }
 
 void Graphics::SetResoultion(int width, int height) noexcept
