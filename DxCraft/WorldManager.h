@@ -9,12 +9,6 @@
 #include "RenderData.h"
 #include <DirectXMath.h>
 
-enum class BlockVisibility {
-	Opaque,
-	Transparent,
-	None
-};
-
 class WorldManager
 {
 public:
@@ -22,7 +16,7 @@ public:
 	WorldManager(WorldManager&) = delete;
 	WorldManager& operator=(WorldManager&) = delete;
 	void CreateChunk(int x, int y, int z, bool empty = false);
-	void ModifyBlock(int x, int y, int z, BlockType type = BlockType::Air);
+	void ModifyBlock(int x, int y, int z, Block::BlockType type = Block::BlockType::Air);
 	void GenerateMeshes();
 	void DrawOpaque(Graphics& gfx, Camera& cam);
 	void DrawTransparent(Graphics& gfx, Camera& cam);
@@ -34,7 +28,6 @@ private:
 		std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,
 		const std::array<float, 2>& texture, float offsetX, float offsetY, float offsetZ);
 	bool BlockVisible(const BasicChunk& chunk, int x, int y, int z);
-	BlockVisibility GetBlockVisibility(const Block& block);
 	BasicChunk* GetChunkFromBlock(int x, int y, int z);
 	robin_hood::unordered_flat_map <Position, BasicChunk, PositionHash> chunks;
 	Graphics& gfx;

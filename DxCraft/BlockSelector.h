@@ -1,26 +1,22 @@
 #pragma once
 #include "XM_Structs.h"
+#include "Block.h"
+#include "RenderData.h"
+#include "Graphics.h"
 
-struct BlockSelector {
-	static constexpr float side = 0.5008f;
-	static constexpr std::pair<std::array<DirectX::XMFLOAT3, 8>, std::array<uint16_t, 36>> Cube{
-		{
-			DirectX::XMFLOAT3(-side,-side,-side),
-			DirectX::XMFLOAT3(side,-side,-side),
-			DirectX::XMFLOAT3(-side,side,-side),
-			DirectX::XMFLOAT3(side,side,-side),
-			DirectX::XMFLOAT3(-side,-side,side),
-			DirectX::XMFLOAT3(side,-side,side),
-			DirectX::XMFLOAT3(-side,side,side),
-			DirectX::XMFLOAT3(side,side,side)
-		},
-		{
-			0, 2, 1, 2, 3, 1,
-			1, 3, 5, 3, 7, 5,
-			2, 6, 3, 3, 6, 7,
-			4, 5, 7, 4, 7, 6,
-			0, 4, 2, 2, 4, 6,
-			0, 1, 4, 1, 5, 4
-		}
-	};
+class BlockSelector {
+	BlockSelector(const BlockSelector&) = delete;
+	BlockSelector& operator=(const BlockSelector&) = delete;
+public:
+	BlockSelector(Graphics& gfx, Block::SelectorType type = Block::SelectorType::BLOCK);
+	~BlockSelector() = default;
+
+	void SetType(Graphics& gfx, Block::SelectorType type, bool OverrideCheck = false);
+	void SetTransforms(Graphics& gfx, const Transforms& tf);
+
+	void Render(Graphics& gfx);
+
+private:
+	RenderData renderData;
+	Block::SelectorType type;
 };

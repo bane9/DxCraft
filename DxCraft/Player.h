@@ -39,16 +39,16 @@ private:
 	void ResolveCollision(DirectX::XMFLOAT3 delta);
 	int blockIndex = 1;
 	std::string blockName = "Stone";
-	BlockType type = BlockType::Stone;
+	Block::BlockType type = Block::BlockType::Stone;
 	Graphics& gfx;
 	WorldManager& wManager;
 	Camera cam;
+	BlockSelector blockSelector;
 	const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 	{
 		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 }
 	};
 	RenderData crosshair;
-	RenderData blockSelector;
 	bool found = false;
 	DirectX::XMFLOAT3 hitBlock;
 	DirectX::XMFLOAT3 previousHitBlock;

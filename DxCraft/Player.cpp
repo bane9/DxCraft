@@ -10,18 +10,14 @@ Player::Player(Graphics& gfx, WorldManager& wManager)
 	: 
 	gfx(gfx),
 	wManager(wManager),
-	hitBlockPos(-1, -1, -1)
+	hitBlockPos(-1, -1, -1),
+	blockSelector(gfx)
 {
 	RenderDataFactory::CreateVertexBuffer(gfx, crosshair, Crosshair::NearSide.first);
 	RenderDataFactory::CreateIndexBuffer(gfx, crosshair, Crosshair::NearSide.second);
 	RenderDataFactory::CreateVertexShader(gfx, crosshair, L"CrosshairVS.cso", ied);
 	RenderDataFactory::CreatePixelShader(gfx, crosshair, L"CrossHairPS.cso");
 	RenderDataFactory::UpdateVScBuf(gfx, crosshair, DirectX::XMMatrixTranspose(gfx.getProjection()));
-
-	RenderDataFactory::CreateVertexBuffer(gfx, blockSelector, BlockSelector::Cube.first);
-	RenderDataFactory::CreateIndexBuffer(gfx, blockSelector, BlockSelector::Cube.second);
-	RenderDataFactory::CreateVertexShader(gfx, blockSelector, L"SelectionVS.cso", ied);
-	RenderDataFactory::CreatePixelShader(gfx, blockSelector, L"SelectionPS.cso");
 
 	cam.SetPos(0.0f, 25.0f, 0.0f);
 }
@@ -127,7 +123,7 @@ void Player::MoveRigth()
 void Player::MoveUp(bool external)
 {
 	auto asd = jumpTimer.GetTime();
-	if ((jumpTimer.GetTime() > 0.175f && !falling) || jumping) {
+	if ((jumpTimer.GetTime() > 0.175f && !falling) || jumping || flying) {
 		if (!flying) jumping = true;
 		if (!external && flying) {
 			auto t = cam.Translate({ 0.0f, FRAMETIME_COMPESATED(jumpFallConstant), 0.0f }, speed * flyingSpeedModifier, flying);
@@ -171,8 +167,9 @@ void Player::CastRay()
 
 	while (cameraRay.Next()) {
 		auto block = wManager.GetBlock(round(hitBlock.x), round(hitBlock.y), round(hitBlock.z));
-		if (block != nullptr && block->type != BlockType::Air) {
-			hitBlockPos = { block->x, block->y, block->z };
+		if (block != nullptr && block->GetBlockType() != Block::BlockType::Air) {
+			auto pos = block->GetPosition();
+			hitBlockPos = { pos.x, pos.y, pos.z };
 			found = true;
 			break;
 		}
@@ -194,7 +191,7 @@ void Player::RightClickEvent()
 		auto camPosLower = Position(DirectX::XMFLOAT3(camPos.x, camPos.y - 1.0f, camPos.z));
 		auto block = wManager.GetBlock(previousHitBlock);
 		if (block != nullptr) {
-			Position p(block->x, block->y, block->z);
+			auto p = block->GetPosition();
 			if (!(p == camPosUpper || p == camPosLower))
 				wManager.ModifyBlock(p.x, p.y, p.z, type);
 		}
@@ -230,7 +227,7 @@ void Player::LoopThenDraw()
 		fallVelocity = std::clamp(fallVelocity, fallMinBound, 100.0f);
 		auto cPos = cam.GetPos();
 		auto block = wManager.GetBlock({cPos.x, cPos.y - 1.0f, cPos.z});
-		if (block == nullptr || block->type == BlockType::Air) {
+		if (block == nullptr || !block->IsCollideable()) {
 			bool fall = true;
 			if(fall) MoveDown(true);
 		}
@@ -274,14 +271,12 @@ void Player::LoopThenDraw()
 		DirectX::XMMatrixTranspose(model)
 	};
 
-	RenderDataFactory::UpdateVScBuf(gfx, blockSelector, tf);
+	blockSelector.SetTransforms(gfx, tf);
 
 	Renderer::DrawIndexed(gfx, crosshair);
 
 	if (hitBlockPos.y > -1) {
-		gfx.RenderWireframe();
-		Renderer::DrawIndexed(gfx, blockSelector);
-		gfx.RenderSolid();
+		blockSelector.Render(gfx);
 	}
 	velocityMaxBound = 1.0f;
 
@@ -298,23 +293,23 @@ void Player::ChangeBlock(bool decrement)
 	
 	switch (blockIndex) {
 		case 1:
-			type = BlockType::Stone;
+			type = Block::BlockType::Stone;
 			blockName = "Stone";
 			break;
 		case 2:
-			type = BlockType::Grass;
+			type = Block::BlockType::Grass;
 			blockName = "Grass";
 			break;
 		case 3:
-			type = BlockType::Dirt;
+			type = Block::BlockType::Dirt;
 			blockName = "Dirt";
 			break;
 		case 4:
-			type = BlockType::Wooden_Plank;
+			type = Block::BlockType::Wooden_Plank;
 			blockName = "Wooden Plank";
 			break;
 		case 5:
-			type = BlockType::Glass;
+			type = Block::BlockType::Glass;
 			blockName = "Glass";
 			break;
 	}
@@ -334,6 +329,8 @@ void Player::ToggleFlying() noexcept
 		jumpVelocity = 0.0f;
 	}
 }
+
+#define VALID_BLOCK(x) x != nullptr && x->IsCollideable()
 
 void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 {

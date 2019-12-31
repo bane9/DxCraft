@@ -11,25 +11,18 @@ BasicChunk::BasicChunk(int x, int y, int z, bool empty)
 		for (int iy = 0; iy < chunkSize; iy++) {
 			for (int iz = 0; iz < chunkSize; iz++) {
 				Block& block = blocks[FlatIndex(ix, iy, iz)];
-				block.x = x + ix;
-				block.y = y + iy;
-				block.z = z + iz;
+				block.pos.x = x + ix;
+				block.pos.y = y + iy;
+				block.pos.z = z + iz;
 				if (iy == 15)
-					block.type = BlockType::Grass;
+					block.SetBlockType(Block::BlockType::Grass);
 				else if (iy >= 12 && iy < 15)
-					block.type = BlockType::Dirt;
+					block.SetBlockType(Block::BlockType::Dirt);
 				else if (iy > 0 && iy < 12)
-					block.type = BlockType::Stone;
+					block.SetBlockType(Block::BlockType::Stone);
 				else
-					block.type = BlockType::Bedrock;
-				if (empty) block.type = BlockType::Air;
-
-				//block.type = static_cast<BlockType>(rand() % static_cast<int>(BlockType::block_count));
-
-				//block.type = BlockType::Glass;
-
-				/*if ((ix + iy + iz) % 2 == 0) block.type = BlockType::Air;
-				else block.type = BlockType::Grass;*/
+					block.SetBlockType(Block::BlockType::Bedrock);
+				if (empty) block.SetBlockType(Block::BlockType::Air);
 			}
 		}
 	}

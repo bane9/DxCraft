@@ -22,16 +22,17 @@ void WorldManager::CreateChunk(int x, int y, int z, bool empty)
 	chunks.emplace(pos, BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize, empty));
 }
 
-void WorldManager::ModifyBlock(int x, int y, int z, BlockType type)
+void WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
 {
 	if (y < 0) return;
 	BasicChunk* chunk = GetChunkFromBlock(x, y, z);
 	if (chunk == nullptr) return;
 	Position normalized = chunk->Normalize(x, y, z);
 	Block& block = chunk->blocks[chunk->FlatIndex(x, y, z)];
-	if (block.type == BlockType::Bedrock) return;
-	block.type = type;
+	if (block.GetBlockType() == Block::BlockType::Bedrock) return;
+	block.SetBlockType(type);
 	GenerateMesh(*chunk);
+	if (block.IsTransparent() && block.GetBlockType() != Block::BlockType::Air) return;
 	if (normalized.x + 1 >= BasicChunk::chunkSize) {
 		BasicChunk* neighbourChunk = GetChunkFromBlock(x + 1, y, z);
 		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
@@ -131,21 +132,15 @@ bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z)
 	if (x < BasicChunk::chunkSize - 1 && y < BasicChunk::chunkSize - 1 && z < BasicChunk::chunkSize - 1
 		&& x > 0 && y > 0 && z > 0)
 	{
-		if(TRANSPARENT_BLOCK(chunk.blocks[chunk.FlatIndex(x, y, z)].type)) return true;
+		return chunk.blocks[chunk.FlatIndex(x, y, z)].IsTransparent();
 	}
 	else
 	{
 		auto block = GetBlock(x, y, z);
 		if (block == nullptr) return true;
-		return TRANSPARENT_BLOCK(block->type);
+		return block->IsTransparent();
 	}
 	return false;
-}
-
-BlockVisibility WorldManager::GetBlockVisibility(const Block& block)
-{
-	if (TRANSPARENT_BLOCK(block.type)) return BlockVisibility::Transparent;
-	else return BlockVisibility::Opaque;
 }
 
 BasicChunk* WorldManager::GetChunkFromBlock(int x, int y, int z)
@@ -195,57 +190,59 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 		for (int y = 0; y < BasicChunk::chunkSize; y++) {
 			for (int z = 0; z < BasicChunk::chunkSize; z++) {
 				const Block& block = chunk.blocks[chunk.FlatIndex(x, y, z)];
-				if (block.type == BlockType::Air) continue;
+				if (block.GetBlockType() == Block::BlockType::Air) continue;
 
-				if (GetBlockVisibility(block) == BlockVisibility::Opaque) {
-					if (BlockVisible(chunk, block.x + 1, block.y, block.z)) {
-						AppendFace(Faces::RightSide, opaqueVertex, opaqueIndex, BlockFaces[static_cast<int>(block.type)][3],
+				auto pos = block.GetPosition();
+
+				if (!block.IsTransparent()) {
+					if (BlockVisible(chunk, pos.x + 1, pos.y, pos.z)) {
+						AppendFace(Faces::RightSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[3],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, block.x - 1, block.y, block.z)) {
-						AppendFace(Faces::LeftSide, opaqueVertex, opaqueIndex, BlockFaces[static_cast<int>(block.type)][2],
+					if (BlockVisible(chunk, pos.x - 1, pos.y, pos.z)) {
+						AppendFace(Faces::LeftSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[2],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, block.x, block.y + 1, block.z)) {
-						AppendFace(Faces::TopSide, opaqueVertex, opaqueIndex, BlockFaces[static_cast<int>(block.type)][5],
+					if (BlockVisible(chunk, pos.x, pos.y + 1, pos.z)) {
+						AppendFace(Faces::TopSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[5],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, block.x, block.y - 1, block.z)) {
-						AppendFace(Faces::BottomSide, opaqueVertex, opaqueIndex, BlockFaces[static_cast<int>(block.type)][4],
+					if (BlockVisible(chunk, pos.x, pos.y - 1, pos.z)) {
+						AppendFace(Faces::BottomSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[4],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, block.x, block.y, block.z + 1)) {
-						AppendFace(Faces::FarSide, opaqueVertex, opaqueIndex, BlockFaces[static_cast<int>(block.type)][0],
+					if (BlockVisible(chunk, pos.x, pos.y, pos.z + 1)) {
+						AppendFace(Faces::FarSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[0],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, block.x, block.y, block.z - 1)) {
-						AppendFace(Faces::NearSide, opaqueVertex, opaqueIndex, BlockFaces[static_cast<int>(block.type)][1],
+					if (BlockVisible(chunk, pos.x, pos.y, pos.z - 1)) {
+						AppendFace(Faces::NearSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[1],
 							x, y, z);
 					}
 				}
 				else {
-					if (BlockVisible(chunk, block.x + 1, block.y, block.z)) {
-						AppendFace(Faces::RightSide, transparentVertex, transparentIndex, BlockFaces[static_cast<int>(block.type)][3],
+					if (BlockVisible(chunk, pos.x + 1, pos.y, pos.z)) {
+						AppendFace(Faces::RightSide, transparentVertex, transparentIndex, block.GetTexCoords()[3],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, block.x - 1, block.y, block.z)) {
-						AppendFace(Faces::LeftSide, transparentVertex, transparentIndex, BlockFaces[static_cast<int>(block.type)][2],
+					if (BlockVisible(chunk, pos.x - 1, pos.y, pos.z)) {
+						AppendFace(Faces::LeftSide, transparentVertex, transparentIndex, block.GetTexCoords()[2],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, block.x, block.y + 1, block.z)) {
-						AppendFace(Faces::TopSide, transparentVertex, transparentIndex, BlockFaces[static_cast<int>(block.type)][5],
+					if (BlockVisible(chunk, pos.x, pos.y + 1, pos.z)) {
+						AppendFace(Faces::TopSide, transparentVertex, transparentIndex, block.GetTexCoords()[5],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, block.x, block.y - 1, block.z)) {
-						AppendFace(Faces::BottomSide, transparentVertex, transparentIndex, BlockFaces[static_cast<int>(block.type)][4],
+					if (BlockVisible(chunk, pos.x, pos.y - 1, pos.z)) {
+						AppendFace(Faces::BottomSide, transparentVertex, transparentIndex, block.GetTexCoords()[4],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, block.x, block.y, block.z + 1)) {
-						AppendFace(Faces::FarSide, transparentVertex, transparentIndex, BlockFaces[static_cast<int>(block.type)][0],
+					if (BlockVisible(chunk, pos.x, pos.y, pos.z + 1)) {
+						AppendFace(Faces::FarSide, transparentVertex, transparentIndex, block.GetTexCoords()[0],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, block.x, block.y, block.z - 1)) {
-						AppendFace(Faces::NearSide, transparentVertex, transparentIndex, BlockFaces[static_cast<int>(block.type)][1],
+					if (BlockVisible(chunk, pos.x, pos.y, pos.z - 1)) {
+						AppendFace(Faces::NearSide, transparentVertex, transparentIndex, block.GetTexCoords()[1],
 							x, y, z);
 					}
 				}

@@ -165,6 +165,8 @@
   <ItemGroup>
     <ClCompile Include="AABB.cpp" />
     <ClCompile Include="BasicChunk.cpp" />
+    <ClCompile Include="Block.cpp" />
+    <ClCompile Include="BlockSelector.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DxgiInfoManager.cpp" />
     <ClCompile Include="Game.cpp" />
