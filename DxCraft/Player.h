@@ -58,6 +58,7 @@ private:
 	float speed = 7.0f;
 	Timer placeTimer;
 	Timer destroyTimer;
+	Timer jumpTimer;
 	bool collision = true;
 	bool flying = false;
 	bool falling = false;
@@ -73,10 +74,10 @@ private:
 	const float collisionMaxBoud = 0.7f;
 
 	float jumpVelocity = 0.0f;
-	float jumpDistance = 12.5f;
+	float jumpDistance = 10.5f;
 
-	float jumpSpeedModifier = 9.0f;
-	float fallSpeedModifier = 3.0f;
+	float jumpSpeedModifier = 7.5f;
+	float fallSpeedModifier = 2.5f;
 
 	float fallMinBound = 4.0f;
 
@@ -88,5 +89,11 @@ private:
 
 	const float flyingSpeedModifier = 4.0f;
 
-	const float blockFace = Faces::side * 0.5f;
+	const float blockFace = 0.125f;
+
+	const float diagonalBlockFace = blockFace;
+
+	const float fallingDecreaseConstant = 0.2f;
+
+	const float jumpingDecreaseConstant = 0.75f;
 };

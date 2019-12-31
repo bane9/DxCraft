@@ -118,15 +118,15 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 
 
 	D3D11_RASTERIZER_DESC rasterDesc{};
-	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.AntialiasedLineEnable = FALSE;
 	rasterDesc.CullMode = D3D11_CULL_BACK;
 	rasterDesc.DepthBias = 0.0f;
 	rasterDesc.DepthBiasClamp = 0.0f;
-	rasterDesc.DepthClipEnable = false;
+	rasterDesc.DepthClipEnable = FALSE;
 	rasterDesc.FillMode = D3D11_FILL_SOLID;
-	rasterDesc.FrontCounterClockwise = false;
-	rasterDesc.MultisampleEnable = false;
-	rasterDesc.ScissorEnable = false;
+	rasterDesc.FrontCounterClockwise = FALSE;
+	rasterDesc.MultisampleEnable = FALSE;
+	rasterDesc.ScissorEnable = FALSE;
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 
 	GFX_EXCEPT_INFO(pDevice->CreateRasterizerState(&rasterDesc, &pRasterDesc));
@@ -180,7 +180,7 @@ void Graphics::EndFrame()
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	HRESULT hr;
-	if (FAILED(hr = pSwap->Present(2, 0))) {
+	if (FAILED(hr = pSwap->Present(1, 0))) {
 		if (hr == DXGI_ERROR_DEVICE_REMOVED) {
 			GFX_EXCEPT_THROW(pDevice->GetDeviceRemovedReason());
 		}

@@ -47,9 +47,13 @@ void Player::MoveForward()
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 	auto temp = cam.Translate({ 0.0f, 0.0f, FRAMETIME_COMPESATED(moveConstant) }, speed * moveVelocity , flying);
-	if (falling || jumping) {
-		temp.x *= 0.35f;
-		temp.z *= 0.35f;
+	if (falling) {
+		temp.x *= fallingDecreaseConstant;
+		temp.z *= fallingDecreaseConstant;
+	}
+	else if(jumping) {
+		temp.x *= jumpingDecreaseConstant;
+		temp.z *= jumpingDecreaseConstant;
 	}
 	ResolveCollision(temp);
 }
@@ -65,9 +69,13 @@ void Player::MoveBackward()
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 	auto temp = cam.Translate({ 0.0f , 0.0f, FRAMETIME_COMPESATED(-moveConstant) }, speed * moveVelocity, flying);
-	if (falling || jumping) {
-		temp.x *= 0.35f;
-		temp.z *= 0.35f;
+	if (falling) {
+		temp.x *= fallingDecreaseConstant;
+		temp.z *= fallingDecreaseConstant;
+	}
+	else if (jumping) {
+		temp.x *= jumpingDecreaseConstant;
+		temp.z *= jumpingDecreaseConstant;
 	}
 	ResolveCollision(temp);
 }
@@ -83,9 +91,13 @@ void Player::MoveLeft()
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 	auto temp = cam.Translate({ FRAMETIME_COMPESATED(-moveConstant), 0.0f, 0.0f }, speed * moveVelocity, flying);
-	if (falling || jumping) {
-		temp.x *= 0.35f;
-		temp.z *= 0.35f;
+	if (falling) {
+		temp.x *= fallingDecreaseConstant;
+		temp.z *= fallingDecreaseConstant;
+	}
+	else if (jumping) {
+		temp.x *= jumpingDecreaseConstant;
+		temp.z *= jumpingDecreaseConstant;
 	}
 	ResolveCollision(temp);
 }
@@ -101,26 +113,34 @@ void Player::MoveRigth()
 	moveVelocity += velocityIncreaseConstant;
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 	auto temp = cam.Translate({ FRAMETIME_COMPESATED(moveConstant), 0.0f, 0.0f }, speed * moveVelocity, flying);
-	if (falling || jumping) {
-		temp.x *= 0.35f;
-		temp.z *= 0.35f;
+	if (falling) {
+		temp.x *= fallingDecreaseConstant;
+		temp.z *= fallingDecreaseConstant;
+	}
+	else if (jumping) {
+		temp.x *= jumpingDecreaseConstant;
+		temp.z *= jumpingDecreaseConstant;
 	}
 	ResolveCollision(temp);
 }
 
 void Player::MoveUp(bool external)
 {
-	if (!flying) jumping = true;
-	if (!external && flying) {
-		auto t = cam.Translate({ 0.0f, FRAMETIME_COMPESATED(jumpFallConstant), 0.0f }, speed * flyingSpeedModifier, flying);
-		auto camPos = cam.GetPos();
-		cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
-	}
-	else if (external) {
-		auto temp = cam.Translate({ 0.0f, FRAMETIME_COMPESATED(jumpFallConstant), 0.0f }, jumpDistance - fallVelocity);
-		temp.x += momentum.x;
-		temp.z += momentum.z;
-		ResolveCollision(temp);
+	auto asd = jumpTimer.GetTime();
+	if ((jumpTimer.GetTime() > 0.175f && !falling) || jumping) {
+		if (!flying) jumping = true;
+		if (!external && flying) {
+			auto t = cam.Translate({ 0.0f, FRAMETIME_COMPESATED(jumpFallConstant), 0.0f }, speed * flyingSpeedModifier, flying);
+			auto camPos = cam.GetPos();
+			cam.SetPos(camPos.x + t.x, camPos.y + t.y, camPos.z + t.z);
+		}
+		else if (external) {
+			auto temp = cam.Translate({ 0.0f, FRAMETIME_COMPESATED(jumpFallConstant), 0.0f }, jumpDistance - fallVelocity);
+			temp.x += momentum.x;
+			temp.z += momentum.z;
+			ResolveCollision(temp);
+		}
+		jumpTimer.Mark();
 	}
 }
 
@@ -203,15 +223,7 @@ void Player::LoopThenDraw()
 		ImGui::End();
 	}
 
-	/*if (ImGui::Begin("asd")) {
-		ImGui::SliderFloat("fallMinBound", &fallMinBound, 0.25f, 10.0f, "%.1f");
-		ImGui::SliderFloat("jumpDistance", &jumpDistance, 0.25f, 100.0f, "%.1f");
-		ImGui::SliderFloat("jumpSpeedModifier", &jumpSpeedModifier, 0.25f, 100.0f, "%.1f");
-		ImGui::SliderFloat("fallSpeedModifier", &fallSpeedModifier, 0.25f, 100.0f, "%.1f");
-		ImGui::End();
-	}*/
-
-	CastRay();
+	CastRay();	
 	if (!flying && !jumping) {
 		auto asd = gfx.GetFrametime();
 		fallVelocity += FRAMETIME_COMPESATED(0.125f * fallSpeedModifier);
@@ -220,27 +232,6 @@ void Player::LoopThenDraw()
 		auto block = wManager.GetBlock({cPos.x, cPos.y - 1.0f, cPos.z});
 		if (block == nullptr || block->type == BlockType::Air) {
 			bool fall = true;
-
-			block = wManager.GetBlock({ cPos.x + blockFace, cPos.y, cPos.z });
-			if (VALID_BLOCK(block)) {
-				fall = false;
-			}
-
-			block = wManager.GetBlock({ cPos.x - blockFace, cPos.y, cPos.z });
-			if (VALID_BLOCK(block)) {
-				fall = false;
-			}
-
-			block = wManager.GetBlock({ cPos.x , cPos.y, cPos.z + blockFace });
-			if (VALID_BLOCK(block)) {
-				fall = false;
-			}
-
-			block = wManager.GetBlock({ cPos.x , cPos.y, cPos.z - blockFace });
-			if (VALID_BLOCK(block)) {
-				fall = false;
-			}
-
 			if(fall) MoveDown(true);
 		}
 		if (cam.GetPos().y < -15.0f) cam.SetPos(0.0f, 25.0f, 0.0f);
@@ -368,8 +359,8 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 		bool check = true;
 		block = wManager.GetBlock({ pos.x, pos.y + delta.y + offsetY, pos.z });
 		if (VALID_BLOCK(block)) {
-			delta.y = 0;
-			if (modf(round(pos.y), &pos.y) < 0.00001f) {
+			if (modf(round(pos.y), &pos.y) < 0.001f) {
+				delta.y = 0;
 				falling = false;
 				check = false;
 			}
@@ -377,13 +368,14 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 		else if (check && !jumping) falling = true;
 	}
 	else if (delta.y > 0.0f) {
-		block = wManager.GetBlock({ pos.x, pos.y - (offsetYLower * blockFace), pos.z });
+		block = wManager.GetBlock({ pos.x, pos.y - (offsetYLower * (Faces::side * 0.5f)), pos.z });
 		if (VALID_BLOCK(block)) {
 			delta.y = 0;
 			jumping = false;
 			jumpVelocity = 0.0f;
 			moveVelocity = velocityMinBound;
 			velocityMaxBound = collisionMaxBoud;
+			falling = true;
 		}
 	}
 
@@ -412,50 +404,50 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 	}
 
 
-	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetY, pos.z + sgn(pos.z) * blockFace });
+	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetY, pos.z + sgn(pos.z) * diagonalBlockFace });
 	if (VALID_BLOCK(block)) {
 		delta.x = 0;
 		velocityMaxBound = collisionMaxBoud;
 	}
 
-	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetY, pos.z - sgn(pos.z) * blockFace });
+	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetY, pos.z - sgn(pos.z) * diagonalBlockFace });
 	if (VALID_BLOCK(block)) {
 		delta.x = 0;
 		velocityMaxBound = collisionMaxBoud;
 	}
 
-	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetY, pos.z + sgn(pos.z) * blockFace });
+	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetY, pos.z + sgn(pos.z) * diagonalBlockFace });
 	if (VALID_BLOCK(block)) {
 		delta.x = 0;
 		velocityMaxBound = collisionMaxBoud;
 	}
 
-	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetY, pos.z - sgn(pos.z) * blockFace });
+	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetY, pos.z - sgn(pos.z) * diagonalBlockFace });
 	if (VALID_BLOCK(block)) {
 		delta.x = 0;
 		velocityMaxBound = collisionMaxBoud;
 	}
 
 
-	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetYLower, pos.z + sgn(pos.z) * blockFace });
+	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetYLower, pos.z + sgn(pos.z) * diagonalBlockFace });
 	if (VALID_BLOCK(block)) {
 		delta.x = 0;
 		velocityMaxBound = collisionMaxBoud;
 	}
 
-	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetYLower, pos.z - sgn(pos.z) * blockFace });
+	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetYLower, pos.z - sgn(pos.z) * diagonalBlockFace });
 	if (VALID_BLOCK(block)) {
 		delta.x = 0;
 		velocityMaxBound = collisionMaxBoud;
 	}
 
-	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetYLower, pos.z + sgn(pos.z) * blockFace });
+	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetYLower, pos.z + sgn(pos.z) * diagonalBlockFace });
 	if (VALID_BLOCK(block)) {
 		delta.x = 0;
 		velocityMaxBound = collisionMaxBoud;
 	}
 
-	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetYLower, pos.z - sgn(pos.z) * blockFace });
+	block = wManager.GetBlock({ pos.x + delta.x + offsetX, pos.y + offsetYLower, pos.z - sgn(pos.z) * diagonalBlockFace });
 	if (VALID_BLOCK(block)) {
 		delta.x = 0;
 		velocityMaxBound = collisionMaxBoud;
