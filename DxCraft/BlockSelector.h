@@ -11,8 +11,8 @@ public:
 	BlockSelector(Graphics& gfx, Block::SelectorType type = Block::SelectorType::BLOCK);
 	~BlockSelector() = default;
 
-	void SetType(Graphics& gfx, Block::SelectorType type, bool OverrideCheck = false);
-	void SetTransforms(Graphics& gfx, const Transforms& tf);
+	void SetType(Block::SelectorType type, bool OverrideCheck = false);
+	void SetTransforms(const Transforms& tf);
 
 	void Render(Graphics& gfx);
 

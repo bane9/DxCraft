@@ -1,6 +1,4 @@
 #include "BlockSelector.h"
-#include "RenderDataFactory.h"
-#include "Renderer.h"
 
 static struct BlockSelectorMeshes {
 	static constexpr float side = 0.5008f;
@@ -27,36 +25,36 @@ static struct BlockSelectorMeshes {
 };
 
 BlockSelector::BlockSelector(Graphics& gfx, Block::SelectorType type)
-	: type(type)
+	: type(type), renderData(gfx)
 {
-	SetType(gfx, type, true);
+	SetType(type, true);
 }
 
-void BlockSelector::SetType(Graphics& gfx, Block::SelectorType type, bool OverrideCheck)
+void BlockSelector::SetType(Block::SelectorType type, bool OverrideCheck)
 {
 	if (this->type == type && !OverrideCheck) return;
 
 	switch (type) {
 	case Block::SelectorType::BLOCK:
 	default:
-		RenderDataFactory::CreateVertexBuffer(gfx, renderData, BlockSelectorMeshes::Cube.first);
-		RenderDataFactory::CreateIndexBuffer(gfx, renderData, BlockSelectorMeshes::Cube.second);
+		renderData.CreateVertexBuffer(BlockSelectorMeshes::Cube.first);
+		renderData.CreateIndexBuffer(BlockSelectorMeshes::Cube.second);
 		break;
 	}
 
-	RenderDataFactory::CreateVertexShader(gfx, renderData, L"SelectionVS.cso");
-	RenderDataFactory::CreatePixelShader(gfx, renderData, L"SelectionPS.cso");
+	renderData.CreateVertexShader(L"SelectionVS.cso");
+	renderData.CreatePixelShader(L"SelectionPS.cso");
 }
 
-void BlockSelector::SetTransforms(Graphics& gfx, const Transforms& tf)
+void BlockSelector::SetTransforms(const Transforms& tf)
 {
-	RenderDataFactory::UpdateVScBuf(gfx, renderData, tf);
+	renderData.UpdateVScBuf(tf);
 }
 
 void BlockSelector::Render(Graphics& gfx)
 {
 	gfx.RenderWireframe();
-	Renderer::DrawIndexed(gfx, renderData);
+	renderData.Render();
 	gfx.RenderSolid();
 }
 

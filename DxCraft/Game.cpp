@@ -6,7 +6,6 @@
 #include "imgui/imgui.h"
 #include <math.h>
 #include <algorithm>
-#include "Renderer.h"
 #include "BlockSelector.h"
 
 GDIPlusManager gdipm;
@@ -147,9 +146,9 @@ void Game::doFrame()
 
 		player.LoopThenDraw();
 
-		wManager.DrawOpaque(wnd.Gfx(), player.GetCamera());
+		wManager.DrawOpaque(player.GetCamera());
 
-		wManager.DrawTransparent(wnd.Gfx(), player.GetCamera());
+		wManager.DrawTransparent(player.GetCamera());
 
 		wnd.Gfx().EndFrame();
 	}

@@ -181,7 +181,7 @@
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="RenderDataFactory.cpp" />
+    <ClCompile Include="RenderData.cpp" />
     <ClCompile Include="Surface.cpp" />
     <ClCompile Include="ViewFrustum.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -216,8 +216,6 @@
     <ClInclude Include="Position.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RenderData.h" />
-    <ClInclude Include="RenderDataFactory.h" />
-    <ClInclude Include="Renderer.h" />
     <ClInclude Include="robin_hood.h" />
     <ClInclude Include="Surface.h" />
     <ClInclude Include="ThreadSettings.h" />

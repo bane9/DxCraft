@@ -18,8 +18,8 @@ public:
 	void CreateChunk(int x, int y, int z, bool empty = false);
 	void ModifyBlock(int x, int y, int z, Block::BlockType type = Block::BlockType::Air);
 	void GenerateMeshes();
-	void DrawOpaque(Graphics& gfx, Camera& cam);
-	void DrawTransparent(Graphics& gfx, Camera& cam);
+	void DrawOpaque(Camera& cam);
+	void DrawTransparent(Camera& cam);
 	Block* GetBlock(int x, int y, int z);
 	Block* GetBlock(const DirectX::XMFLOAT3& pos);
 private:

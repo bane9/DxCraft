@@ -2,7 +2,6 @@
 #include "MathFunctions.h"
 #include "imgui/imgui.h"
 #include <algorithm>
-#include "RenderDataFactory.h"
 
 #define FRAMETIME_COMPESATED(x) ((x) * (gfx.GetFrametime() / 16.667f))
 
@@ -11,13 +10,14 @@ Player::Player(Graphics& gfx, WorldManager& wManager)
 	gfx(gfx),
 	wManager(wManager),
 	hitBlockPos(-1, -1, -1),
-	blockSelector(gfx)
+	blockSelector(gfx),
+	crosshair(gfx)
 {
-	RenderDataFactory::CreateVertexBuffer(gfx, crosshair, Crosshair::NearSide.first);
-	RenderDataFactory::CreateIndexBuffer(gfx, crosshair, Crosshair::NearSide.second);
-	RenderDataFactory::CreateVertexShader(gfx, crosshair, L"CrosshairVS.cso", ied);
-	RenderDataFactory::CreatePixelShader(gfx, crosshair, L"CrossHairPS.cso");
-	RenderDataFactory::UpdateVScBuf(gfx, crosshair, DirectX::XMMatrixTranspose(gfx.getProjection()));
+	crosshair.CreateVertexBuffer(Crosshair::NearSide.first);
+	crosshair.CreateIndexBuffer(Crosshair::NearSide.second);
+	crosshair.CreateVertexShader(L"CrosshairVS.cso", ied);
+	crosshair.CreatePixelShader(L"CrossHairPS.cso");
+	crosshair.UpdateVScBuf(DirectX::XMMatrixTranspose(gfx.getProjection()));
 
 	cam.SetPos(0.0f, 25.0f, 0.0f);
 }
@@ -285,9 +285,9 @@ void Player::LoopThenDraw()
 		DirectX::XMMatrixTranspose(model)
 	};
 
-	blockSelector.SetTransforms(gfx, tf);
+	blockSelector.SetTransforms(tf);
 
-	Renderer::DrawIndexed(gfx, crosshair);
+	crosshair.Render();
 
 	if (hitBlockPos.y > -1) {
 		blockSelector.Render(gfx);

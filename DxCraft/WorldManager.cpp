@@ -1,18 +1,16 @@
 #include "WorldManager.h"
 #include "MathFunctions.h"
 #include <algorithm>
-#include "Renderer.h"
 #include <optional>
 #include "Camera.h"
-#include "RenderDataFactory.h"
 #include <math.h>
 
 WorldManager::WorldManager(Graphics& gfx)
-	: gfx(gfx)
+	: gfx(gfx), renderData(gfx)
 {
-	RenderDataFactory::CreateVertexShader(gfx, renderData, L"TextureVS.cso", ied);
-	RenderDataFactory::CreatePixelShader(gfx, renderData, L"TexturePS.cso");
-	RenderDataFactory::Create2DTexture(gfx, renderData, "images\\terrain.png");
+	renderData.CreateVertexShader(L"TextureVS.cso", ied);
+	renderData.CreatePixelShader(L"TexturePS.cso");
+	renderData.Create2DTexture("images\\terrain.png");
 }
 
 void WorldManager::CreateChunk(int x, int y, int z, bool empty)
@@ -66,7 +64,7 @@ void WorldManager::GenerateMeshes() {
 	}
 }
 
-void WorldManager::DrawOpaque(Graphics& gfx, Camera& cam)
+void WorldManager::DrawOpaque(Camera& cam)
 {
 	for (auto& chunk : chunks) {
 		if(!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
@@ -78,15 +76,15 @@ void WorldManager::DrawOpaque(Graphics& gfx, Camera& cam)
 			DirectX::XMMatrixTranspose(model)
 		};
 		
-		RenderDataFactory::UpdateVScBuf(gfx, renderData, tf);
+		renderData.UpdateVScBuf(tf);
 
 		if(chunk.second.opaqueIndexBufferSize > 0)
-			Renderer::DrawIndexed(gfx, renderData, chunk.second.opaqueVertexBuffer, chunk.second.opaqueIndexBuffer,
+			RenderData::Render(renderData, chunk.second.opaqueVertexBuffer, chunk.second.opaqueIndexBuffer,
 				chunk.second.opaqueIndexBufferSize, sizeof(Vertex));
 	}
 }
 
-void WorldManager::DrawTransparent(Graphics& gfx, Camera& cam)
+void WorldManager::DrawTransparent(Camera& cam)
 {
 	for (auto& chunk : chunks) {
 		if (!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
@@ -98,10 +96,10 @@ void WorldManager::DrawTransparent(Graphics& gfx, Camera& cam)
 			DirectX::XMMatrixTranspose(model)
 		};
 
-		RenderDataFactory::UpdateVScBuf(gfx, renderData, tf);
+		renderData.UpdateVScBuf(tf);
 
 		if (chunk.second.transparentIndexBufferSize > 0)
-			Renderer::DrawIndexed(gfx, renderData, chunk.second.transparentVertexBuffer, chunk.second.transparentIndexBuffer,
+			RenderData::Render(renderData, chunk.second.transparentVertexBuffer, chunk.second.transparentIndexBuffer,
 				chunk.second.transparentIndexBufferSize, sizeof(Vertex));
 	}
 }
@@ -251,15 +249,15 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 	}
 	
 	if (opaqueVertex.size() > 0 && opaqueIndex.size() > 0) {
-		chunk.opaqueVertexBuffer = RenderDataFactory::CreateVertexBuffer(gfx, opaqueVertex);
-		chunk.opaqueIndexBuffer = RenderDataFactory::CreateIndexBuffer(gfx, opaqueIndex);
+		chunk.opaqueVertexBuffer = RenderData::CreateVertexBuffer(gfx, opaqueVertex);
+		chunk.opaqueIndexBuffer = RenderData::CreateIndexBuffer(gfx, opaqueIndex);
 		chunk.opaqueIndexBufferSize = opaqueIndex.size();
 	}
 	else chunk.opaqueIndexBufferSize = 0;
 
 	if (transparentVertex.size() > 0 && transparentIndex.size() > 0) {
-		chunk.transparentVertexBuffer = RenderDataFactory::CreateVertexBuffer(gfx, transparentVertex);
-		chunk.transparentIndexBuffer = RenderDataFactory::CreateIndexBuffer(gfx, transparentIndex);
+		chunk.transparentVertexBuffer = RenderData::CreateVertexBuffer(gfx, transparentVertex);
+		chunk.transparentIndexBuffer = RenderData::CreateIndexBuffer(gfx, transparentIndex);
 		chunk.transparentIndexBufferSize = transparentIndex.size();
 	}
 	else chunk.transparentIndexBufferSize = 0;

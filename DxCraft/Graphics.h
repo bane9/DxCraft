@@ -19,8 +19,7 @@
 
 class Graphics
 {
-	friend class RenderDataFactory;
-	friend class Renderer;
+	friend class RenderData;
 public:
 	Graphics(HWND hWnd, size_t width, size_t height);
 	Graphics(Graphics&) = delete;

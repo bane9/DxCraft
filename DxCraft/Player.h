@@ -1,7 +1,6 @@
 #pragma once
 #include "Graphics.h"
 #include "RenderData.h"
-#include "Renderer.h"
 #include "Camera.h"
 #include "Ray.h"
 #include "Timer.h"
