@@ -18,8 +18,8 @@ WorldManager::WorldManager(Graphics& gfx)
 void WorldManager::CreateChunk(int x, int y, int z, bool empty)
 {
 	if (y < 0) return;
-	Position pos(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize);
-	chunks.emplace(pos, BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize, empty));
+	chunks.emplace(Position(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize),
+		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize, empty));
 }
 
 void WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
@@ -120,7 +120,7 @@ void WorldManager::AppendFace(const std::pair<std::array<Vertex, 4>, std::array<
 		const float endTexY   = (texture[1] + 1.0f) / 16.0f;
 		vertex.tc.x = vertex.tc.x == 1 ? startTexX : endTexX;
 		vertex.tc.y = vertex.tc.y == 1 ? startTexY : endTexY;
-		return std::move(vertex);
+		return vertex;
 		});
 	const int offset = vertexBuffer.size() > 0 ? (vertexBuffer.size() / 4 - 1) * 4 : 0;
 	std::transform(face.second.begin(), face.second.end(), std::back_inserter(indexBuffer), [offset](int a) {return offset + a;});

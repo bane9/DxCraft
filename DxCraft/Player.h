@@ -89,7 +89,7 @@ private:
 
 	const float flyingSpeedModifier = 4.0f;
 
-	const float blockFace = 0.125f;
+	const float blockFace = 0.05f;
 
 	const float diagonalBlockFace = blockFace;
 

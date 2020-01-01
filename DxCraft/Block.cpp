@@ -101,6 +101,11 @@ bool Block::IsCollideable() const noexcept
 	return !(blockType == Block::BlockType::Air);
 }
 
+bool Block::IsFullMesh() const noexcept
+{
+	return false;
+}
+
 Block::MeshType Block::GetMeshType() const noexcept
 {
 	return meshType;

@@ -220,7 +220,21 @@ void Player::LoopThenDraw()
 		ImGui::End();
 	}
 
-	CastRay();	
+
+	CastRay();
+
+	if (ImGui::Begin("Hit direction")) {
+		if(!found) ImGui::Text("%s", "Not hit");
+		else {
+			
+			Position hitDirection(0, (int)(round(hitBlock.y) - round(previousHitBlock.y)), 0);
+			hitDirection.x = hitDirection.y != 0 ? 0 : (int)(round(hitBlock.x) - round(previousHitBlock.x));
+			hitDirection.z = hitDirection.y != 0  || hitDirection.z != 0 ? 0 : (int)(round(hitBlock.z) - round(previousHitBlock.z));
+			ImGui::Text("%i %i %i", hitDirection.x, hitDirection.y, hitDirection.z);
+		}
+		ImGui::End();
+	}
+
 	if (!flying && !jumping) {
 		auto asd = gfx.GetFrametime();
 		fallVelocity += FRAMETIME_COMPESATED(0.125f * fallSpeedModifier);

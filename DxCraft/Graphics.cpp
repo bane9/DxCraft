@@ -263,13 +263,13 @@ float Graphics::GetFrametime()
 
 void Graphics::BeginFrame(float red, float green, float blue) noexcept
 {
+	frameTimer.Mark();
 	const float color[] = { red,green,blue,1.0f };
 	pContext->ClearRenderTargetView(pTarget.Get(), color);
 	pContext->ClearDepthStencilView(pDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-	frameTimer.Mark();
 }
 
 void Graphics::setCamera(DirectX::FXMMATRIX cam) noexcept

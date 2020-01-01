@@ -38,6 +38,7 @@ public:
 	BlockType GetBlockType() const noexcept;
 	bool IsTransparent() const noexcept;
 	bool IsCollideable() const noexcept;
+	bool IsFullMesh() const noexcept;
 	MeshType GetMeshType() const noexcept;
 	SelectorType GetSelectorType() const noexcept;
 	void SetBlockType(BlockType type) noexcept;
