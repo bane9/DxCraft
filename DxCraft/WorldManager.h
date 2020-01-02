@@ -27,7 +27,7 @@ private:
 	void AppendFace(const std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>>& face,
 		std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,
 		const std::array<float, 2>& texture, float offsetX, float offsetY, float offsetZ);
-	bool BlockVisible(const BasicChunk& chunk, int x, int y, int z);
+	bool BlockVisible(const BasicChunk& chunk, int x, int y, int z, Block::BlockType type = Block::BlockType::block_count);
 	BasicChunk* GetChunkFromBlock(int x, int y, int z);
 	robin_hood::unordered_flat_map <Position, BasicChunk, PositionHash> chunks;
 	Graphics& gfx;

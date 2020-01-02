@@ -1,25 +1,25 @@
 #include "BlockSelector.h"
 
 static struct BlockSelectorMeshes {
-	static constexpr float side = 0.5008f;
-	static constexpr std::pair<std::array<DirectX::XMFLOAT3, 8>, std::array<uint16_t, 36>> Cube{
+	static constexpr float side = 0.501f;
+	static constexpr std::pair<std::array<DirectX::XMFLOAT3, 8>, std::array<uint16_t, 24>> Cube{
 		{
-			DirectX::XMFLOAT3(-side,-side,-side),
-			DirectX::XMFLOAT3(side,-side,-side),
-			DirectX::XMFLOAT3(-side,side,-side),
-			DirectX::XMFLOAT3(side,side,-side),
-			DirectX::XMFLOAT3(-side,-side,side),
-			DirectX::XMFLOAT3(side,-side,side),
-			DirectX::XMFLOAT3(-side,side,side),
-			DirectX::XMFLOAT3(side,side,side)
+			DirectX::XMFLOAT3(-side, -side, side),
+			DirectX::XMFLOAT3(-side, side, side),
+			DirectX::XMFLOAT3(-side, -side, -side),
+			DirectX::XMFLOAT3(-side, side, -side),
+			DirectX::XMFLOAT3(side, -side, side),
+			DirectX::XMFLOAT3(side, side, side),
+			DirectX::XMFLOAT3(side, -side, -side),
+			DirectX::XMFLOAT3(side, side, -side),
 		},
 		{
-			0, 2, 1, 2, 3, 1,
-			1, 3, 5, 3, 7, 5,
-			2, 6, 3, 3, 6, 7,
-			4, 5, 7, 4, 7, 6,
-			0, 4, 2, 2, 4, 6,
-			0, 1, 4, 1, 5, 4
+			0, 1, 3, 2,
+			2, 3, 7, 6,
+			6, 7, 5, 4,
+			4, 5, 1, 0,
+			2, 6, 4, 0,
+			7, 3, 1, 5,
 		}
 	};
 };
@@ -27,6 +27,7 @@ static struct BlockSelectorMeshes {
 BlockSelector::BlockSelector(Graphics& gfx, Block::SelectorType type)
 	: type(type), renderData(gfx)
 {
+	renderData.topology = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
 	SetType(type, true);
 }
 
@@ -53,8 +54,6 @@ void BlockSelector::SetTransforms(const Transforms& tf)
 
 void BlockSelector::Render(Graphics& gfx)
 {
-	gfx.RenderWireframe();
 	renderData.Render();
-	gfx.RenderSolid();
 }
 

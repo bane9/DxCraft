@@ -6,8 +6,11 @@ BasicChunk::BasicChunk(int x, int y, int z, bool empty)
 {
 	aabb.SetPosition({static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)});
 	blocks.resize(chunkSize * chunkSize * chunkSize);
+	#pragma omp parallel for schedule(dynamic)
 	for (int ix = 0; ix < chunkSize; ix++) {
+		#pragma omp parallel for schedule(dynamic)
 		for (int iy = 0; iy < chunkSize; iy++) {
+			#pragma omp parallel for schedule(dynamic)
 			for (int iz = 0; iz < chunkSize; iz++) {
 				Block& block = blocks[FlatIndex(ix, iy, iz)];
 				block.pos.x = x + ix;

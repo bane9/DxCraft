@@ -38,6 +38,8 @@ public:
 	void EnableZTest();
 	void DisableZTest();
 	float GetFrametime();
+	void DisableBackFaceCulling();
+	void EnableBackFaceCulling();
 #ifdef _DEBUG
 	DxgiInfoManager& getInfoManager();
 #endif

@@ -118,14 +118,14 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 
 
 	D3D11_RASTERIZER_DESC rasterDesc{};
-	rasterDesc.AntialiasedLineEnable = FALSE;
+	rasterDesc.AntialiasedLineEnable = TRUE;
 	rasterDesc.CullMode = D3D11_CULL_BACK;
 	rasterDesc.DepthBias = 0.0f;
 	rasterDesc.DepthBiasClamp = 0.0f;
 	rasterDesc.DepthClipEnable = FALSE;
 	rasterDesc.FillMode = D3D11_FILL_SOLID;
 	rasterDesc.FrontCounterClockwise = FALSE;
-	rasterDesc.MultisampleEnable = FALSE;
+	rasterDesc.MultisampleEnable = TRUE;
 	rasterDesc.ScissorEnable = FALSE;
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 
@@ -259,6 +259,40 @@ void Graphics::DisableZTest()
 float Graphics::GetFrametime()
 {
 	return frameTime;
+}
+
+void Graphics::DisableBackFaceCulling()
+{
+	D3D11_RASTERIZER_DESC rasterDesc{};
+	rasterDesc.AntialiasedLineEnable = TRUE;
+	rasterDesc.CullMode = D3D11_CULL_NONE;
+	rasterDesc.DepthBias = 0.0f;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = FALSE;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = FALSE;
+	rasterDesc.MultisampleEnable = TRUE;
+	rasterDesc.ScissorEnable = FALSE;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	GFX_EXCEPT_INFO(pDevice->CreateRasterizerState(&rasterDesc, &pRasterDesc));
+}
+
+void Graphics::EnableBackFaceCulling()
+{
+	D3D11_RASTERIZER_DESC rasterDesc{};
+	rasterDesc.AntialiasedLineEnable = TRUE;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.DepthBias = 0.0f;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = FALSE;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = FALSE;
+	rasterDesc.MultisampleEnable = TRUE;
+	rasterDesc.ScissorEnable = FALSE;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	GFX_EXCEPT_INFO(pDevice->CreateRasterizerState(&rasterDesc, &pRasterDesc));
 }
 
 void Graphics::BeginFrame(float red, float green, float blue) noexcept
