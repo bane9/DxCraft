@@ -1,25 +1,27 @@
 #include "BlockSelector.h"
 
 static struct BlockSelectorMeshes {
-	static constexpr float side = 0.501f;
+	static constexpr float CubeSide = 0.501f;
 	static constexpr std::pair<std::array<DirectX::XMFLOAT3, 8>, std::array<uint16_t, 24>> Cube{
 		{
-			DirectX::XMFLOAT3(-side, -side, side),
-			DirectX::XMFLOAT3(-side, side, side),
-			DirectX::XMFLOAT3(-side, -side, -side),
-			DirectX::XMFLOAT3(-side, side, -side),
-			DirectX::XMFLOAT3(side, -side, side),
-			DirectX::XMFLOAT3(side, side, side),
-			DirectX::XMFLOAT3(side, -side, -side),
-			DirectX::XMFLOAT3(side, side, -side),
+			DirectX::XMFLOAT3(-CubeSide, -CubeSide, CubeSide),
+			DirectX::XMFLOAT3(-CubeSide, CubeSide, CubeSide),
+			DirectX::XMFLOAT3(-CubeSide, -CubeSide, -CubeSide),
+			DirectX::XMFLOAT3(-CubeSide, CubeSide, -CubeSide),
+			DirectX::XMFLOAT3(CubeSide, -CubeSide, CubeSide),
+			DirectX::XMFLOAT3(CubeSide, CubeSide, CubeSide),
+			DirectX::XMFLOAT3(CubeSide, -CubeSide, -CubeSide),
+			DirectX::XMFLOAT3(CubeSide, CubeSide, -CubeSide),
 		},
 		{
-			0, 1, 3, 2,
-			2, 3, 7, 6,
-			6, 7, 5, 4,
-			4, 5, 1, 0,
-			2, 6, 4, 0,
-			7, 3, 1, 5,
+			0, 1, 3, 
+			2, 2, 3, 
+			7, 6, 6, 
+			7, 5, 4,
+			4, 5, 1,
+			0, 2, 6, 
+			4, 0, 7, 
+			3, 1, 5
 		}
 	};
 };
@@ -56,4 +58,3 @@ void BlockSelector::Render(Graphics& gfx)
 {
 	renderData.Render();
 }
-

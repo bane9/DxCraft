@@ -287,6 +287,7 @@ void Player::LoopThenDraw()
 
 	blockSelector.SetTransforms(tf);
 
+
 	crosshair.Render();
 
 	if (hitBlockPos.y > -1) {

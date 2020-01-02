@@ -4,6 +4,7 @@
 #include "ThreadSettings.h"
 #include "WorldManager.h"
 #include "Player.h"
+#include "RenderData.h"
 
 class Game
 {
@@ -23,4 +24,5 @@ private:
 	Player player;
 	Timer jumpTimer;
 	Timer sprintTimer;
+	RenderData test;
 };

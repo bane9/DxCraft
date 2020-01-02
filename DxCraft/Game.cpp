@@ -6,12 +6,12 @@
 #include "imgui/imgui.h"
 #include <math.h>
 #include <algorithm>
-#include "BlockSelector.h"
+#include "BillBoard.h"
 
 GDIPlusManager gdipm;
 
 Game::Game(size_t width, size_t height)
-	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager)
+	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager), test(wnd.Gfx())
 {
 
 	const int area = 6;
@@ -29,8 +29,17 @@ Game::Game(size_t width, size_t height)
 
 	//wManager.CreateChunk(0, 0, 0);
 	//wManager.CreateChunk(0, 1, 0, true);
+	const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
+	{
+		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
+		{ "Normal",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA,0 },
+		{ "TexCoord",0,DXGI_FORMAT_R32G32_FLOAT,0,24,D3D11_INPUT_PER_VERTEX_DATA,0 }
+	};
 	wManager.GenerateMeshes();
-
+	test.CreateVertexBuffer(BillBoard::Mesh.first);
+	test.CreateIndexBuffer(BillBoard::Mesh.second);
+	test.CreateVertexShader(L"TextureVS.cso", ied);
+	test.CreatePixelShader(L"TexturePS.cso");
 } 
 
 void Game::doFrame()
@@ -148,6 +157,18 @@ void Game::doFrame()
 
 		wManager.DrawOpaque(player.GetCamera());
 
+
+		auto model = DirectX::XMMatrixTranslation(0, 16, 0);
+		const Transforms tf =
+		{
+			DirectX::XMMatrixTranspose(model * wnd.Gfx().getCamera() * wnd.Gfx().getProjection()),
+			DirectX::XMMatrixTranspose(model)
+		};
+
+		test.UpdateVScBuf(tf);
+
+		test.Render();
+		
 		wManager.DrawTransparent(player.GetCamera());
 
 		wnd.Gfx().EndFrame();

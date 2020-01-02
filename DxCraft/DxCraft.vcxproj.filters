@@ -203,6 +203,9 @@
     <ClInclude Include="RenderData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BillBoard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="TexturePS.hlsl">

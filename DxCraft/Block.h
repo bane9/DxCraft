@@ -5,7 +5,7 @@
 class Block {
 	friend class BasicChunk;
 public:
-	static enum class BlockType {
+	enum class BlockType {
 		Air,
 		Stone,
 		Grass,
@@ -17,12 +17,12 @@ public:
 		block_count
 	};
 
-	static enum class MeshType {
+	enum class MeshType {
 		INDEPENDANT_CUBE,
 		FULL_MESH
 	};
 
-	static enum class SelectorType {
+	enum class SelectorType {
 		BLOCK,
 		BILBOARD_FULL
 	};

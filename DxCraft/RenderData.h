@@ -4,7 +4,7 @@
 #include "Graphics.h"
 #include "ExceptionMacros.h"
 
-struct RenderData {
+class RenderData {
 public:
 	RenderData(Graphics& gfx) : gfx(gfx) {}
 	~RenderData() = default;
