@@ -9,7 +9,7 @@ DxCraft is a work in progress Minecraft clone made in C++17 and DirectX11
   - [x] Block placing/destruction
   - [x] Collision
   - [x] Player physics
-  - [ ] Meshing non cube elements
+  - [X] Meshing non cube elements
   - [X] Frustum culling
   - [ ] Metadata system
   - [ ] Adding the rest of the blocks
