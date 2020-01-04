@@ -58,9 +58,17 @@ static constexpr std::array<std::array<std::array<float, 2>, 6>, static_cast<int
 			{1, 3},
 			{1, 3},
 			{1, 3},
+		}},
+		{{ //Sugar cane
+			{9, 4},
+			{9, 4},
+			{9, 4},
+			{9, 4},
+			{9, 4},
+			{9, 4},
 		}}
 
-	} };
+}};
 
 
 Block::Block()
@@ -93,17 +101,18 @@ Block::BlockType Block::GetBlockType() const noexcept
 bool Block::IsTransparent() const noexcept
 {
 	return (blockType == Block::BlockType::Air ||
-			blockType == Block::BlockType::Glass);
+			blockType == Block::BlockType::Glass || 
+		blockType == Block::BlockType::Sugar_Cane);
 }
 
 bool Block::IsCollideable() const noexcept
 {
-	return !(blockType == Block::BlockType::Air);
+	return !(blockType == Block::BlockType::Air || blockType == Block::BlockType::Sugar_Cane);
 }
 
 bool Block::IsFullMesh() const noexcept
 {
-	return false;
+	return meshType == Block::MeshType::FULL_MESH;
 }
 
 Block::MeshType Block::GetMeshType() const noexcept
@@ -120,12 +129,12 @@ void Block::SetBlockType(BlockType type) noexcept
 {
 	blockType = type;
 
-	if (false)
+	if (type == Block::BlockType::Sugar_Cane)
 		meshType = Block::MeshType::FULL_MESH;
 	else
 		meshType = Block::MeshType::INDEPENDANT_CUBE;
 
-	if (false)
+	if (type == Block::BlockType::Sugar_Cane)
 		selectorType = Block::SelectorType::BILBOARD_FULL;
 	else
 		selectorType = Block::SelectorType::BLOCK;
@@ -137,4 +146,12 @@ const std::array<std::array<float, 2>, 6>& Block::GetTexCoords() const noexcept
 	return BlockTextures[static_cast<int>(blockType)];
 }
 
-
+AABB Block::GetAABB()
+{
+	switch (selectorType) {
+	case Block::SelectorType::BILBOARD_FULL:
+		return AABB({ 0.8f, 0.0f, 0.8f });
+	default:
+		return AABB({ 1.0f, 1.0f, 1.0f });
+	}
+}

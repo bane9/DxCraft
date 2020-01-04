@@ -29,17 +29,7 @@ Game::Game(size_t width, size_t height)
 
 	//wManager.CreateChunk(0, 0, 0);
 	//wManager.CreateChunk(0, 1, 0, true);
-	const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
-	{
-		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "Normal",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "TexCoord",0,DXGI_FORMAT_R32G32_FLOAT,0,24,D3D11_INPUT_PER_VERTEX_DATA,0 }
-	};
 	wManager.GenerateMeshes();
-	test.CreateVertexBuffer(BillBoard::Mesh.first);
-	test.CreateIndexBuffer(BillBoard::Mesh.second);
-	test.CreateVertexShader(L"TextureVS.cso", ied);
-	test.CreatePixelShader(L"TexturePS.cso");
 } 
 
 void Game::doFrame()
@@ -166,8 +156,6 @@ void Game::doFrame()
 		};
 
 		test.UpdateVScBuf(tf);
-
-		test.Render();
 		
 		wManager.DrawTransparent(player.GetCamera());
 

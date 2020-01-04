@@ -19,7 +19,7 @@ public:
 		
 		rayDistance = 0.0f;
 
-		falloff = 0.5f;
+		falloff = 0.001f;
 	}
 
 	bool Next() noexcept
@@ -28,8 +28,6 @@ public:
 		rayPos.y += dy * falloff;
 		rayPos.z += dz * falloff;
 		rayDistance += falloff;
-		falloff *= 0.5f;
-		falloff = std::clamp(falloff, 0.05f, 0.75f);
 		return rayDistance < rayLimit;
 	}
 

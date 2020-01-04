@@ -3,6 +3,7 @@
 #include "Block.h"
 #include "RenderData.h"
 #include "Graphics.h"
+#include "AABB.h"
 
 class BlockSelector {
 	BlockSelector(const BlockSelector&) = delete;
@@ -15,7 +16,6 @@ public:
 	void SetTransforms(const Transforms& tf);
 
 	void Render(Graphics& gfx);
-
 private:
 	RenderData renderData;
 	Block::SelectorType type;

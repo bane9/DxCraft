@@ -4,6 +4,7 @@
 #include <optional>
 #include "Camera.h"
 #include <math.h>
+#include "BillBoard.h"
 
 WorldManager::WorldManager(Graphics& gfx)
 	: gfx(gfx), renderData(gfx)
@@ -30,7 +31,7 @@ void WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
 	if (block.GetBlockType() == Block::BlockType::Bedrock) return;
 	block.SetBlockType(type);
 	GenerateMesh(*chunk);
-	if (block.IsTransparent() && block.GetBlockType() != Block::BlockType::Air) return;
+	if (block.GetBlockType() != Block::BlockType::Air) return;
 	if (normalized.x + 1 >= BasicChunk::chunkSize) {
 		BasicChunk* neighbourChunk = GetChunkFromBlock(x + 1, y, z);
 		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
@@ -124,7 +125,8 @@ void WorldManager::AppendFace(const std::pair<std::array<Vertex, 4>, std::array<
 		return vertex;
 		});
 	const int offset = vertexBuffer.size() > 0 ? (vertexBuffer.size() / 4 - 1) * 4 : 0;
-	std::transform(face.second.begin(), face.second.end(), std::back_inserter(indexBuffer), [offset](int a) {return offset + a;});
+	std::transform(face.second.begin(), face.second.end(), std::back_inserter(indexBuffer), 
+		[offset](int a) {return offset + a;});
 }
 
 bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z, Block::BlockType type)
@@ -134,13 +136,26 @@ bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z, Bl
 		&& x > 0 && y > 0 && z > 0)
 	{
 		auto block = chunk.blocks[chunk.FlatIndex(x, y, z)];
-		return block.IsTransparent() && block.GetBlockType() != type;
+		switch (block.GetBlockType())
+		{
+		case Block::BlockType::Sugar_Cane:
+			return true;
+		default:
+			return block.IsTransparent() && block.GetBlockType() != type;
+		}
+		
 	}
 	else
 	{
 		auto block = GetBlock(x, y, z);
 		if (block == nullptr) return true;
-		return block->IsTransparent() && block->GetBlockType() != type;
+		switch (block->GetBlockType())
+		{
+		case Block::BlockType::Sugar_Cane:
+			return true;
+		default:
+			return block->IsTransparent() && block->GetBlockType() != type;
+		}
 	}
 	return false;
 }
@@ -187,7 +202,6 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 	std::vector<Vertex> transparentVertex;
 	std::vector<uint16_t> transparentIndex;
 
-	int numOfAirBlocks = 0; 
 	for (int x = 0; x < BasicChunk::chunkSize; x++) {
 		for (int y = 0; y < BasicChunk::chunkSize; y++) {
 			for (int z = 0; z < BasicChunk::chunkSize; z++) {
@@ -195,6 +209,11 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 				if (block.GetBlockType() == Block::BlockType::Air) continue;
 
 				auto pos = block.GetPosition();
+
+				if (block.GetBlockType() == Block::BlockType::Sugar_Cane) {
+					AppendFullMesh(BillBoard::MeshL, opaqueVertex, opaqueIndex, block.GetTexCoords(), x, y, z);
+					continue;
+				}
 
 				if (!block.IsTransparent()) {
 					if (BlockVisible(chunk, pos.x + 1, pos.y, pos.z)) {

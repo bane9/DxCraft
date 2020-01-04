@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include "Position.h"
+#include "AABB.h"
 
 class Block {
 	friend class BasicChunk;
@@ -13,8 +14,10 @@ public:
 		Wooden_Plank,
 		Bedrock,
 		Glass,
+		Sugar_Cane,
 
-		block_count
+		block_count,
+		None
 	};
 
 	enum class MeshType {
@@ -43,6 +46,7 @@ public:
 	SelectorType GetSelectorType() const noexcept;
 	void SetBlockType(BlockType type) noexcept;
 	const std::array<std::array<float, 2>, 6>& GetTexCoords() const noexcept;
+	AABB GetAABB();
 
 private:
 	Position pos;

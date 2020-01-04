@@ -1,4 +1,5 @@
 #include "AABB.h"
+#include "MathFunctions.h"
 
 AABB::AABB(const DirectX::XMFLOAT3& dimension)
 	: dimension(dimension)
@@ -72,3 +73,21 @@ float AABB::collision_z_depth(const AABB& obj1, const AABB& obj2, float eps) noe
 	else
 		return obj2.position.z - (obj1.position.z + obj1.dimension.z) - eps;
 }
+
+bool AABB::IsPointInside(DirectX::XMFLOAT3 point)
+{
+	const float min_x = position.x;
+	const float min_y = position.y;
+	const float min_z = position.z;
+
+	const float max_x = min_x + dimension.x;
+	const float max_y = min_y + dimension.y;
+	const float max_z = min_z + dimension.z;
+
+	const float x = point.x;
+	const float y = point.y;
+	const float z = point.z;
+
+	return min_x <= x && x <= max_x && min_y <= y && y <= max_y && min_z <= z && z <= max_z;
+}
+

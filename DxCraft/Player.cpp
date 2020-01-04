@@ -169,8 +169,12 @@ void Player::CastRay()
 		auto block = wManager.GetBlock(round(hitBlock.x), round(hitBlock.y), round(hitBlock.z));
 		if (block != nullptr && block->GetBlockType() != Block::BlockType::Air) {
 			auto pos = block->GetPosition();
+			AABB aabb = block->GetAABB();
+			aabb.SetPosition({(float)pos.x, (float)pos.y, (float)pos.z});
+			if (!aabb.IsPointInside({ round(hitBlock.x), round(hitBlock.y), round(hitBlock.z) })) continue;
 			hitBlockPos = { pos.x, pos.y, pos.z };
 			found = true;
+			blockSelector.SetType(block->GetSelectorType());
 			break;
 		}
 		previousHitBlock = std::move(hitBlock);
@@ -303,8 +307,8 @@ void Player::ChangeBlock(bool decrement)
 		++blockIndex;
 	else
 		--blockIndex;
-	if (blockIndex > 5) blockIndex = 1;
-	else if (blockIndex < 1) blockIndex = 5;
+	if (blockIndex > 6) blockIndex = 1;
+	else if (blockIndex < 1) blockIndex = 6;
 	
 	switch (blockIndex) {
 		case 1:
@@ -326,6 +330,10 @@ void Player::ChangeBlock(bool decrement)
 		case 5:
 			type = Block::BlockType::Glass;
 			blockName = "Glass";
+			break;
+		case 6: 
+			type = Block::BlockType::Sugar_Cane;
+			blockName = "Sugar Cane";
 			break;
 	}
 }
