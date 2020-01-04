@@ -36,28 +36,27 @@ struct BillBoard {
 		13, 15, 14,
 	}
 	};
-
-	static constexpr float MeshMX = 0.4f;
-	static constexpr float MeshMY = 0.5f;
-	static constexpr float MeshMZ = MeshMX;
-	static constexpr std::pair<std::array<Vertex, 16>, std::array<uint16_t, 24>> MeshM{
+	
+	static constexpr float SaplingSide = 0.375f;
+	static constexpr float SaplingSideY = SaplingSide;
+	static constexpr std::pair<std::array<Vertex, 16>, std::array<uint16_t, 24>> Sapling{
 	{
-		Vertex{DirectX::XMFLOAT3(MeshMX, MeshMY, MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 1)},
-		Vertex{DirectX::XMFLOAT3(MeshMX, -MeshMY, MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 2)},
-		Vertex{DirectX::XMFLOAT3(-MeshMX, MeshMY, -MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 1)},
-		Vertex{DirectX::XMFLOAT3(-MeshMX, -MeshMY, -MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 2)},
-		Vertex{DirectX::XMFLOAT3(MeshMX, MeshMY, -MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 1)},
-		Vertex{DirectX::XMFLOAT3(MeshMX, -MeshMY, -MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 2)},
-		Vertex{DirectX::XMFLOAT3(-MeshMX, MeshMY, MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 1)},
-		Vertex{DirectX::XMFLOAT3(-MeshMX, -MeshMY, MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 2)},
-		Vertex{DirectX::XMFLOAT3(-MeshMX, MeshMY, -MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 1)},
-		Vertex{DirectX::XMFLOAT3(-MeshMX, -MeshMY, -MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 2)},
-		Vertex{DirectX::XMFLOAT3(MeshMX, MeshMY, MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 1)},
-		Vertex{DirectX::XMFLOAT3(MeshMX, -MeshMY, MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 2)},
-		Vertex{DirectX::XMFLOAT3(-MeshMX, MeshMY, MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 1)},
-		Vertex{DirectX::XMFLOAT3(-MeshMX, -MeshMY, MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 2)},
-		Vertex{DirectX::XMFLOAT3(MeshMX, MeshMY, -MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 1)},
-		Vertex{DirectX::XMFLOAT3(MeshMX, -MeshMY, -MeshMZ), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 2)}
+		Vertex{DirectX::XMFLOAT3(SaplingSide, SaplingSide, SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 1)},
+		Vertex{DirectX::XMFLOAT3(SaplingSide, -SaplingSide, SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 2)},
+		Vertex{DirectX::XMFLOAT3(-SaplingSide, SaplingSide, -SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 1)},
+		Vertex{DirectX::XMFLOAT3(-SaplingSide, -SaplingSide, -SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 2)},
+		Vertex{DirectX::XMFLOAT3(SaplingSide, SaplingSide, -SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 1)},
+		Vertex{DirectX::XMFLOAT3(SaplingSide, -SaplingSide, -SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 2)},
+		Vertex{DirectX::XMFLOAT3(-SaplingSide, SaplingSide, SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 1)},
+		Vertex{DirectX::XMFLOAT3(-SaplingSide, -SaplingSide, SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 2)},
+		Vertex{DirectX::XMFLOAT3(-SaplingSide, SaplingSide, -SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 1)},
+		Vertex{DirectX::XMFLOAT3(-SaplingSide, -SaplingSide, -SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 2)},
+		Vertex{DirectX::XMFLOAT3(SaplingSide, SaplingSide, SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 1)},
+		Vertex{DirectX::XMFLOAT3(SaplingSide, -SaplingSide, SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 2)},
+		Vertex{DirectX::XMFLOAT3(-SaplingSide, SaplingSide, SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 1)},
+		Vertex{DirectX::XMFLOAT3(-SaplingSide, -SaplingSide, SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(2, 2)},
+		Vertex{DirectX::XMFLOAT3(SaplingSide, SaplingSide, -SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 1)},
+		Vertex{DirectX::XMFLOAT3(SaplingSide, -SaplingSide, -SaplingSide), DirectX::XMFLOAT3(), DirectX::XMFLOAT2(1, 2)}
 	},
 	{
 		1, 2, 0,

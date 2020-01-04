@@ -74,7 +74,7 @@ float AABB::collision_z_depth(const AABB& obj1, const AABB& obj2, float eps) noe
 		return obj2.position.z - (obj1.position.z + obj1.dimension.z) - eps;
 }
 
-bool AABB::IsPointInside(DirectX::XMFLOAT3 point)
+bool AABB::IsLineIntersected(DirectX::XMFLOAT3 orig, DirectX::XMFLOAT3 dest)
 {
 	const float min_x = position.x;
 	const float min_y = position.y;
@@ -84,10 +84,33 @@ bool AABB::IsPointInside(DirectX::XMFLOAT3 point)
 	const float max_y = min_y + dimension.y;
 	const float max_z = min_z + dimension.z;
 
-	const float x = point.x;
-	const float y = point.y;
-	const float z = point.z;
+	float tmin = (min_x - orig.x) / dest.x;
+	float tmax = (max_x - orig.x) / dest.x;
 
-	return min_x <= x && x <= max_x && min_y <= y && y <= max_y && min_z <= z && z <= max_z;
+	if (tmin > tmax) std::swap(tmin, tmax);
+
+	float tymin = (min_y - orig.y) / dest.y;
+	float tymax = (max_y - orig.y) / dest.y;
+
+	if (tymin > tymax) std::swap(tymin, tymax);
+
+	if ((tmin > tymax) || (tymin > tmax))
+		return false;
+
+	if (tymin > tmin)
+		tmin = tymin;
+
+	if (tymax < tmax)
+		tmax = tymax;
+
+	float tzmax = (max_z - orig.z) / dest.z;
+	float tzmin = (min_z - orig.z) / dest.z;
+
+	if (tzmin > tzmax) std::swap(tzmin, tzmax);
+
+	if ((tmin > tzmax) || (tzmin > tmax))
+		return false;
+
+	return true;
 }
 

@@ -4,6 +4,7 @@
 #include "RenderData.h"
 #include "Graphics.h"
 #include "AABB.h"
+#include "Position.h"
 
 class BlockSelector {
 	BlockSelector(const BlockSelector&) = delete;
@@ -13,7 +14,7 @@ public:
 	~BlockSelector() = default;
 
 	void SetType(Block::SelectorType type, bool OverrideCheck = false);
-	void SetTransforms(const Transforms& tf);
+	void SetPosition(Position pos, DirectX::XMMATRIX cam, DirectX::XMMATRIX projection);
 
 	void Render(Graphics& gfx);
 private:

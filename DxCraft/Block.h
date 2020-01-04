@@ -15,6 +15,13 @@ public:
 		Bedrock,
 		Glass,
 		Sugar_Cane,
+		Poppy,
+		Dandelion,
+		Red_Mushroom,
+		Brown_Mushroom,
+		Oak_Sapling,
+		Birch_Sapling,
+		Dark_Oak_Sapling,
 
 		block_count,
 		None
@@ -22,12 +29,18 @@ public:
 
 	enum class MeshType {
 		INDEPENDANT_CUBE,
-		FULL_MESH
+		FULL_MESH_L,
+		FULL_MESH_M,
+		FULL_MESH_S,
+		SAPLING
 	};
 
 	enum class SelectorType {
 		BLOCK,
-		BILBOARD_FULL
+		BILBOARD_FULL_L,
+		MUSHROOM,
+		FLOWER,
+		SAPLING
 	};
 
 public:

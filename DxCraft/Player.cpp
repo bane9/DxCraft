@@ -16,6 +16,7 @@ Player::Player(Graphics& gfx, WorldManager& wManager)
 	crosshair.CreateVertexBuffer(Crosshair::NearSide.first);
 	crosshair.CreateIndexBuffer(Crosshair::NearSide.second);
 	crosshair.CreateVertexShader(L"CrosshairVS.cso", ied);
+	crosshair.CreateVertexShader(L"CrosshairVS.cso", ied);
 	crosshair.CreatePixelShader(L"CrossHairPS.cso");
 	crosshair.UpdateVScBuf(DirectX::XMMatrixTranspose(gfx.getProjection()));
 
@@ -169,9 +170,9 @@ void Player::CastRay()
 		auto block = wManager.GetBlock(round(hitBlock.x), round(hitBlock.y), round(hitBlock.z));
 		if (block != nullptr && block->GetBlockType() != Block::BlockType::Air) {
 			auto pos = block->GetPosition();
-			AABB aabb = block->GetAABB();
+			/*AABB aabb = block->GetAABB();
 			aabb.SetPosition({(float)pos.x, (float)pos.y, (float)pos.z});
-			if (!aabb.IsPointInside({ round(hitBlock.x), round(hitBlock.y), round(hitBlock.z) })) continue;
+			if (!aabb.IsLineIntersected(cameraRay.GetOrigin(), hitBlock)) continue;*/
 			hitBlockPos = { pos.x, pos.y, pos.z };
 			found = true;
 			blockSelector.SetType(block->GetSelectorType());
@@ -224,7 +225,6 @@ void Player::LoopThenDraw()
 		ImGui::End();
 	}
 
-
 	CastRay();
 
 	if (ImGui::Begin("Hit direction")) {
@@ -240,7 +240,6 @@ void Player::LoopThenDraw()
 	}
 
 	if (!flying && !jumping) {
-		auto asd = gfx.GetFrametime();
 		fallVelocity += FRAMETIME_COMPESATED(0.125f * fallSpeedModifier);
 		fallVelocity = std::clamp(fallVelocity, fallMinBound, 100.0f);
 		auto cPos = cam.GetPos();
@@ -281,16 +280,8 @@ void Player::LoopThenDraw()
 	moveVelocity = std::clamp(moveVelocity, velocityMinBound, velocityMaxBound);
 
 	gfx.setCamera(cam.GetMatrix());
-	auto model = DirectX::XMMatrixTranslation(hitBlockPos.x, hitBlockPos.y, hitBlockPos.z);
 
-	const Transforms tf =
-	{
-		DirectX::XMMatrixTranspose(model * gfx.getCamera() * gfx.getProjection()),
-		DirectX::XMMatrixTranspose(model)
-	};
-
-	blockSelector.SetTransforms(tf);
-
+	blockSelector.SetPosition(hitBlockPos, gfx.getCamera(), gfx.getProjection());
 
 	crosshair.Render();
 
@@ -307,8 +298,8 @@ void Player::ChangeBlock(bool decrement)
 		++blockIndex;
 	else
 		--blockIndex;
-	if (blockIndex > 6) blockIndex = 1;
-	else if (blockIndex < 1) blockIndex = 6;
+	if (blockIndex > 13) blockIndex = 1;
+	else if (blockIndex < 1) blockIndex = 13;
 	
 	switch (blockIndex) {
 		case 1:
@@ -334,6 +325,34 @@ void Player::ChangeBlock(bool decrement)
 		case 6: 
 			type = Block::BlockType::Sugar_Cane;
 			blockName = "Sugar Cane";
+			break;
+		case 7:
+			type = Block::BlockType::Dandelion;
+			blockName = "Dandelion";
+			break;
+		case 8:
+			type = Block::BlockType::Poppy;
+			blockName = "Poppy";
+			break;
+		case 9:
+			type = Block::BlockType::Brown_Mushroom;
+			blockName = "Brown Mushroom";
+			break;
+		case 10:
+			type = Block::BlockType::Red_Mushroom;
+			blockName = "Red Mushroom";
+			break;
+		case 11:
+			type = Block::BlockType::Oak_Sapling;
+			blockName = "Oak Sapling";
+			break;
+		case 12:
+			type = Block::BlockType::Birch_Sapling;
+			blockName = "Birch Sapling";
+			break;
+		case 13:
+			type = Block::BlockType::Dark_Oak_Sapling;
+			blockName = "Dark Oak Sapling";
 			break;
 	}
 }

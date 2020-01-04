@@ -136,26 +136,14 @@ bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z, Bl
 		&& x > 0 && y > 0 && z > 0)
 	{
 		auto block = chunk.blocks[chunk.FlatIndex(x, y, z)];
-		switch (block.GetBlockType())
-		{
-		case Block::BlockType::Sugar_Cane:
-			return true;
-		default:
-			return block.IsTransparent() && block.GetBlockType() != type;
-		}
+		return block.IsTransparent();
 		
 	}
 	else
 	{
 		auto block = GetBlock(x, y, z);
 		if (block == nullptr) return true;
-		switch (block->GetBlockType())
-		{
-		case Block::BlockType::Sugar_Cane:
-			return true;
-		default:
-			return block->IsTransparent() && block->GetBlockType() != type;
-		}
+		return block->IsTransparent();
 	}
 	return false;
 }
@@ -210,9 +198,22 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 
 				auto pos = block.GetPosition();
 
-				if (block.GetBlockType() == Block::BlockType::Sugar_Cane) {
+				switch(block.GetMeshType()){
+				case Block::MeshType::FULL_MESH_L:
 					AppendFullMesh(BillBoard::MeshL, opaqueVertex, opaqueIndex, block.GetTexCoords(), x, y, z);
 					continue;
+				case Block::MeshType::FULL_MESH_M:
+					AppendFullMesh(BillBoard::MeshS, opaqueVertex, opaqueIndex, block.GetTexCoords(), x, y, z);
+					continue;
+				case Block::MeshType::FULL_MESH_S:
+					AppendFullMesh(BillBoard::MeshS, opaqueVertex, opaqueIndex, block.GetTexCoords(), x, y, z);
+					continue;
+				case Block::MeshType::SAPLING:
+					AppendFullMesh(BillBoard::Sapling, opaqueVertex, opaqueIndex, block.GetTexCoords(), x, 
+						y - (0.5f - BillBoard::SaplingSideY), z);
+					continue;
+				default:
+					break;
 				}
 
 				if (!block.IsTransparent()) {

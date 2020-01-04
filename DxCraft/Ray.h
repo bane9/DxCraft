@@ -11,12 +11,13 @@ public:
 	{}
 
 	void SetPositionAndDirection(const DirectX::XMFLOAT3& startCoord, float pitch, float yaw) noexcept {
+		rayOrigin = startCoord;
 		rayPos = startCoord;
 
 		dx = std::sin(yaw) * std::cos(pitch);
 		dy = std::sin(-pitch);
 		dz = std::cos(yaw) * std::cos(pitch);
-		
+
 		rayDistance = 0.0f;
 
 		falloff = 0.001f;
@@ -32,13 +33,19 @@ public:
 	}
 
 
-	DirectX::XMFLOAT3 GetVector() const noexcept 
+	DirectX::XMFLOAT3 GetVector() const noexcept
 	{
 		return rayPos;
 	}
 
+	DirectX::XMFLOAT3 GetOrigin() const noexcept
+	{
+		return rayOrigin;
+	}
+
 private:
 	DirectX::XMFLOAT3 rayPos;
+	DirectX::XMFLOAT3 rayOrigin;
 	float dx;
 	float dy;
 	float dz;
