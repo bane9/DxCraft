@@ -220,7 +220,7 @@ void Player::LeftClickEvent()
 
 void Player::LoopThenDraw()
 {
-	evtManager.Loop();
+	evtManager.Loop(gfx.GetFrametime() / 16.667f);
 	if (jumping && falling) {
 		jumping = false;
 		falling = false;
@@ -289,7 +289,7 @@ void Player::LoopThenDraw()
 		blockSelector.Render(gfx);
 	}
 	velocityMaxBound = 1.0f;
-
+	
 }
 
 void Player::ChangeBlock(bool decrement)
