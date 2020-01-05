@@ -9,6 +9,7 @@
 #include "RenderData.h"
 #include <DirectXMath.h>
 #include <algorithm>
+#include <type_traits>
 
 class WorldManager
 {
@@ -28,10 +29,10 @@ private:
 	void AppendFace(const std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>>& face,
 		std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,
 		const std::array<float, 2>& texture, float offsetX, float offsetY, float offsetZ);
-	template<typename Container>
+	template<typename Container, typename UVs>
 	void AppendFullMesh(const Container& mesh,
 		std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,
-		const std::array<std::array<float, 2>, 6>& textures, float offsetX, float offsetY, float offsetZ);
+		const UVs& textures, float offsetX, float offsetY, float offsetZ);
 	bool BlockVisible(const BasicChunk& chunk, int x, int y, int z, Block::BlockType type = Block::BlockType::None);
 	BasicChunk* GetChunkFromBlock(int x, int y, int z);
 	robin_hood::unordered_flat_map <Position, BasicChunk, PositionHash> chunks;
@@ -46,11 +47,12 @@ private:
 	RenderData renderData;
 };
 
-template<typename Container>
+template<typename Container, typename UVs>
 inline void WorldManager::AppendFullMesh(const Container& mesh,
 	std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,
-	const std::array<std::array<float, 2>, 6>& textures, float offsetX, float offsetY, float offsetZ)
+	const UVs& textures, float offsetX, float offsetY, float offsetZ)
 {
+	
 	for (int i = 0; i < textures.size(); i++) {
 		std::transform(mesh.first.begin(), mesh.first.end(), std::back_inserter(vertexBuffer),
 			[offsetX, offsetY, offsetZ, &textures, i](Vertex vertex) {

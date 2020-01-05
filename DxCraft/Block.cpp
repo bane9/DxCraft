@@ -252,12 +252,14 @@ AABB Block::GetAABB()
 {
 	switch (selectorType) {
 	case Block::SelectorType::BILBOARD_FULL_L:
-		return AABB({ 0.4f, 0.5f, 0.4f });
+		return AABB({ 0.8f, 2.0f, 0.8f });
+	case Block::SelectorType::SAPLING:
+		return AABB({ 0.6f, 1.2f, 0.6f });
 	case Block::SelectorType::FLOWER:
-		return AABB({ 0.25f, 0.35f, 0.25f });
+		return AABB({ 0.4f, 1.4f, 0.4f });
 	case Block::SelectorType::MUSHROOM:
-		return AABB({ 0.25f, 0.25f, 0.25f });
+		return AABB({ 0.4f, 0.75f, 0.4f });
 	default:
-		return AABB({ 0.5f, 0.5f, 0.5f });
+		return AABB({ 1.0f, 2.0f, 1.0f });
 	}
 }

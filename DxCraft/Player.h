@@ -73,10 +73,10 @@ private:
 	const float collisionMaxBoud = 0.7f;
 
 	float jumpVelocity = 0.0f;
-	float jumpDistance = 10.5f;
+	float jumpDistance = 8.75f;
 
-	float jumpSpeedModifier = 7.5f;
-	float fallSpeedModifier = 2.5f;
+	float jumpSpeedModifier = 5.0f;
+	float fallSpeedModifier = 2.75f;
 
 	float fallMinBound = 4.0f;
 
@@ -92,7 +92,7 @@ private:
 
 	const float diagonalBlockFace = blockFace;
 
-	const float fallingDecreaseConstant = 0.2f;
+	const float fallingDecreaseConstant = 0.02f;
 
 	const float jumpingDecreaseConstant = 0.75f;
 };

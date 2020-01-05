@@ -15,4 +15,5 @@ public:
 	static float collision_y_depth(const AABB& obj1, const AABB& obj2, float eps = 0.00128f) noexcept;
 	static float collision_z_depth(const AABB& obj1, const AABB& obj2, float eps = 0.00128f) noexcept;
 	bool IsLineIntersected(DirectX::XMFLOAT3 orig, DirectX::XMFLOAT3 dest);
+	bool IsPointInside(const DirectX::XMFLOAT3& point);
 };

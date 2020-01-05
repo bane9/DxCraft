@@ -170,13 +170,14 @@ void Player::CastRay()
 		auto block = wManager.GetBlock(round(hitBlock.x), round(hitBlock.y), round(hitBlock.z));
 		if (block != nullptr && block->GetBlockType() != Block::BlockType::Air) {
 			auto pos = block->GetPosition();
-			/*AABB aabb = block->GetAABB();
-			aabb.SetPosition({(float)pos.x, (float)pos.y, (float)pos.z});
-			if (!aabb.IsLineIntersected(cameraRay.GetOrigin(), hitBlock)) continue;*/
-			hitBlockPos = { pos.x, pos.y, pos.z };
-			found = true;
-			blockSelector.SetType(block->GetSelectorType());
-			break;
+			AABB aabb = block->GetAABB();
+			aabb.SetPosition({(float)pos.x, (float)pos.y - 0.5f, (float)pos.z});
+			if (aabb.IsPointInside(hitBlock)) {
+				hitBlockPos = { pos.x, pos.y, pos.z };
+				found = true;
+				blockSelector.SetType(block->GetSelectorType());
+				break;
+			}
 		}
 		previousHitBlock = std::move(hitBlock);
 		hitBlock = cameraRay.GetVector();

@@ -114,3 +114,20 @@ bool AABB::IsLineIntersected(DirectX::XMFLOAT3 orig, DirectX::XMFLOAT3 dest)
 	return true;
 }
 
+bool AABB::IsPointInside(const DirectX::XMFLOAT3& point)
+{
+	const float min_x = position.x - dimension.x * 0.5f;
+	const float min_y = position.y - dimension.y * 0.5f;
+	const float min_z = position.z - dimension.z * 0.5f;
+
+	const float max_x = position.x + dimension.x * 0.5f;
+	const float max_y = position.y + dimension.y * 0.5f;
+	const float max_z = position.z + dimension.z * 0.5f;
+
+	const float x = point.x;
+	const float y = point.y;
+	const float z = point.z;
+
+	return min_x <= x && x <= max_x && min_y <= y && y <= max_y && min_z <= z && z <= max_z;
+}
+
