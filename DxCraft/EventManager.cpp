@@ -4,13 +4,13 @@
 
 
 using PlaceSignature = bool(WorldManager& wManager, BlockEventManager& blockEvt, const Position& BlockPosition,
-	const Position & PlaceDirection, Block::BlockType BlockType);
-#define PLACE_PARAMATERS WorldManager& wManager, BlockEventManager& blockEvt, const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType
+	const Position & PlaceDirection, Block::BlockType BlockType, int evtDepth);
+#define PLACE_PARAMATERS WorldManager& wManager, BlockEventManager& blockEvt, const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType, int evtDepth
 
 std::array<std::function<PlaceSignature>, 4> PlaceEvent = {
 	[](PLACE_PARAMATERS) { //Default
 		bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
-		if(result) blockEvt.CreateSurroundingUpdates(BlockPosition);
+		if(result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
 		return result;
 	},
 	[](PLACE_PARAMATERS) { //Sugar cane
@@ -18,14 +18,14 @@ std::array<std::function<PlaceSignature>, 4> PlaceEvent = {
 		if (block == nullptr || (block->GetBlockType() != Block::BlockType::Grass &&
 			block->GetBlockType() != Block::BlockType::Sugar_Cane)) return false;
 		bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
-		if (result) blockEvt.CreateSurroundingUpdates(BlockPosition);
+		if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
 		return result;
 	},
 	[](PLACE_PARAMATERS) { //Flowers/Saplings
 		auto block = wManager.GetBlock(BlockPosition.x, BlockPosition.y - 1, BlockPosition.z);
 		if (block == nullptr || (block->GetBlockType() != Block::BlockType::Grass)) return false;
 		bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
-		if (result) blockEvt.CreateSurroundingUpdates(BlockPosition);
+		if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
 		return result;
 	},
 	[](PLACE_PARAMATERS) { //Mushrooms
@@ -33,7 +33,7 @@ std::array<std::function<PlaceSignature>, 4> PlaceEvent = {
 		if (block == nullptr || (block->GetBlockType() != Block::BlockType::Grass
 			&& block->GetBlockType() != Block::BlockType::Stone)) return false;
 		bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
-		if (result) blockEvt.CreateSurroundingUpdates(BlockPosition);
+		if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
 		return result;
 	},
 };
@@ -42,13 +42,13 @@ std::array<std::function<PlaceSignature>, 4> PlaceEvent = {
 
 
 using DestroySignature = bool(WorldManager& wManager, BlockEventManager& blockEvt, 
-	const Position& BlockPosition);
-#define DESTROY_PARAMATERS WorldManager& wManager,  BlockEventManager& blockEvt, const Position& BlockPosition
+	const Position& BlockPosition, int evtDepth);
+#define DESTROY_PARAMATERS WorldManager& wManager,  BlockEventManager& blockEvt, const Position& BlockPosition, int evtDepth
 
 std::array<std::function<DestroySignature>, 2> DestroyEvent = {
 		[](DESTROY_PARAMATERS) { //Default
 			bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z);
-			if (result) blockEvt.CreateSurroundingUpdates(BlockPosition);
+			if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
 			return result;
 		},
 		[](DESTROY_PARAMATERS) { //Sugar cane
@@ -59,13 +59,13 @@ std::array<std::function<DestroySignature>, 2> DestroyEvent = {
 					{0, 0, 0},
 					Block::BlockType::Sugar_Cane,
 					BlockEventManager::Event::EventType::REMOVE_BLOCK,
-					Timer{}.GetTime() * 1000.0f,
-					0.1f / 1000.0f
+					blockEvt.EventTimer.GetTime() * 1000.0f,
+					75.0f
 				};
 				blockEvt.AddEvent(evt);
 			}
 			bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z);
-			if (result) blockEvt.CreateSurroundingUpdates(BlockPosition);
+			if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
 			return result;
 		},
 };
@@ -82,7 +82,7 @@ std::array<std::function<UpdateSignature>, 2> UpdateEvent = {
 	[](UPDATE_PARAMATERS) { //Stuff that cannot float
 		Position pos = evt.blockPosition;
 		auto block = wManager.GetBlock(pos.x, pos.y - 1, pos.z);
-		if (block != nullptr || block->GetBlockType() == Block::BlockType::Air) {
+		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
 			auto currentBlock = wManager.GetBlock(pos.x, pos.y, pos.z);
 			if (currentBlock != nullptr) {
 				BlockEventManager::Event evt1 = {
@@ -90,8 +90,8 @@ std::array<std::function<UpdateSignature>, 2> UpdateEvent = {
 					{0, 0, 0},
 					block->GetBlockType(),
 					BlockEventManager::Event::EventType::REMOVE_BLOCK,
-					Timer{}.GetTime() * 1000.0f,
-					0.1f / 1000.0f
+					blockEvt.EventTimer.GetTime() * 1000.0f,
+					75.0f
 				};
 				blockEvt.AddEvent(evt1);
 			}
@@ -108,54 +108,55 @@ BlockEventManager::BlockEventManager(WorldManager& wManager)
 {
 }
 
-bool BlockEventManager::PlaceBlock(const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType)
+bool BlockEventManager::PlaceBlock(const Position& BlockPosition, const Position& PlaceDirection, 
+	Block::BlockType BlockType, int evtDepth)
 {
 	switch (BlockType)
 	{
 	case Block::BlockType::Sugar_Cane:
-		return PlaceEvent[1](wManager, *this, BlockPosition, PlaceDirection, BlockType);
+		return PlaceEvent[1](wManager, *this, BlockPosition, PlaceDirection, BlockType, evtDepth);
 	case Block::BlockType::Dandelion:
 	case Block::BlockType::Poppy:
 	case Block::BlockType::Birch_Sapling:
 	case Block::BlockType::Oak_Sapling:
 	case Block::BlockType::Dark_Oak_Sapling:
-		return PlaceEvent[2](wManager, *this, BlockPosition, PlaceDirection, BlockType);
+		return PlaceEvent[2](wManager, *this, BlockPosition, PlaceDirection, BlockType, evtDepth);
 	case Block::BlockType::Brown_Mushroom:
 	case Block::BlockType::Red_Mushroom:
-		return PlaceEvent[3](wManager, *this, BlockPosition, PlaceDirection, BlockType);
+		return PlaceEvent[3](wManager, *this, BlockPosition, PlaceDirection, BlockType, evtDepth);
 	default:
-		return PlaceEvent[0](wManager, *this, BlockPosition, PlaceDirection, BlockType);
+		return PlaceEvent[0](wManager, *this, BlockPosition, PlaceDirection, BlockType, evtDepth);
 	}
 }
 
-bool BlockEventManager::RemoveBlock(const Position& BlockPosition)
+bool BlockEventManager::RemoveBlock(const Position& BlockPosition, int evtDepth)
 {
 	auto block = wManager.GetBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z);
 	if (block == nullptr) return false;
 	switch (block->GetBlockType())
 	{
 	case Block::BlockType::Sugar_Cane:
-		return DestroyEvent[1](wManager, *this, BlockPosition);
+		return DestroyEvent[1](wManager, *this, BlockPosition, evtDepth);
 	default:
-		return DestroyEvent[0](wManager, *this, BlockPosition);
+		return DestroyEvent[0](wManager, *this, BlockPosition, evtDepth);
 	}
 }
 
-void BlockEventManager::Loop(float FrametimeCompesator)
+void BlockEventManager::Loop()
 {
 	auto tempEvents = Events;
 	Events.clear();
 	for (auto it = tempEvents.begin(); it < tempEvents.end(); ++it) {
 		const auto& evt = *it;
-		if (Timer{}.GetTime() * 1000.0f - evt.StartTime < (evt.DelayUntilUpdate * FrametimeCompesator)) {
-			Events.push_back(*it);
+		if (EventTimer.GetTime() * 1000.0f - evt.StartTime < evt.DelayUntilUpdate) {
+			Events.push_back(evt);
 			continue;
 		}
 		if (evt.eventType == Event::EventType::REMOVE_BLOCK) {
-			RemoveBlock(evt.blockPosition);
+			RemoveBlock(evt.blockPosition, evt.UpdateDepth);
 		}
 		else if (evt.eventType == Event::EventType::PLACE_BLOCK) {
-			PlaceBlock(evt.blockPosition, evt.placeDirection, evt.blockType);
+			PlaceBlock(evt.blockPosition, evt.placeDirection, evt.blockType, evt.UpdateDepth);
 		}
 		else if (evt.eventType == Event::EventType::UPDATE_BLOCK) {
 			bool result;
@@ -194,14 +195,37 @@ void BlockEventManager::AddEvent(const Event& event)
 void BlockEventManager::CreateSurroundingUpdates(const Position& BlockPosition)
 {
 	Event evt{
-		{BlockPosition.x, BlockPosition.y + 1, BlockPosition.z},
+		{BlockPosition.x, BlockPosition.y, BlockPosition.z},
 		{0, 0, 0},
 		Block::BlockType::None,
 		BlockEventManager::Event::EventType::UPDATE_BLOCK,
-		Timer{}.GetTime() * 1000.0f,
-		0.1f / 1000.0f
+		EventTimer.GetTime() * 1000.0f,
+		75.0f,
+		1
 	};
 
-	AddEvent(evt);
+	auto tempEvt = evt;
+	tempEvt.blockPosition.x--;
+	AddEvent(tempEvt);
+
+	tempEvt = evt;
+	tempEvt.blockPosition.x++;
+	AddEvent(tempEvt);
+
+	tempEvt = evt;
+	tempEvt.blockPosition.y--;
+	AddEvent(tempEvt);
+
+	tempEvt = evt;
+	tempEvt.blockPosition.y++;
+	AddEvent(tempEvt);
+
+	tempEvt = evt;
+	tempEvt.blockPosition.z--;
+	AddEvent(tempEvt);
+
+	tempEvt = evt;
+	tempEvt.blockPosition.z++;
+	AddEvent(tempEvt);
 }
 

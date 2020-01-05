@@ -220,7 +220,7 @@ void Player::LeftClickEvent()
 
 void Player::LoopThenDraw()
 {
-	evtManager.Loop(gfx.GetFrametime() / 16.667f);
+	evtManager.Loop();
 	if (jumping && falling) {
 		jumping = false;
 		falling = false;

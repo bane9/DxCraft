@@ -14,6 +14,7 @@
 
 class Player
 {
+	friend class Game;
 public:
 	Player(Graphics& gfx, WorldManager& wManager);
 	Player(const Player&) = delete;

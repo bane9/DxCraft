@@ -12,9 +12,9 @@ class BlockEventManager
 	BlockEventManager& operator=(const BlockEventManager&) = delete;
 public:
 	BlockEventManager(WorldManager& wManager);
-	bool PlaceBlock(const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType);
-	bool RemoveBlock(const Position& BlockPosition);
-	void Loop(float FrametimeCompesator);
+	bool PlaceBlock(const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType, int evtDepth = 0);
+	bool RemoveBlock(const Position& BlockPosition, int evtDepth = 0);
+	void Loop();
 	struct Event {
 		enum EventType {
 			PLACE_BLOCK,
@@ -31,8 +31,10 @@ public:
 	};
 	void AddEvent(const Event& event);
 	void CreateSurroundingUpdates(const Position& BlockPosition);
+	Timer EventTimer;
 private:
 	WorldManager& wManager;
 	std::vector<Event> Events;
+
 };
 
