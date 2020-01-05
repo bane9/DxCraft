@@ -11,6 +11,9 @@ struct Position {
 	bool operator==(const Position& other) const {
 		return x == other.x && y == other.y && z == other.z;
 	}
+	Position operator+(const Position& other) const {
+		return { x + other.x, y + other.y, z + other.z };
+	}
 	int x, y, z;
 private:
 	void XMFLOAT3ToPos(const DirectX::XMFLOAT3& pos) {

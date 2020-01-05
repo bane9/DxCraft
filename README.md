@@ -11,9 +11,8 @@ DxCraft is a work in progress Minecraft clone made in C++17 and DirectX11
   - [x] Player physics
   - [X] Meshing non cube elements
   - [X] Frustum culling
-  - [ ] Metadata system
-  - [ ] Adding the rest of the blocks
-  - [ ] Plants/trees
+  - [x] Metadata system
+  - [x] Plants/trees
   - [ ] Water/lava
   - [ ] Biomes
   - [ ] Dynamic world generation

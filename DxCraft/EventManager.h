@@ -8,6 +8,7 @@
 
 class BlockEventManager
 {
+	friend class TreeGenerator;
 	BlockEventManager(const BlockEventManager&) = delete;
 	BlockEventManager& operator=(const BlockEventManager&) = delete;
 public:

@@ -188,6 +188,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="RenderData.cpp" />
     <ClCompile Include="Surface.cpp" />
+    <ClCompile Include="TreeGenerator.cpp" />
     <ClCompile Include="ViewFrustum.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="WinMain.cpp" />
@@ -227,6 +228,7 @@
     <ClInclude Include="Surface.h" />
     <ClInclude Include="ThreadSettings.h" />
     <ClInclude Include="Timer.h" />
+    <ClInclude Include="TreeGenerator.h" />
     <ClInclude Include="ViewFrustum.h" />
     <ClInclude Include="WinConfig.h" />
     <ClInclude Include="Window.h" />

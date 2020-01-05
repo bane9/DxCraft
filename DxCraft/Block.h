@@ -22,6 +22,8 @@ public:
 		Oak_Sapling,
 		Birch_Sapling,
 		Dark_Oak_Sapling,
+		Oak_Wood,
+		Leaves,
 
 		block_count,
 		None

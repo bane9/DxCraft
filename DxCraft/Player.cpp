@@ -2,6 +2,7 @@
 #include "MathFunctions.h"
 #include "imgui/imgui.h"
 #include <algorithm>
+#include "TreeGenerator.h"
 
 #define FRAMETIME_COMPESATED(x) ((x) * (gfx.GetFrametime() / 16.667f))
 
@@ -202,8 +203,15 @@ void Player::RightClickEvent()
 		auto block = wManager.GetBlock(previousHitBlock);
 		if (block != nullptr) {
 			auto p = block->GetPosition();
-			if (!(p == camPosUpper || p == camPosLower))
-				evtManager.PlaceBlock(previousHitBlock, hitDirection, type);
+			if (!(p == camPosUpper || p == camPosLower)) {
+				auto checkSapling = wManager.GetBlock(hitBlock);
+				if (checkSapling != nullptr && checkSapling->GetBlockType() == Block::BlockType::Oak_Sapling) {
+					TreeGenerator::GenerateTree(evtManager, hitBlockPos);
+				}
+				else {
+					evtManager.PlaceBlock(previousHitBlock, hitDirection, type);
+				}
+			}
 		}
 
 	}
@@ -298,8 +306,8 @@ void Player::ChangeBlock(bool decrement)
 		++blockIndex;
 	else
 		--blockIndex;
-	if (blockIndex > 13) blockIndex = 1;
-	else if (blockIndex < 1) blockIndex = 13;
+	if (blockIndex > 15) blockIndex = 1;
+	else if (blockIndex < 1) blockIndex = 15;
 	
 	switch (blockIndex) {
 		case 1:
@@ -353,6 +361,14 @@ void Player::ChangeBlock(bool decrement)
 		case 13:
 			type = Block::BlockType::Dark_Oak_Sapling;
 			blockName = "Dark Oak Sapling";
+			break;
+		case 14:
+			type = Block::BlockType::Oak_Wood;
+			blockName = "Oak Wood";
+			break;
+		case 15:
+			type = Block::BlockType::Leaves;
+			blockName = "Leaves";
 			break;
 	}
 }

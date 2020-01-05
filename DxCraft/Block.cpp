@@ -122,6 +122,22 @@ static constexpr std::array<std::array<std::array<float, 2>, 6>, static_cast<int
 			{15, 4},
 			{15, 4},
 			{15, 4},
+		}},
+		{{ //Oak wood
+			{4, 1},
+			{4, 1},
+			{4, 1},
+			{4, 1},
+			{5, 1},
+			{5, 1},
+		}},
+		{{ //Leaves
+			{4, 3},
+			{4, 3},
+			{4, 3},
+			{4, 3},
+			{4, 3},
+			{4, 3},
 		}}
 
 }};
@@ -169,6 +185,7 @@ bool Block::IsTransparent() const noexcept
 	case Block::BlockType::Oak_Sapling:
 	case Block::BlockType::Birch_Sapling:
 	case Block::BlockType::Dark_Oak_Sapling:
+	case Block::BlockType::Leaves:
 		return true;
 	default:
 		return false;

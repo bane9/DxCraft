@@ -195,7 +195,7 @@ void BlockEventManager::AddEvent(const Event& event)
 void BlockEventManager::CreateSurroundingUpdates(const Position& BlockPosition)
 {
 	Event evt{
-		{BlockPosition.x, BlockPosition.y, BlockPosition.z},
+		{BlockPosition.x, BlockPosition.y + 1, BlockPosition.z},
 		{0, 0, 0},
 		Block::BlockType::None,
 		BlockEventManager::Event::EventType::UPDATE_BLOCK,
@@ -204,28 +204,6 @@ void BlockEventManager::CreateSurroundingUpdates(const Position& BlockPosition)
 		1
 	};
 
-	auto tempEvt = evt;
-	tempEvt.blockPosition.x--;
-	AddEvent(tempEvt);
-
-	tempEvt = evt;
-	tempEvt.blockPosition.x++;
-	AddEvent(tempEvt);
-
-	tempEvt = evt;
-	tempEvt.blockPosition.y--;
-	AddEvent(tempEvt);
-
-	tempEvt = evt;
-	tempEvt.blockPosition.y++;
-	AddEvent(tempEvt);
-
-	tempEvt = evt;
-	tempEvt.blockPosition.z--;
-	AddEvent(tempEvt);
-
-	tempEvt = evt;
-	tempEvt.blockPosition.z++;
-	AddEvent(tempEvt);
+	AddEvent(evt);
 }
 
