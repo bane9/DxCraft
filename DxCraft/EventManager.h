@@ -5,6 +5,7 @@
 #include <vector>
 #include "WorldManager.h"
 #include <functional>
+#include <random>
 
 class BlockEventManager
 {
@@ -38,9 +39,11 @@ public:
 	void AddEvent(const Event& event);
 	void CreateSurroundingUpdates(const Position& BlockPosition);
 	Timer EventTimer;
+	std::mt19937 gen;
+	std::uniform_real_distribution<> DestroyDelayRand;
 private:
 	WorldManager& wManager;
 	std::vector<Event> Events;
-
+	std::random_device rd;
 };
 
