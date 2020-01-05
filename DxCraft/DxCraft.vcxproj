@@ -173,6 +173,7 @@
     <ClCompile Include="BlockSelector.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DxgiInfoManager.cpp" />
+    <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GDIPlusManager.cpp" />
     <ClCompile Include="Graphics.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="Crosshair.h" />
     <ClInclude Include="CustomException.h" />
     <ClInclude Include="DxgiInfoManager.h" />
+    <ClInclude Include="EventManager.h" />
     <ClInclude Include="ExceptionMacros.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GDIPlusManager.h" />

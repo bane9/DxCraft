@@ -27,8 +27,6 @@ Game::Game(size_t width, size_t height)
 		}
 	}
 
-	//wManager.CreateChunk(0, 0, 0);
-	//wManager.CreateChunk(0, 1, 0, true);
 	wManager.GenerateMeshes();
 } 
 
@@ -134,8 +132,6 @@ void Game::doFrame()
 			ImGui::End();
 		}
 
-
-
 		if (wnd.mouse.LeftIsPressed()) {
 			player.LeftClickEvent();
 		}
@@ -144,8 +140,6 @@ void Game::doFrame()
 		}
 
 		player.LoopThenDraw();
-
-		wManager.DrawOpaque(player.GetCamera());
 
 
 		auto model = DirectX::XMMatrixTranslation(0, 16, 0);
@@ -157,7 +151,7 @@ void Game::doFrame()
 
 		test.UpdateVScBuf(tf);
 		
-		wManager.DrawTransparent(player.GetCamera());
+		wManager.RenderChunks(player.GetCamera());
 
 		wnd.Gfx().EndFrame();
 	}

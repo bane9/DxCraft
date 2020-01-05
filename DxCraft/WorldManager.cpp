@@ -21,17 +21,17 @@ void WorldManager::CreateChunk(int x, int y, int z, bool empty)
 		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize, empty));
 }
 
-void WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
+bool WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
 {
-	if (y < 0) return;
+	if (y < 0) return false;
 	BasicChunk* chunk = GetChunkFromBlock(x, y, z);
-	if (chunk == nullptr) return;
+	if (chunk == nullptr) return false;
 	Position normalized = chunk->Normalize(x, y, z);
 	Block& block = chunk->blocks[chunk->FlatIndex(x, y, z)];
-	if (block.GetBlockType() == Block::BlockType::Bedrock) return;
+	if (block.GetBlockType() == Block::BlockType::Bedrock) return false;
 	block.SetBlockType(type);
 	GenerateMesh(*chunk);
-	if (block.GetBlockType() != Block::BlockType::Air) return;
+	if (block.GetBlockType() != Block::BlockType::Air) return false;
 	if (normalized.x + 1 >= BasicChunk::chunkSize) {
 		BasicChunk* neighbourChunk = GetChunkFromBlock(x + 1, y, z);
 		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
@@ -56,7 +56,7 @@ void WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
 		BasicChunk* neighbourChunk = GetChunkFromBlock(x, y, z - 1);
 		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
 	}
-
+	return true;
 }
 
 void WorldManager::GenerateMeshes() {
@@ -68,7 +68,7 @@ void WorldManager::GenerateMeshes() {
 	OutputDebugString(asd.c_str());
 }
 
-void WorldManager::DrawOpaque(Camera& cam)
+void WorldManager::RenderChunks(Camera& cam)
 {
 	for (auto& chunk : chunks) {
 		if(!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
@@ -82,51 +82,10 @@ void WorldManager::DrawOpaque(Camera& cam)
 		
 		renderData.UpdateVScBuf(tf);
 
-		if(chunk.second.opaqueIndexBufferSize > 0)
-			RenderData::Render(renderData, chunk.second.opaqueVertexBuffer, chunk.second.opaqueIndexBuffer,
-				chunk.second.opaqueIndexBufferSize, sizeof(Vertex));
+		if(chunk.second.IndexBufferSize > 0)
+			RenderData::Render(renderData, chunk.second.VertexBuffer, chunk.second.IndexBuffer,
+				chunk.second.IndexBufferSize, sizeof(Vertex));
 	}
-}
-
-void WorldManager::DrawTransparent(Camera& cam)
-{
-	for (auto& chunk : chunks) {
-		if (!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
-		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
-
-		const Transforms tf =
-		{
-			DirectX::XMMatrixTranspose(model * gfx.getCamera() * gfx.getProjection()),
-			DirectX::XMMatrixTranspose(model)
-		};
-
-		renderData.UpdateVScBuf(tf);
-
-		if (chunk.second.transparentIndexBufferSize > 0)
-			RenderData::Render(renderData, chunk.second.transparentVertexBuffer, chunk.second.transparentIndexBuffer,
-				chunk.second.transparentIndexBufferSize, sizeof(Vertex));
-	}
-}
-
-void WorldManager::AppendFace(const std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>>& face,
-	std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,
-	const std::array<float, 2>& texture, float offsetX, float offsetY, float offsetZ)
-{
-	std::transform(face.first.begin(), face.first.end(), std::back_inserter(vertexBuffer), [offsetX, offsetY, offsetZ, &texture](Vertex vertex) {
-		vertex.pos.x += offsetX;
-		vertex.pos.y += offsetY;
-		vertex.pos.z += offsetZ;
-		const float startTexX = texture[0] / 16.0f;
-		const float endTexX   = (texture[0] + 1.0f) / 16.0f;
-		const float startTexY = texture[1] / 16.0f;
-		const float endTexY   = (texture[1] + 1.0f) / 16.0f;
-		vertex.tc.x = vertex.tc.x == 1 ? startTexX : endTexX;
-		vertex.tc.y = vertex.tc.y == 1 ? startTexY : endTexY;
-		return vertex;
-		});
-	const int offset = vertexBuffer.size() > 0 ? (vertexBuffer.size() / 4 - 1) * 4 : 0;
-	std::transform(face.second.begin(), face.second.end(), std::back_inserter(indexBuffer), 
-		[offset](int a) {return offset + a;});
 }
 
 bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z, Block::BlockType type)
@@ -184,11 +143,8 @@ Block* WorldManager::GetBlock(const DirectX::XMFLOAT3& pos)
 
 void WorldManager::GenerateMesh(BasicChunk& chunk)
 {
-	std::vector<Vertex> opaqueVertex;
-	std::vector<uint16_t> opaqueIndex;
-
-	std::vector<Vertex> transparentVertex;
-	std::vector<uint16_t> transparentIndex;
+	std::vector<Vertex> VertexBuffer;
+	std::vector<uint16_t> IndexBuffer;
 
 	for (int x = 0; x < BasicChunk::chunkSize; x++) {
 		for (int y = 0; y < BasicChunk::chunkSize; y++) {
@@ -200,16 +156,13 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 
 				switch(block.GetMeshType()){
 				case Block::MeshType::FULL_MESH_L:
-					AppendFullMesh(BillBoard::MeshL, opaqueVertex, opaqueIndex, block.GetTexCoords(), x, y, z);
-					continue;
-				case Block::MeshType::FULL_MESH_M:
-					AppendFullMesh(BillBoard::MeshS, opaqueVertex, opaqueIndex, block.GetTexCoords(), x, y, z);
+					AppendMesh(BillBoard::MeshL, VertexBuffer, IndexBuffer, block.GetTexCoords(), x, y, z);
 					continue;
 				case Block::MeshType::FULL_MESH_S:
-					AppendFullMesh(BillBoard::MeshS, opaqueVertex, opaqueIndex, block.GetTexCoords(), x, y, z);
+					AppendMesh(BillBoard::MeshS, VertexBuffer, IndexBuffer, block.GetTexCoords(), x, y, z);
 					continue;
 				case Block::MeshType::SAPLING:
-					AppendFullMesh(BillBoard::Sapling, opaqueVertex, opaqueIndex, block.GetTexCoords(), x, 
+					AppendMesh(BillBoard::Sapling, VertexBuffer, IndexBuffer, block.GetTexCoords(), x, 
 						y - (0.5f - BillBoard::SaplingSideY), z);
 					continue;
 				default:
@@ -218,53 +171,53 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 
 				if (!block.IsTransparent()) {
 					if (BlockVisible(chunk, pos.x + 1, pos.y, pos.z)) {
-						AppendFace(Faces::RightSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[3],
+						AppendMesh(Faces::RightSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[3],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x - 1, pos.y, pos.z)) {
-						AppendFace(Faces::LeftSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[2],
+						AppendMesh(Faces::LeftSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[2],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y + 1, pos.z)) {
-						AppendFace(Faces::TopSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[5],
+						AppendMesh(Faces::TopSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[5],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y - 1, pos.z)) {
-						AppendFace(Faces::BottomSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[4],
+						AppendMesh(Faces::BottomSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[4],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y, pos.z + 1)) {
-						AppendFace(Faces::FarSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[0],
+						AppendMesh(Faces::FarSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[0],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y, pos.z - 1)) {
-						AppendFace(Faces::NearSide, opaqueVertex, opaqueIndex, block.GetTexCoords()[1],
+						AppendMesh(Faces::NearSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[1],
 							x, y, z);
 					}
 				}
 				else {
 					if (BlockVisible(chunk, pos.x + 1, pos.y, pos.z, block.GetBlockType())) {
-						AppendFace(Faces::RightSide, transparentVertex, transparentIndex, block.GetTexCoords()[3],
+						AppendMesh(Faces::RightSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[3],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x - 1, pos.y, pos.z, block.GetBlockType())) {
-						AppendFace(Faces::LeftSide, transparentVertex, transparentIndex, block.GetTexCoords()[2],
+						AppendMesh(Faces::LeftSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[2],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y + 1, pos.z, block.GetBlockType())) {
-						AppendFace(Faces::TopSide, transparentVertex, transparentIndex, block.GetTexCoords()[5],
+						AppendMesh(Faces::TopSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[5],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y - 1, pos.z, block.GetBlockType())) {
-						AppendFace(Faces::BottomSide, transparentVertex, transparentIndex, block.GetTexCoords()[4],
+						AppendMesh(Faces::BottomSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[4],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y, pos.z + 1, block.GetBlockType())) {
-						AppendFace(Faces::FarSide, transparentVertex, transparentIndex, block.GetTexCoords()[0],
+						AppendMesh(Faces::FarSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[0],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y, pos.z - 1, block.GetBlockType())) {
-						AppendFace(Faces::NearSide, transparentVertex, transparentIndex, block.GetTexCoords()[1],
+						AppendMesh(Faces::NearSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[1],
 							x, y, z);
 					}
 				}
@@ -272,18 +225,11 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 		}
 	}
 	
-	if (opaqueVertex.size() > 0 && opaqueIndex.size() > 0) {
-		chunk.opaqueVertexBuffer = RenderData::CreateVertexBuffer(gfx, opaqueVertex);
-		chunk.opaqueIndexBuffer = RenderData::CreateIndexBuffer(gfx, opaqueIndex);
-		chunk.opaqueIndexBufferSize = opaqueIndex.size();
+	if (VertexBuffer.size() > 0 && IndexBuffer.size() > 0) {
+		chunk.VertexBuffer = RenderData::CreateVertexBuffer(gfx, VertexBuffer);
+		chunk.IndexBuffer = RenderData::CreateIndexBuffer(gfx, IndexBuffer);
+		chunk.IndexBufferSize = IndexBuffer.size();
 	}
-	else chunk.opaqueIndexBufferSize = 0;
-
-	if (transparentVertex.size() > 0 && transparentIndex.size() > 0) {
-		chunk.transparentVertexBuffer = RenderData::CreateVertexBuffer(gfx, transparentVertex);
-		chunk.transparentIndexBuffer = RenderData::CreateIndexBuffer(gfx, transparentIndex);
-		chunk.transparentIndexBufferSize = transparentIndex.size();
-	}
-	else chunk.transparentIndexBufferSize = 0;
+	else chunk.IndexBufferSize = 0;
 
 }

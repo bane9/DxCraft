@@ -11,11 +11,12 @@ Player::Player(Graphics& gfx, WorldManager& wManager)
 	wManager(wManager),
 	hitBlockPos(-1, -1, -1),
 	blockSelector(gfx),
-	crosshair(gfx)
+	crosshair(gfx),
+	evtManager(wManager),
+	hitDirection(0, 0, 0)
 {
 	crosshair.CreateVertexBuffer(Crosshair::NearSide.first);
 	crosshair.CreateIndexBuffer(Crosshair::NearSide.second);
-	crosshair.CreateVertexShader(L"CrosshairVS.cso", ied);
 	crosshair.CreateVertexShader(L"CrosshairVS.cso", ied);
 	crosshair.CreatePixelShader(L"CrossHairPS.cso");
 	crosshair.UpdateVScBuf(DirectX::XMMatrixTranspose(gfx.getProjection()));
@@ -171,11 +172,14 @@ void Player::CastRay()
 		if (block != nullptr && block->GetBlockType() != Block::BlockType::Air) {
 			auto pos = block->GetPosition();
 			AABB aabb = block->GetAABB();
-			aabb.SetPosition({(float)pos.x, (float)pos.y - 0.5f, (float)pos.z});
+			aabb.SetPosition({static_cast<float>(pos.x), static_cast<float>(pos.y) - 0.5f, static_cast<float>(pos.z)});
 			if (aabb.IsPointInside(hitBlock)) {
 				hitBlockPos = { pos.x, pos.y, pos.z };
 				found = true;
 				blockSelector.SetType(block->GetSelectorType());
+				hitDirection = { 0, (int)(round(hitBlock.y) - round(previousHitBlock.y)), 0 };
+				hitDirection.x = hitDirection.y != 0 ? 0 : (int)(round(hitBlock.x) - round(previousHitBlock.x));
+				hitDirection.z = hitDirection.y != 0 || hitDirection.z != 0 ? 0 : (int)(round(hitBlock.z) - round(previousHitBlock.z));
 				break;
 			}
 		}
@@ -199,7 +203,7 @@ void Player::RightClickEvent()
 		if (block != nullptr) {
 			auto p = block->GetPosition();
 			if (!(p == camPosUpper || p == camPosLower))
-				wManager.ModifyBlock(p.x, p.y, p.z, type);
+				evtManager.PlaceBlock(previousHitBlock, hitDirection, type);
 		}
 
 	}
@@ -209,13 +213,14 @@ void Player::RightClickEvent()
 void Player::LeftClickEvent()
 {
 	if (found && destroyTimer.GetTime() > 0.075f)
-		wManager.ModifyBlock(hitBlockPos.x, hitBlockPos.y, hitBlockPos.z);
+		evtManager.RemoveBlock(hitBlockPos);
 
 	destroyTimer.Mark();
 }
 
 void Player::LoopThenDraw()
 {
+	evtManager.Loop();
 	if (jumping && falling) {
 		jumping = false;
 		falling = false;
@@ -230,13 +235,7 @@ void Player::LoopThenDraw()
 
 	if (ImGui::Begin("Hit direction")) {
 		if(!found) ImGui::Text("%s", "Not hit");
-		else {
-			
-			Position hitDirection(0, (int)(round(hitBlock.y) - round(previousHitBlock.y)), 0);
-			hitDirection.x = hitDirection.y != 0 ? 0 : (int)(round(hitBlock.x) - round(previousHitBlock.x));
-			hitDirection.z = hitDirection.y != 0 || hitDirection.z != 0 ? 0 : (int)(round(hitBlock.z) - round(previousHitBlock.z));
-			ImGui::Text("%i %i %i", hitDirection.x, hitDirection.y, hitDirection.z);
-		}
+		else ImGui::Text("%i %i %i", hitDirection.x, hitDirection.y, hitDirection.z);
 		ImGui::End();
 	}
 

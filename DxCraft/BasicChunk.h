@@ -22,13 +22,9 @@ private:
 	inline int FlatIndex(int x, int y, int z) const noexcept;
 	std::vector<Block> blocks;
 	
-	Microsoft::WRL::ComPtr<ID3D11Buffer> opaqueVertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> opaqueIndexBuffer;
-	UINT opaqueIndexBufferSize = 0;
-
-	Microsoft::WRL::ComPtr<ID3D11Buffer> transparentVertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> transparentIndexBuffer;
-	UINT transparentIndexBufferSize = 0;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
+	UINT IndexBufferSize = 0;
 
 	int x, y, z;
 	AABB aabb;

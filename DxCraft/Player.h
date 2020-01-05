@@ -10,6 +10,7 @@
 #include "BlockSelector.h"
 #include <DirectXMath.h>
 #include "XM_Structs.h"
+#include "EventManager.h"
 
 class Player
 {
@@ -52,6 +53,8 @@ private:
 	DirectX::XMFLOAT3 hitBlock;
 	DirectX::XMFLOAT3 previousHitBlock;
 	DirectX::XMFLOAT3 momentum{0.0f, 0.0f, 0.0f};
+	Position hitDirection;
+	BlockEventManager evtManager;
 	Position hitBlockPos;
 	Ray cameraRay;
 	float speed = 7.0f;
