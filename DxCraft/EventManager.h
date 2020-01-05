@@ -29,6 +29,11 @@ public:
 		float StartTime = 0.0f;
 		float DelayUntilUpdate = 0.0f;
 		int UpdateDepth = 0;
+		struct DependantOnBlock {
+			Position pos = { 0, 0, 0 };
+			Block::BlockType type = Block::BlockType::None;
+		};
+		DependantOnBlock dependantOnBlock;
 	};
 	void AddEvent(const Event& event);
 	void CreateSurroundingUpdates(const Position& BlockPosition);

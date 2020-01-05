@@ -2,7 +2,6 @@
 #include <array>
 
 
-
 using PlaceSignature = bool(WorldManager& wManager, BlockEventManager& blockEvt, const Position& BlockPosition,
 	const Position & PlaceDirection, Block::BlockType BlockType, int evtDepth);
 #define PLACE_PARAMATERS WorldManager& wManager, BlockEventManager& blockEvt, const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType, int evtDepth
@@ -45,7 +44,7 @@ using DestroySignature = bool(WorldManager& wManager, BlockEventManager& blockEv
 	const Position& BlockPosition, int evtDepth);
 #define DESTROY_PARAMATERS WorldManager& wManager,  BlockEventManager& blockEvt, const Position& BlockPosition, int evtDepth
 
-std::array<std::function<DestroySignature>, 2> DestroyEvent = {
+std::array<std::function<DestroySignature>, 3> DestroyEvent = {
 		[](DESTROY_PARAMATERS) { //Default
 			bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z);
 			if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
@@ -68,6 +67,9 @@ std::array<std::function<DestroySignature>, 2> DestroyEvent = {
 			if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
 			return result;
 		},
+		[](DESTROY_PARAMATERS) { //No spread
+			return wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z);
+		}
 };
 #undef DESTROY_PARAMATERS
 
@@ -75,7 +77,7 @@ std::array<std::function<DestroySignature>, 2> DestroyEvent = {
 using UpdateSignature = bool(WorldManager& wManager, BlockEventManager& blockEvt, const BlockEventManager::Event& evt);
 #define UPDATE_PARAMATERS WorldManager& wManager,  BlockEventManager& blockEvt, const BlockEventManager::Event& evt
 
-std::array<std::function<UpdateSignature>, 2> UpdateEvent = {
+std::array<std::function<UpdateSignature>, 3> UpdateEvent = {
 	[](UPDATE_PARAMATERS) { //Default
 		return true;
 	},
@@ -98,6 +100,22 @@ std::array<std::function<UpdateSignature>, 2> UpdateEvent = {
 			wManager.ModifyBlock(pos.x, pos.y, pos.z);
 		}
 		return true;
+	},
+	[](UPDATE_PARAMATERS) { //Leaves
+		auto block = wManager.GetBlock(evt.dependantOnBlock.pos.x, evt.dependantOnBlock.pos.y, evt.dependantOnBlock.pos.z);
+		if (block == nullptr || block->GetBlockType() != evt.dependantOnBlock.type) {
+			BlockEventManager::Event evt1 = {
+					evt.blockPosition,
+					{0, 0, 0},
+					Block::BlockType::None,
+					BlockEventManager::Event::EventType::REMOVE_BLOCK,
+					blockEvt.EventTimer.GetTime() * 1000.0f,
+					1000.0f + static_cast<float>(rand() % 20000)
+			};
+			blockEvt.AddEvent(evt1);
+			return false;
+		}
+		return false;
 	}
 };
 #undef UPDATE_PARAMATERS
@@ -137,6 +155,8 @@ bool BlockEventManager::RemoveBlock(const Position& BlockPosition, int evtDepth)
 	{
 	case Block::BlockType::Sugar_Cane:
 		return DestroyEvent[1](wManager, *this, BlockPosition, evtDepth);
+	case Block::BlockType::Leaves:
+		return DestroyEvent[2](wManager, *this, BlockPosition, evtDepth);
 	default:
 		return DestroyEvent[0](wManager, *this, BlockPosition, evtDepth);
 	}
@@ -173,6 +193,9 @@ void BlockEventManager::Loop()
 				case Block::BlockType::Brown_Mushroom:
 				case Block::BlockType::Red_Mushroom:
 					result = UpdateEvent[1](wManager, *this, evt);
+					break;
+				case Block::BlockType::Leaves:
+					result = UpdateEvent[2](wManager, *this, evt);
 					break;
 				default:
 					result = UpdateEvent[0](wManager, *this, evt);
