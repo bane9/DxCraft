@@ -170,7 +170,7 @@ void Player::CastRay()
 
 	while (cameraRay.Next()) {
 		auto block = wManager.GetBlock(round(hitBlock.x), round(hitBlock.y), round(hitBlock.z));
-		if (block != nullptr && block->GetBlockType() != Block::BlockType::Air) {
+		if (block != nullptr && block->GetBlockType() != Block::BlockType::Air && !block->IsLiquid()) {
 			auto pos = block->GetPosition();
 			AABB aabb = block->GetAABB();
 			aabb.SetPosition({static_cast<float>(pos.x), static_cast<float>(pos.y) - 0.5f, static_cast<float>(pos.z)});
@@ -187,6 +187,16 @@ void Player::CastRay()
 		previousHitBlock = std::move(hitBlock);
 		hitBlock = cameraRay.GetVector();
 	}
+}
+
+void Player::PlaceLiquid()
+{
+	BlockEventManager::Event evt = {};
+	evt.blockPosition = previousHitBlock;
+	evt.blockType = Block::BlockType::Water;
+	evt.eventType = BlockEventManager::Event::EventType::PLACE_BLOCK;
+	evt.water_level = 7;
+	evtManager.AddEvent(evt);
 }
 
 void Player::RotateCamera(float dx, float dy)
@@ -207,6 +217,9 @@ void Player::RightClickEvent()
 				auto checkSapling = wManager.GetBlock(hitBlock);
 				if (checkSapling != nullptr && checkSapling->GetBlockType() == Block::BlockType::Oak_Sapling) {
 					TreeGenerator::GenerateTree(evtManager, hitBlockPos);
+				}
+				else if (type == Block::BlockType::Water) {
+					PlaceLiquid();
 				}
 				else {
 					evtManager.PlaceBlock(previousHitBlock, hitDirection, type);
@@ -241,7 +254,7 @@ void Player::LoopThenDraw()
 
 	CastRay();
 
-	if (ImGui::Begin("Hit direction")) {
+	if (false && ImGui::Begin("Hit direction")) {
 		if(!found) ImGui::Text("%s", "Not hit");
 		else ImGui::Text("%i %i %i", hitDirection.x, hitDirection.y, hitDirection.z);
 		ImGui::End();
@@ -306,8 +319,8 @@ void Player::ChangeBlock(bool decrement)
 		++blockIndex;
 	else
 		--blockIndex;
-	if (blockIndex > 15) blockIndex = 1;
-	else if (blockIndex < 1) blockIndex = 15;
+	if (blockIndex > 17) blockIndex = 1;
+	else if (blockIndex < 1) blockIndex = 17;
 	
 	switch (blockIndex) {
 		case 1:
@@ -369,6 +382,14 @@ void Player::ChangeBlock(bool decrement)
 		case 15:
 			type = Block::BlockType::Leaves;
 			blockName = "Leaves";
+			break;
+		case 16:
+			type = Block::BlockType::Water;
+			blockName = "Water";
+			break;
+		case 17:
+			type = Block::BlockType::Lava;
+			blockName = "Lava";
 			break;
 	}
 }

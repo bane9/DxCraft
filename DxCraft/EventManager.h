@@ -13,10 +13,6 @@ class BlockEventManager
 	BlockEventManager(const BlockEventManager&) = delete;
 	BlockEventManager& operator=(const BlockEventManager&) = delete;
 public:
-	BlockEventManager(WorldManager& wManager);
-	bool PlaceBlock(const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType, int evtDepth = 0);
-	bool RemoveBlock(const Position& BlockPosition, int evtDepth = 0);
-	void Loop();
 	struct Event {
 		enum EventType {
 			PLACE_BLOCK,
@@ -35,9 +31,14 @@ public:
 			Block::BlockType type = Block::BlockType::None;
 		};
 		DependantOnBlock dependantOnBlock;
+		int water_level = 0;
 	};
+	BlockEventManager(WorldManager& wManager);
+	bool PlaceBlock(const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType, Event evt = {});
+	bool RemoveBlock(const Position& BlockPosition, Event evt = {});
+	void Loop();
 	void AddEvent(const Event& event);
-	void CreateSurroundingUpdates(const Position& BlockPosition);
+	void CreateSurroundingUpdates(const Position& BlockPosition, int updateDepth = 0);
 	Timer EventTimer;
 	std::mt19937 gen;
 	std::uniform_real_distribution<> DestroyDelayRand;

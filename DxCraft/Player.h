@@ -37,6 +37,7 @@ public:
 
 private:
 	void CastRay();
+	void PlaceLiquid();
 	void ResolveCollision(DirectX::XMFLOAT3 delta);
 	int blockIndex = 1;
 	std::string blockName = "Stone";

@@ -4,17 +4,17 @@
 #include <math.h>
 
 struct Position {
-	Position(int x = 0, int y = 0, int z = 0) : x(x), y(y), z(z) {}
-	Position() = delete;
+	Position(int x, int y, int z) : x(x), y(y), z(z) {}
+	Position() = default;
 	Position(const DirectX::XMFLOAT3& pos) { XMFLOAT3ToPos(pos); }
-	Position& operator=(const DirectX::XMFLOAT3& pos) { XMFLOAT3ToPos(pos); }
+	Position& operator=(const DirectX::XMFLOAT3& pos) { XMFLOAT3ToPos(pos); return *this; }
 	bool operator==(const Position& other) const {
 		return x == other.x && y == other.y && z == other.z;
 	}
 	Position operator+(const Position& other) const {
 		return { x + other.x, y + other.y, z + other.z };
 	}
-	int x, y, z;
+	int x = 0, y = 0, z = 0;
 private:
 	void XMFLOAT3ToPos(const DirectX::XMFLOAT3& pos) {
 		x = static_cast<int>(round(pos.x));

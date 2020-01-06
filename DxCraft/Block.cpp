@@ -138,6 +138,22 @@ static constexpr std::array<std::array<std::array<float, 2>, 6>, static_cast<int
 			{4, 3},
 			{4, 3},
 			{4, 3},
+		}},
+		{{ //Water
+			{14, 13},
+			{14, 13},
+			{14, 13},
+			{14, 13},
+			{14, 13},
+			{14, 13},
+		}},
+		{{ //Lava
+			{14, 15},
+			{14, 15},
+			{14, 15},
+			{14, 15},
+			{14, 15},
+			{14, 15},
 		}}
 
 }};
@@ -186,6 +202,8 @@ bool Block::IsTransparent() const noexcept
 	case Block::BlockType::Birch_Sapling:
 	case Block::BlockType::Dark_Oak_Sapling:
 	case Block::BlockType::Leaves:
+	case Block::BlockType::Water:
+	case Block::BlockType::Lava:
 		return true;
 	default:
 		return false;
@@ -206,6 +224,8 @@ bool Block::IsCollideable() const noexcept
 	case Block::BlockType::Oak_Sapling:
 	case Block::BlockType::Birch_Sapling:
 	case Block::BlockType::Dark_Oak_Sapling:
+	case Block::BlockType::Water:
+	case Block::BlockType::Lava:
 		return false;
 	default:
 		return true;
@@ -265,7 +285,7 @@ const std::array<std::array<float, 2>, 6>& Block::GetTexCoords() const noexcept
 	return BlockTextures[static_cast<int>(blockType)];
 }
 
-AABB Block::GetAABB()
+AABB Block::GetAABB() const noexcept
 {
 	switch (selectorType) {
 	case Block::SelectorType::BILBOARD_FULL_L:
@@ -278,5 +298,28 @@ AABB Block::GetAABB()
 		return AABB({ 0.4f, 0.75f, 0.4f });
 	default:
 		return AABB({ 1.0f, 2.0f, 1.0f });
+	}
+}
+
+bool Block::NeedsSeperateDrawCall() const noexcept
+{
+	switch (blockType)
+	{
+	case Block::BlockType::Water:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool Block::IsLiquid() const noexcept
+{
+	switch (blockType)
+	{
+	case Block::BlockType::Water:
+	case Block::BlockType::Lava:
+		return true;
+	default:
+		return false;
 	}
 }

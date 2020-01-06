@@ -26,6 +26,10 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
 	UINT IndexBufferSize = 0;
 
+	Microsoft::WRL::ComPtr<ID3D11Buffer> AdditionalVertexBuffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> AdditionalIndexBuffer;
+	UINT AdditionalIndexBufferSize = 0;
+
 	int x, y, z;
 	AABB aabb;
 };

@@ -24,6 +24,8 @@ public:
 		Dark_Oak_Sapling,
 		Oak_Wood,
 		Leaves,
+		Water,
+		Lava,
 
 		block_count,
 		None
@@ -61,8 +63,16 @@ public:
 	SelectorType GetSelectorType() const noexcept;
 	void SetBlockType(BlockType type) noexcept;
 	const std::array<std::array<float, 2>, 6>& GetTexCoords() const noexcept;
-	AABB GetAABB();
-
+	AABB GetAABB() const noexcept;
+	bool NeedsSeperateDrawCall() const noexcept;
+	bool IsLiquid() const noexcept;
+	struct LiquidInfo {
+		static constexpr int water_spread = 7;
+		static constexpr int lava_spread = 4;
+		int level;
+		int angle;
+	};
+	LiquidInfo liquidInfo;
 private:
 	Position pos;
 	BlockType blockType;

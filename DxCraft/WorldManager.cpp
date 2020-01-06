@@ -86,6 +86,23 @@ void WorldManager::RenderChunks(Camera& cam)
 			RenderData::Render(renderData, chunk.second.VertexBuffer, chunk.second.IndexBuffer,
 				chunk.second.IndexBufferSize, sizeof(Vertex));
 	}
+
+	for (auto& chunk : chunks) {
+		if (!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
+		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
+
+		const Transforms tf =
+		{
+			DirectX::XMMatrixTranspose(model * gfx.getCamera() * gfx.getProjection()),
+			DirectX::XMMatrixTranspose(model)
+		};
+
+		renderData.UpdateVScBuf(tf);
+
+		if (chunk.second.AdditionalIndexBufferSize > 0)
+			RenderData::Render(renderData, chunk.second.AdditionalVertexBuffer, chunk.second.AdditionalIndexBuffer,
+				chunk.second.AdditionalIndexBufferSize, sizeof(Vertex));
+	}
 }
 
 bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z, Block::BlockType type)
@@ -95,14 +112,14 @@ bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z, Bl
 		&& x > 0 && y > 0 && z > 0)
 	{
 		auto block = chunk.blocks[chunk.FlatIndex(x, y, z)];
-		return block.IsTransparent();
+		return block.IsTransparent() && block.GetBlockType() != type;
 		
 	}
 	else
 	{
 		auto block = GetBlock(x, y, z);
 		if (block == nullptr) return true;
-		return block->IsTransparent();
+		return block->IsTransparent() && block->GetBlockType() != type;
 	}
 	return false;
 }
@@ -146,6 +163,9 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 	std::vector<Vertex> VertexBuffer;
 	std::vector<uint16_t> IndexBuffer;
 
+	std::vector<Vertex> AdditionalVertexBuffer;
+	std::vector<uint16_t> AdditionalIndexBuffer;
+
 	for (int x = 0; x < BasicChunk::chunkSize; x++) {
 		for (int y = 0; y < BasicChunk::chunkSize; y++) {
 			for (int z = 0; z < BasicChunk::chunkSize; z++) {
@@ -154,15 +174,18 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 
 				auto pos = block.GetPosition();
 
+				auto& TargetVertexBuffer = block.NeedsSeperateDrawCall() ? AdditionalVertexBuffer : VertexBuffer;
+				auto& TargetIndexBuffer = block.NeedsSeperateDrawCall() ? AdditionalIndexBuffer : IndexBuffer;
+
 				switch(block.GetMeshType()){
 				case Block::MeshType::FULL_MESH_L:
-					AppendMesh(BillBoard::MeshL, VertexBuffer, IndexBuffer, block.GetTexCoords(), x, y, z);
+					AppendMesh(BillBoard::MeshL, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords(), x, y, z);
 					continue;
 				case Block::MeshType::FULL_MESH_S:
-					AppendMesh(BillBoard::MeshS, VertexBuffer, IndexBuffer, block.GetTexCoords(), x, y, z);
+					AppendMesh(BillBoard::MeshS, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords(), x, y, z);
 					continue;
 				case Block::MeshType::SAPLING:
-					AppendMesh(BillBoard::Sapling, VertexBuffer, IndexBuffer, block.GetTexCoords(), x, 
+					AppendMesh(BillBoard::Sapling, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords(), x, 
 						y - (0.5f - BillBoard::SaplingSideY), z);
 					continue;
 				default:
@@ -171,53 +194,53 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 
 				if (!block.IsTransparent()) {
 					if (BlockVisible(chunk, pos.x + 1, pos.y, pos.z)) {
-						AppendMesh(Faces::RightSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[3],
+						AppendMesh(Faces::RightSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[3],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x - 1, pos.y, pos.z)) {
-						AppendMesh(Faces::LeftSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[2],
+						AppendMesh(Faces::LeftSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[2],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y + 1, pos.z)) {
-						AppendMesh(Faces::TopSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[5],
+						AppendMesh(Faces::TopSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[5],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y - 1, pos.z)) {
-						AppendMesh(Faces::BottomSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[4],
+						AppendMesh(Faces::BottomSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[4],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y, pos.z + 1)) {
-						AppendMesh(Faces::FarSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[0],
+						AppendMesh(Faces::FarSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[0],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y, pos.z - 1)) {
-						AppendMesh(Faces::NearSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[1],
+						AppendMesh(Faces::NearSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[1],
 							x, y, z);
 					}
 				}
 				else {
 					if (BlockVisible(chunk, pos.x + 1, pos.y, pos.z, block.GetBlockType())) {
-						AppendMesh(Faces::RightSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[3],
+						AppendMesh(Faces::RightSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[3],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x - 1, pos.y, pos.z, block.GetBlockType())) {
-						AppendMesh(Faces::LeftSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[2],
+						AppendMesh(Faces::LeftSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[2],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y + 1, pos.z, block.GetBlockType())) {
-						AppendMesh(Faces::TopSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[5],
+						AppendMesh(Faces::TopSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[5],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y - 1, pos.z, block.GetBlockType())) {
-						AppendMesh(Faces::BottomSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[4],
+						AppendMesh(Faces::BottomSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[4],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y, pos.z + 1, block.GetBlockType())) {
-						AppendMesh(Faces::FarSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[0],
+						AppendMesh(Faces::FarSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[0],
 							x, y, z);
 					}
 					if (BlockVisible(chunk, pos.x, pos.y, pos.z - 1, block.GetBlockType())) {
-						AppendMesh(Faces::NearSide, VertexBuffer, IndexBuffer, block.GetTexCoords()[1],
+						AppendMesh(Faces::NearSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[1],
 							x, y, z);
 					}
 				}
@@ -231,5 +254,12 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 		chunk.IndexBufferSize = IndexBuffer.size();
 	}
 	else chunk.IndexBufferSize = 0;
+
+	if (AdditionalVertexBuffer.size() > 0 && AdditionalIndexBuffer.size() > 0) {
+		chunk.AdditionalVertexBuffer = RenderData::CreateVertexBuffer(gfx, AdditionalVertexBuffer);
+		chunk.AdditionalIndexBuffer = RenderData::CreateIndexBuffer(gfx, AdditionalIndexBuffer);
+		chunk.AdditionalIndexBufferSize = AdditionalIndexBuffer.size();
+	}
+	else chunk.AdditionalIndexBufferSize = 0;
 
 }

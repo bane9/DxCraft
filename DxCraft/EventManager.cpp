@@ -1,15 +1,15 @@
 #include "EventManager.h"
 #include <array>
 
+#define WATER_SPREAD_RATE 750.0f / 1000.0f
 
-using PlaceSignature = bool(WorldManager& wManager, BlockEventManager& blockEvt, const Position& BlockPosition,
-	const Position & PlaceDirection, Block::BlockType BlockType, int evtDepth);
-#define PLACE_PARAMATERS WorldManager& wManager, BlockEventManager& blockEvt, const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType, int evtDepth
+#define PLACE_PARAMATERS WorldManager& wManager, BlockEventManager& blockEvt, const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType, BlockEventManager::Event evt
+using PlaceSignature = bool(PLACE_PARAMATERS);
 
-std::array<std::function<PlaceSignature>, 5> PlaceEvent = {
+std::array<std::function<PlaceSignature>, 6> PlaceEvent = {
 	[](PLACE_PARAMATERS) { //Default
 		bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
-		if(result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
+		if(result && evt.UpdateDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition, 1);
 		return result;
 	},
 	[](PLACE_PARAMATERS) { //Sugar cane
@@ -17,14 +17,14 @@ std::array<std::function<PlaceSignature>, 5> PlaceEvent = {
 		if (block == nullptr || (block->GetBlockType() != Block::BlockType::Grass &&
 			block->GetBlockType() != Block::BlockType::Sugar_Cane)) return false;
 		bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
-		if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
+		if (result && evt.UpdateDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition, 1);
 		return result;
 	},
 	[](PLACE_PARAMATERS) { //Flowers/Saplings
 		auto block = wManager.GetBlock(BlockPosition.x, BlockPosition.y - 1, BlockPosition.z);
 		if (block == nullptr || (block->GetBlockType() != Block::BlockType::Grass)) return false;
 		bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
-		if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
+		if (result && evt.UpdateDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition, 1);
 		return result;
 	},
 	[](PLACE_PARAMATERS) { //Mushrooms
@@ -32,26 +32,129 @@ std::array<std::function<PlaceSignature>, 5> PlaceEvent = {
 		if (block == nullptr || (block->GetBlockType() != Block::BlockType::Grass
 			&& block->GetBlockType() != Block::BlockType::Stone)) return false;
 		bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
-		if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
+		if (result && evt.UpdateDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition, 1);
 		return result;
 	},
-	[](PLACE_PARAMATERS) { //No update
-		wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
-		return true;
+	[](PLACE_PARAMATERS) { //No spread
+		return wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
+	},
+	[](PLACE_PARAMATERS) { //Liquid
+		if (evt.water_level == 0) return true;
+		if(!wManager.ModifyBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z, evt.blockType)) /*return false*/;
+		auto block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z);
+		block->liquidInfo.level--;
+
+		block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y - 1, evt.blockPosition.z);
+		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.y--;
+			newEvt.water_level = 7;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+			return true;
+		}
+
+		block = wManager.GetBlock(evt.blockPosition.x + 1, evt.blockPosition.y - 1, evt.blockPosition.z);
+		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.x++;
+			newEvt.blockPosition.y--;
+			newEvt.water_level = 7;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else {
+			block = wManager.GetBlock(evt.blockPosition.x + 1, evt.blockPosition.y, evt.blockPosition.z);
+			if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+				BlockEventManager::Event newEvt = evt;
+				newEvt.blockPosition.x++;
+				newEvt.water_level--;
+				newEvt.StartTime = blockEvt.EventTimer.GetTime();
+				newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+				blockEvt.AddEvent(newEvt);
+			}
+		}
+
+		block = wManager.GetBlock(evt.blockPosition.x - 1, evt.blockPosition.y - 1, evt.blockPosition.z);
+		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.x--;
+			newEvt.blockPosition.y--;
+			newEvt.water_level = 7;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else {
+			block = wManager.GetBlock(evt.blockPosition.x - 1, evt.blockPosition.y, evt.blockPosition.z);
+			if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+				BlockEventManager::Event newEvt = evt;
+				newEvt.blockPosition.x--;
+				newEvt.water_level--;
+				newEvt.StartTime = blockEvt.EventTimer.GetTime();
+				newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+				blockEvt.AddEvent(newEvt);
+			}
+		}
+
+		block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y - 1, evt.blockPosition.z + 1);
+		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.z++;
+			newEvt.blockPosition.y--;
+			newEvt.water_level = 7;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else {
+			block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z + 1);
+			if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+				BlockEventManager::Event newEvt = evt;
+				newEvt.blockPosition.z++;
+				newEvt.water_level--;
+				newEvt.StartTime = blockEvt.EventTimer.GetTime();
+				newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+				blockEvt.AddEvent(newEvt);
+			}
+		}
+
+		block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y - 1, evt.blockPosition.z - 1);
+		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.z--;
+			newEvt.blockPosition.y--;
+			newEvt.water_level = 7;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else {
+			block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z - 1);
+			if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+				BlockEventManager::Event newEvt = evt;
+				newEvt.blockPosition.z--;
+				newEvt.water_level--;
+				newEvt.StartTime = blockEvt.EventTimer.GetTime();
+				newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+				blockEvt.AddEvent(newEvt);
+			}
+		}
 	},
 };
 #undef PLACE_PARAMATERS
 
 
 
-using DestroySignature = bool(WorldManager& wManager, BlockEventManager& blockEvt, 
-	const Position& BlockPosition, int evtDepth);
-#define DESTROY_PARAMATERS WorldManager& wManager,  BlockEventManager& blockEvt, const Position& BlockPosition, int evtDepth
+#define DESTROY_PARAMATERS WorldManager& wManager,  BlockEventManager& blockEvt, const Position& BlockPosition, BlockEventManager::Event evt
+using DestroySignature = bool(DESTROY_PARAMATERS);
 
 std::array<std::function<DestroySignature>, 3> DestroyEvent = {
 		[](DESTROY_PARAMATERS) { //Default
 			bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z);
-			if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
+			if (result && evt.UpdateDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition, 1);
 			return result;
 		},
 		[](DESTROY_PARAMATERS) { //Sugar cane
@@ -68,19 +171,17 @@ std::array<std::function<DestroySignature>, 3> DestroyEvent = {
 				blockEvt.AddEvent(evt);
 			}
 			bool result = wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z);
-			if (result && evtDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition);
+			if (result && evt.UpdateDepth == 0) blockEvt.CreateSurroundingUpdates(BlockPosition, 1);
 			return result;
 		},
 		[](DESTROY_PARAMATERS) { //No spread
-			wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z);
-			return true;
+			return wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z);
 		}
 };
 #undef DESTROY_PARAMATERS
 
-
-using UpdateSignature = bool(WorldManager& wManager, BlockEventManager& blockEvt, const BlockEventManager::Event& evt);
 #define UPDATE_PARAMATERS WorldManager& wManager,  BlockEventManager& blockEvt, const BlockEventManager::Event& evt
+using UpdateSignature = bool(UPDATE_PARAMATERS);
 
 std::array<std::function<UpdateSignature>, 3> UpdateEvent = {
 	[](UPDATE_PARAMATERS) { //Default
@@ -132,42 +233,44 @@ BlockEventManager::BlockEventManager(WorldManager& wManager)
 }
 
 bool BlockEventManager::PlaceBlock(const Position& BlockPosition, const Position& PlaceDirection, 
-	Block::BlockType BlockType, int evtDepth)
+	Block::BlockType BlockType, Event evt)
 {
 	switch (BlockType)
 	{
 	case Block::BlockType::Sugar_Cane:
-		return PlaceEvent[1](wManager, *this, BlockPosition, PlaceDirection, BlockType, evtDepth);
+		return PlaceEvent[1](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
 	case Block::BlockType::Dandelion:
 	case Block::BlockType::Poppy:
 	case Block::BlockType::Birch_Sapling:
 	case Block::BlockType::Oak_Sapling:
 	case Block::BlockType::Dark_Oak_Sapling:
-		return PlaceEvent[2](wManager, *this, BlockPosition, PlaceDirection, BlockType, evtDepth);
+		return PlaceEvent[2](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
 	case Block::BlockType::Brown_Mushroom:
 	case Block::BlockType::Red_Mushroom:
-		return PlaceEvent[3](wManager, *this, BlockPosition, PlaceDirection, BlockType, evtDepth);
+		return PlaceEvent[3](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
 	case Block::BlockType::Leaves:
 	case Block::BlockType::Oak_Wood:
-		return PlaceEvent[4](wManager, *this, BlockPosition, PlaceDirection, BlockType, evtDepth);
+		return PlaceEvent[4](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
+	case Block::BlockType::Water:
+		return PlaceEvent[5](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
 	default:
-		return PlaceEvent[0](wManager, *this, BlockPosition, PlaceDirection, BlockType, evtDepth);
+		return PlaceEvent[0](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
 	}
 }
 
-bool BlockEventManager::RemoveBlock(const Position& BlockPosition, int evtDepth)
+bool BlockEventManager::RemoveBlock(const Position& BlockPosition, Event evt)
 {
 	auto block = wManager.GetBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z);
 	if (block == nullptr) return false;
 	switch (block->GetBlockType())
 	{
 	case Block::BlockType::Sugar_Cane:
-		return DestroyEvent[1](wManager, *this, BlockPosition, evtDepth);
+		return DestroyEvent[1](wManager, *this, BlockPosition, evt);
 	case Block::BlockType::Leaves:
 	case Block::BlockType::Oak_Wood:
-		return DestroyEvent[2](wManager, *this, BlockPosition, evtDepth);
+		return DestroyEvent[2](wManager, *this, BlockPosition, evt);
 	default:
-		return DestroyEvent[0](wManager, *this, BlockPosition, evtDepth);
+		return DestroyEvent[0](wManager, *this, BlockPosition, evt);
 	}
 }
 
@@ -182,13 +285,14 @@ void BlockEventManager::Loop()
 			Events.push_back(evt);
 		}
 		else if (evt.eventType == Event::EventType::REMOVE_BLOCK) {
-			RemoveBlock(evt.blockPosition, evt.UpdateDepth);
+			RemoveBlock(evt.blockPosition, evt);
 		}
 		else if (evt.eventType == Event::EventType::PLACE_BLOCK) {
-			PlaceBlock(evt.blockPosition, evt.placeDirection, evt.blockType, evt.UpdateDepth);
+			PlaceBlock(evt.blockPosition, evt.placeDirection, evt.blockType, evt);
 		}
 		else if (evt.eventType == Event::EventType::UPDATE_BLOCK) {
 			auto block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z);
+			if (block == nullptr) continue;
 			bool result;
 			switch (block->GetBlockType()) {
 			case Block::BlockType::Sugar_Cane:
@@ -218,18 +322,39 @@ void BlockEventManager::AddEvent(const Event& event)
 	Events.push_back(event);
 }
 
-void BlockEventManager::CreateSurroundingUpdates(const Position& BlockPosition)
+void BlockEventManager::CreateSurroundingUpdates(const Position& BlockPosition, int updateDepth)
 {
 	Event evt{
-		{BlockPosition.x, BlockPosition.y + 1, BlockPosition.z},
+		{BlockPosition.x, BlockPosition.y, BlockPosition.z},
 		{0, 0, 0},
 		Block::BlockType::None,
 		BlockEventManager::Event::EventType::UPDATE_BLOCK,
 		EventTimer.GetTime(),
 		75.0f / 1000.0f,
-		1
+		updateDepth
 	};
 
+	--evt.blockPosition.x;
+	AddEvent(evt);
+	++evt.blockPosition.x;
+
+	++evt.blockPosition.x;
+	AddEvent(evt);
+	--evt.blockPosition.x;
+
+	--evt.blockPosition.y;
+	AddEvent(evt);
+	++evt.blockPosition.y;
+
+	++evt.blockPosition.y;
+	AddEvent(evt);
+	--evt.blockPosition.y;
+
+	--evt.blockPosition.z;
+	AddEvent(evt);
+	++evt.blockPosition.z;
+
+	++evt.blockPosition.z;
 	AddEvent(evt);
 }
 
