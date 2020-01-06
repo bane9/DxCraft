@@ -31,7 +31,7 @@ public:
 			Block::BlockType type = Block::BlockType::None;
 		};
 		DependantOnBlock dependantOnBlock;
-		int water_level = 0;
+		int water_level = 7;
 	};
 	BlockEventManager(WorldManager& wManager);
 	bool PlaceBlock(const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType, Event evt = {});

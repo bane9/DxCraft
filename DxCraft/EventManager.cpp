@@ -1,5 +1,6 @@
 #include "EventManager.h"
 #include <array>
+#include <algorithm>
 
 #define WATER_SPREAD_RATE 750.0f / 1000.0f
 
@@ -39,10 +40,10 @@ std::array<std::function<PlaceSignature>, 6> PlaceEvent = {
 		return wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
 	},
 	[](PLACE_PARAMATERS) { //Liquid
-		if (evt.water_level == 0) return true;
-		if(!wManager.ModifyBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z, evt.blockType)) /*return false*/;
+		if (evt.water_level < 1) return true;
+		wManager.ModifyBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z, evt.blockType);
 		auto block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z);
-		block->liquidInfo.level--;
+		block->liquidInfo.level = evt.water_level;
 
 		block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y - 1, evt.blockPosition.z);
 		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
@@ -52,7 +53,7 @@ std::array<std::function<PlaceSignature>, 6> PlaceEvent = {
 			newEvt.StartTime = blockEvt.EventTimer.GetTime();
 			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
 			blockEvt.AddEvent(newEvt);
-			return true;
+			if (evt.water_level < 7) return true;
 		}
 
 		block = wManager.GetBlock(evt.blockPosition.x + 1, evt.blockPosition.y - 1, evt.blockPosition.z);
@@ -61,6 +62,17 @@ std::array<std::function<PlaceSignature>, 6> PlaceEvent = {
 			newEvt.blockPosition.x++;
 			newEvt.blockPosition.y--;
 			newEvt.water_level = 7;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else if (block != nullptr && block->GetBlockType() == Block::BlockType::Water) {
+			block->liquidInfo.level = std::clamp(block->liquidInfo.level + evt.water_level, 1, 7);
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.x++;
+			newEvt.blockPosition.y--;
+			newEvt.eventType = BlockEventManager::Event::EventType::UPDATE_BLOCK;
+			newEvt.water_level = block->liquidInfo.level;
 			newEvt.StartTime = blockEvt.EventTimer.GetTime();
 			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
 			blockEvt.AddEvent(newEvt);
@@ -87,6 +99,17 @@ std::array<std::function<PlaceSignature>, 6> PlaceEvent = {
 			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
 			blockEvt.AddEvent(newEvt);
 		}
+		else if (block != nullptr && block->GetBlockType() == Block::BlockType::Water) {
+			block->liquidInfo.level = std::clamp(block->liquidInfo.level + evt.water_level, 1, 7);
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.x--;
+			newEvt.blockPosition.y--;
+			newEvt.eventType = BlockEventManager::Event::EventType::UPDATE_BLOCK;
+			newEvt.water_level = block->liquidInfo.level;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
 		else {
 			block = wManager.GetBlock(evt.blockPosition.x - 1, evt.blockPosition.y, evt.blockPosition.z);
 			if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
@@ -109,6 +132,17 @@ std::array<std::function<PlaceSignature>, 6> PlaceEvent = {
 			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
 			blockEvt.AddEvent(newEvt);
 		}
+		else if (block != nullptr && block->GetBlockType() == Block::BlockType::Water) {
+			block->liquidInfo.level = std::clamp(block->liquidInfo.level + evt.water_level, 1, 7);
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.z++;
+			newEvt.blockPosition.y--;
+			newEvt.eventType = BlockEventManager::Event::EventType::UPDATE_BLOCK;
+			newEvt.water_level = block->liquidInfo.level;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
 		else {
 			block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z + 1);
 			if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
@@ -127,6 +161,17 @@ std::array<std::function<PlaceSignature>, 6> PlaceEvent = {
 			newEvt.blockPosition.z--;
 			newEvt.blockPosition.y--;
 			newEvt.water_level = 7;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else if (block != nullptr && block->GetBlockType() == Block::BlockType::Water) {
+			block->liquidInfo.level = std::clamp(block->liquidInfo.level + evt.water_level, 1, 7);
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.z--;
+			newEvt.blockPosition.y--;
+			newEvt.eventType = BlockEventManager::Event::EventType::UPDATE_BLOCK;
+			newEvt.water_level = block->liquidInfo.level;
 			newEvt.StartTime = blockEvt.EventTimer.GetTime();
 			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
 			blockEvt.AddEvent(newEvt);
@@ -183,7 +228,7 @@ std::array<std::function<DestroySignature>, 3> DestroyEvent = {
 #define UPDATE_PARAMATERS WorldManager& wManager,  BlockEventManager& blockEvt, const BlockEventManager::Event& evt
 using UpdateSignature = bool(UPDATE_PARAMATERS);
 
-std::array<std::function<UpdateSignature>, 3> UpdateEvent = {
+std::array<std::function<UpdateSignature>, 4> UpdateEvent = {
 	[](UPDATE_PARAMATERS) { //Default
 		return true;
 	},
@@ -222,7 +267,160 @@ std::array<std::function<UpdateSignature>, 3> UpdateEvent = {
 			return true;
 		}
 		return false;
-	}
+	},
+	[](UPDATE_PARAMATERS) { //Liquid
+		auto block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y - 1, evt.blockPosition.z);
+		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.y--;
+			newEvt.water_level = 7;
+			newEvt.eventType = BlockEventManager::Event::PLACE_BLOCK;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+			return true;
+		}
+
+		block = wManager.GetBlock(evt.blockPosition.x + 1, evt.blockPosition.y - 1, evt.blockPosition.z);
+		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.x++;
+			newEvt.blockPosition.y--;
+			newEvt.water_level = 7;
+			newEvt.eventType = BlockEventManager::Event::EventType::PLACE_BLOCK;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else if (block != nullptr && block->GetBlockType() == Block::BlockType::Water) {
+			block->liquidInfo.level = std::clamp(block->liquidInfo.level + evt.water_level, 1, 7);
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.x++;
+			newEvt.blockPosition.y--;
+			newEvt.eventType = BlockEventManager::Event::EventType::UPDATE_BLOCK;
+			newEvt.water_level = block->liquidInfo.level;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else {
+			block = wManager.GetBlock(evt.blockPosition.x + 1, evt.blockPosition.y, evt.blockPosition.z);
+			if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+				BlockEventManager::Event newEvt = evt;
+				newEvt.blockPosition.x++;
+				newEvt.water_level--;
+				newEvt.eventType = BlockEventManager::Event::EventType::PLACE_BLOCK;
+				newEvt.StartTime = blockEvt.EventTimer.GetTime();
+				newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+				blockEvt.AddEvent(newEvt);
+			}
+		}
+
+		block = wManager.GetBlock(evt.blockPosition.x - 1, evt.blockPosition.y - 1, evt.blockPosition.z);
+		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.x--;
+			newEvt.blockPosition.y--;
+			newEvt.water_level = 7;
+			newEvt.eventType = BlockEventManager::Event::EventType::PLACE_BLOCK;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else if (block != nullptr && block->GetBlockType() == Block::BlockType::Water) {
+			block->liquidInfo.level = std::clamp(block->liquidInfo.level + evt.water_level, 1, 7);
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.x--;
+			newEvt.blockPosition.y--;
+			newEvt.eventType = BlockEventManager::Event::EventType::UPDATE_BLOCK;
+			newEvt.water_level = block->liquidInfo.level;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else {
+			block = wManager.GetBlock(evt.blockPosition.x - 1, evt.blockPosition.y, evt.blockPosition.z);
+			if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+				BlockEventManager::Event newEvt = evt;
+				newEvt.blockPosition.x--;
+				newEvt.water_level--;
+				newEvt.eventType = BlockEventManager::Event::EventType::PLACE_BLOCK;
+				newEvt.StartTime = blockEvt.EventTimer.GetTime();
+				newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+				blockEvt.AddEvent(newEvt);
+			}
+		}
+
+		block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y - 1, evt.blockPosition.z + 1);
+		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.z++;
+			newEvt.blockPosition.y--;
+			newEvt.water_level = 7;
+			newEvt.eventType = BlockEventManager::Event::EventType::PLACE_BLOCK;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else if (block != nullptr && block->GetBlockType() == Block::BlockType::Water) {
+			block->liquidInfo.level = std::clamp(block->liquidInfo.level + evt.water_level, 1, 7);
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.z++;
+			newEvt.blockPosition.y--;
+			newEvt.eventType = BlockEventManager::Event::EventType::UPDATE_BLOCK;
+			newEvt.water_level = block->liquidInfo.level;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else {
+			block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z + 1);
+			if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+				BlockEventManager::Event newEvt = evt;
+				newEvt.blockPosition.z++;
+				newEvt.water_level--;
+				newEvt.eventType = BlockEventManager::Event::EventType::PLACE_BLOCK;
+				newEvt.StartTime = blockEvt.EventTimer.GetTime();
+				newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+				blockEvt.AddEvent(newEvt);
+			}
+		}
+
+		block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y - 1, evt.blockPosition.z - 1);
+		if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.z--;
+			newEvt.blockPosition.y--;
+			newEvt.water_level = 7;
+			newEvt.eventType = BlockEventManager::Event::EventType::PLACE_BLOCK;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else if (block != nullptr && block->GetBlockType() == Block::BlockType::Water) {
+			block->liquidInfo.level = std::clamp(block->liquidInfo.level + evt.water_level, 1, 7);
+			BlockEventManager::Event newEvt = evt;
+			newEvt.blockPosition.z--;
+			newEvt.blockPosition.y--;
+			newEvt.eventType = BlockEventManager::Event::EventType::UPDATE_BLOCK;
+			newEvt.water_level = block->liquidInfo.level;
+			newEvt.StartTime = blockEvt.EventTimer.GetTime();
+			newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+			blockEvt.AddEvent(newEvt);
+		}
+		else {
+			block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z - 1);
+			if (block != nullptr && block->GetBlockType() == Block::BlockType::Air) {
+				BlockEventManager::Event newEvt = evt;
+				newEvt.blockPosition.z--;
+				newEvt.water_level--;
+				newEvt.eventType = BlockEventManager::Event::EventType::PLACE_BLOCK;
+				newEvt.StartTime = blockEvt.EventTimer.GetTime();
+				newEvt.DelayUntilUpdate = WATER_SPREAD_RATE;
+				blockEvt.AddEvent(newEvt);
+			}
+		}
+	},
 };
 #undef UPDATE_PARAMATERS
 
@@ -252,7 +450,11 @@ bool BlockEventManager::PlaceBlock(const Position& BlockPosition, const Position
 	case Block::BlockType::Oak_Wood:
 		return PlaceEvent[4](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
 	case Block::BlockType::Water:
+	{
+		auto block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z);
+		if (block == nullptr || block->GetBlockType() != Block::BlockType::Air) return false;
 		return PlaceEvent[5](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
+	}
 	default:
 		return PlaceEvent[0](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
 	}
@@ -278,9 +480,7 @@ void BlockEventManager::Loop()
 {
 	auto tempEvents = Events;
 	Events.clear();
-	while (tempEvents.size() > 0) {
-		auto evt = tempEvents.back();
-		tempEvents.pop_back();
+	for (auto& evt : tempEvents) {
 		if (EventTimer.GetTime() - evt.StartTime < evt.DelayUntilUpdate) {
 			Events.push_back(evt);
 		}
@@ -309,6 +509,14 @@ void BlockEventManager::Loop()
 				result = UpdateEvent[2](wManager, *this, evt);
 				if (!result) Events.push_back(evt);
 				break;
+			case Block::BlockType::Water:
+			{
+				auto block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z);
+				evt.water_level = block->liquidInfo.level;
+				evt.blockType = block->GetBlockType();
+				result = UpdateEvent[3](wManager, *this, evt);
+				break;
+			}
 			default:
 				result = UpdateEvent[0](wManager, *this, evt);
 				break;

@@ -113,7 +113,6 @@ bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z, Bl
 	{
 		auto block = chunk.blocks[chunk.FlatIndex(x, y, z)];
 		return block.IsTransparent() && block.GetBlockType() != type;
-		
 	}
 	else
 	{
