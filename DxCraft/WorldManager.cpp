@@ -14,11 +14,11 @@ WorldManager::WorldManager(Graphics& gfx)
 	renderData.Create2DTexture("images\\terrain.png");
 }
 
-void WorldManager::CreateChunk(int x, int y, int z, bool empty)
+BasicChunk* WorldManager::CreateChunk(int x, int y, int z, bool empty)
 {
-	if (y < 0) return;
-	chunks.emplace(Position(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize),
-		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize, empty));
+	if (y < 0) return nullptr;
+	return &(*chunks.emplace(Position(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize),
+		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize, empty)).first).second;
 }
 
 bool WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
@@ -31,7 +31,7 @@ bool WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
 	if (block.GetBlockType() == Block::BlockType::Bedrock) return false;
 	block.SetBlockType(type);
 	GenerateMesh(*chunk);
-	if (block.GetBlockType() != Block::BlockType::Air) return false;
+	if (block.GetBlockType() != Block::BlockType::Air) return true;
 	if (normalized.x + 1 >= BasicChunk::chunkSize) {
 		BasicChunk* neighbourChunk = GetChunkFromBlock(x + 1, y, z);
 		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
@@ -65,18 +65,15 @@ bool WorldManager::ModifyBlock(const Position& pos, Block::BlockType type)
 }
 
 void WorldManager::GenerateMeshes() {
-	Timer t;
 	for (auto& chunk : chunks) {
 		GenerateMesh(chunk.second);
 	}
-	auto asd = std::to_wstring(t.Mark() * 1000.0f);
-	OutputDebugString(asd.c_str());
 }
 
 void WorldManager::RenderChunks(Camera& cam)
 {
 	for (auto& chunk : chunks) {
-		if(!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
+		//if(!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
 
 		const Transforms tf =
@@ -93,7 +90,7 @@ void WorldManager::RenderChunks(Camera& cam)
 	}
 
 	for (auto& chunk : chunks) {
-		if (!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
+		//if (!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
 
 		const Transforms tf =
@@ -180,7 +177,6 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 			for (int z = 0; z < BasicChunk::chunkSize; z++) {
 				const Block& block = chunk.blocks[chunk.FlatIndex(x, y, z)];
 				if (block.GetBlockType() == Block::BlockType::Air) continue;
-
 				auto pos = block.GetPosition();
 
 				auto& TargetVertexBuffer = block.NeedsSeperateDrawCall() ? AdditionalVertexBuffer : VertexBuffer;

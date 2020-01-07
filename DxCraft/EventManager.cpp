@@ -223,7 +223,7 @@ std::array<std::function<PlaceSignature>, 6> PlaceEvent = {
 	},
 	[](PLACE_PARAMATERS) { //Liquid
 		if (evt.water_level < 1) return true;
-		wManager.ModifyBlock(evt.blockPosition, evt.blockType);
+		wManager.ModifyBlock(evt.blockPosition, Block::BlockType::Water);
 		auto block = wManager.GetBlock(evt.blockPosition);
 		block->liquidInfo.level = evt.water_level;
 		if (evt.UpdateDepth > 0) return true;
@@ -345,8 +345,8 @@ bool BlockEventManager::PlaceBlock(const Position& BlockPosition, const Position
 		return PlaceEvent[4](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
 	case Block::BlockType::Water:
 	{
-		auto block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z);
-		if (block == nullptr || block->GetBlockType() != Block::BlockType::Air) return false;
+		//auto block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z);
+		//if (block == nullptr || block->GetBlockType() != Block::BlockType::Air) return false;
 		return PlaceEvent[5](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
 	}
 	default:

@@ -81,7 +81,7 @@ public:
 	LiquidInfo liquidInfo;
 private:
 	Position pos;
-	BlockType blockType;
+	BlockType blockType = Block::BlockType::Air;
 	MeshType meshType;
 	SelectorType selectorType;
 };

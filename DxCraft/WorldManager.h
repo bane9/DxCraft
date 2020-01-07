@@ -17,7 +17,7 @@ public:
 	WorldManager(Graphics& gfx);
 	WorldManager(WorldManager&) = delete;
 	WorldManager& operator=(WorldManager&) = delete;
-	void CreateChunk(int x, int y, int z, bool empty = false);
+	BasicChunk* CreateChunk(int x, int y, int z, bool empty = false);
 	bool ModifyBlock(int x, int y, int z, Block::BlockType type = Block::BlockType::Air);
 	bool ModifyBlock(const Position& pos, Block::BlockType type = Block::BlockType::Air);
 	void GenerateMeshes();
@@ -25,6 +25,7 @@ public:
 	Block* GetBlock(int x, int y, int z);
 	Block* GetBlock(const Position& pos);
 	Block* GetBlock(const DirectX::XMFLOAT3& pos);
+	BasicChunk* GetChunkFromBlock(int x, int y, int z);
 private:
 	void GenerateMesh(BasicChunk& chunk);
 	template<typename Container, typename UVs>
@@ -32,7 +33,6 @@ private:
 		std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,
 		const UVs& textures, float offsetX, float offsetY, float offsetZ);
 	bool BlockVisible(const BasicChunk& chunk, int x, int y, int z, Block::BlockType type = Block::BlockType::None);
-	BasicChunk* GetChunkFromBlock(int x, int y, int z);
 	robin_hood::unordered_flat_map <Position, BasicChunk, PositionHash> chunks;
 	Graphics& gfx;
 	const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =

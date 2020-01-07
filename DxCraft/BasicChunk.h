@@ -17,7 +17,7 @@ public:
 	BasicChunk(int x, int y, int z, bool empty = false);
 	Position GetPosition() const noexcept;
 	static constexpr int chunkSize = 16;
-private:
+public:
 	Position Normalize(int x, int y, int z) const noexcept;
 	inline int FlatIndex(int x, int y, int z) const noexcept;
 	std::vector<Block> blocks;

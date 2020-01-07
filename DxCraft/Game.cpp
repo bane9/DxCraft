@@ -7,6 +7,8 @@
 #include <math.h>
 #include <algorithm>
 #include "BillBoard.h"
+#include "FastNoise.h"
+#include <algorithm>
 
 GDIPlusManager gdipm;
 
@@ -14,16 +16,25 @@ Game::Game(size_t width, size_t height)
 	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager), test(wnd.Gfx())
 {
 
-	const int area = 6;
-	for (int x = -area / 2; x < area / 2; x++) {
-		for (int z = -area / 2; z < area / 2; z++) {
-			wManager.CreateChunk(x, 0, z);
-		}
-	}
-
-	for (int x = -area / 2; x < area / 2; x++) {
-		for (int z = -area / 2; z < area / 2; z++) {
-			wManager.CreateChunk(x, 1, z, true);
+	const int area = 25;
+	FastNoise noise;
+	noise.SetNoiseType(FastNoise::NoiseType::Value);
+	noise.SetFrequency(0.03f);
+	std::vector<std::vector<float>> hMap;
+	
+	for (int x = 0; x < area; x++) {
+		for (int y = 0; y < 1; y++) {
+			for (int z = 0; z < area; z++) {
+				auto& chunk = *wManager.CreateChunk(x, y, z);
+				for (int ix = 0; ix < BasicChunk::chunkSize; ix++) {
+					for (int iz = 0; iz < BasicChunk::chunkSize; iz++) {
+						float height = (noise.GetNoise((x * 16 - 16) + ix, (z * 16 - 16) + iz) / 2.0f + 0.5f) * 15.0f;
+						for (int iy = 0; iy < height; iy++) {
+							chunk.blocks[chunk.FlatIndex(ix, iy, iz)].SetBlockType(Block::BlockType::Grass);
+						}
+					}
+				}
+			}
 		}
 	}
 

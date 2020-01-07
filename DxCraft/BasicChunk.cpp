@@ -4,27 +4,14 @@
 BasicChunk::BasicChunk(int x, int y, int z, bool empty)
 	: x(x), y(y), z(z), aabb({16.0f, 16.0f, 16.0f})
 {
-	aabb.SetPosition({static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)});
 	blocks.resize(chunkSize * chunkSize * chunkSize);
-	#pragma omp parallel for schedule(dynamic)
 	for (int ix = 0; ix < chunkSize; ix++) {
-		#pragma omp parallel for schedule(dynamic)
 		for (int iy = 0; iy < chunkSize; iy++) {
-			#pragma omp parallel for schedule(dynamic)
 			for (int iz = 0; iz < chunkSize; iz++) {
-				Block& block = blocks[FlatIndex(ix, iy, iz)];
-				block.pos.x = x + ix;
-				block.pos.y = y + iy;
-				block.pos.z = z + iz;
-				if (iy == 15)
-					block.SetBlockType(Block::BlockType::Grass);
-				else if (iy >= 12 && iy < 15)
-					block.SetBlockType(Block::BlockType::Dirt);
-				else if (iy > 0 && iy < 12)
-					block.SetBlockType(Block::BlockType::Stone);
-				else
-					block.SetBlockType(Block::BlockType::Bedrock);
-				if (empty) block.SetBlockType(Block::BlockType::Air);
+				auto& block = blocks[FlatIndex(ix, iy, iz)];
+				block.pos.x = ix + x;
+				block.pos.y = iy + y;
+				block.pos.z = iz + z;
 			}
 		}
 	}

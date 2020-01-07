@@ -1,6 +1,6 @@
 # DxCraft
 
-![](https://i.imgur.com/b6GhTCS.png)
+![](preview.png)
 
 DxCraft is a work in progress Minecraft clone made in C++17 and DirectX11
 # To-do list
