@@ -70,7 +70,13 @@ public:
 		static constexpr int water_spread = 7;
 		static constexpr int lava_spread = 4;
 		int level = 7;
-		int angle;
+		enum class Direction {
+			FORWARD,
+			BACKWARD,
+			RIGHT,
+			LEFT,
+			DOWNWARD
+		} direction;
 	};
 	LiquidInfo liquidInfo;
 private:

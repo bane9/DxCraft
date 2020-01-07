@@ -59,6 +59,11 @@ bool WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
 	return true;
 }
 
+bool WorldManager::ModifyBlock(const Position& pos, Block::BlockType type)
+{
+	return ModifyBlock(pos.x, pos.y, pos.z, type);
+}
+
 void WorldManager::GenerateMeshes() {
 	Timer t;
 	for (auto& chunk : chunks) {
@@ -150,6 +155,11 @@ Block* WorldManager::GetBlock(int x, int y, int z)
 		return nullptr;
 
 	return &chunk->blocks[chunk->FlatIndex(x, y, z)];
+}
+
+Block* WorldManager::GetBlock(const Position& pos)
+{
+	return GetBlock(pos.x, pos.y, pos.z);
 }
 
 Block* WorldManager::GetBlock(const DirectX::XMFLOAT3& pos)

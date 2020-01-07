@@ -46,34 +46,39 @@ void RenderData::Create2DTexture(const char* filePath)
 	D3D11_TEXTURE2D_DESC textureDesc = {};
 	textureDesc.Width = s.GetWidth();
 	textureDesc.Height = s.GetHeight();
-	textureDesc.MipLevels = 1;
+	textureDesc.MipLevels = 0;
 	textureDesc.ArraySize = 1;
 	textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.SampleDesc.Quality = 0;
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
 	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA sd1 = {};
-	sd1.pSysMem = s.GetBufferPtr();
-	sd1.SysMemPitch = s.GetWidth() * sizeof(Surface::Color);
+	textureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
-	GFX_EXCEPT_INFO(gfx.pDevice->CreateTexture2D(&textureDesc, &sd1, pTexture.ReleaseAndGetAddressOf()));
+	GFX_EXCEPT_INFO(gfx.pDevice->CreateTexture2D(&textureDesc, nullptr, pTexture.ReleaseAndGetAddressOf()));
+
+	gfx.pContext->UpdateSubresource(pTexture.Get(), 0, nullptr, s.GetBufferPtrConst(), s.GetWidth() * sizeof(Surface::Color), 0);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = textureDesc.Format;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MipLevels = 3;
 
 	GFX_EXCEPT_INFO(gfx.pDevice->CreateShaderResourceView(pTexture.Get(), &srvDesc, pTextureView.ReleaseAndGetAddressOf()));
+
+	gfx.pContext->GenerateMips(pTextureView.Get());
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
 	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	/*samplerDesc.MinLOD = 0.0f;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;*/
 
 
 	GFX_EXCEPT_INFO(gfx.pDevice->CreateSamplerState(&samplerDesc, pSampler.ReleaseAndGetAddressOf()));

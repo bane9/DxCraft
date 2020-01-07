@@ -19,9 +19,11 @@ public:
 	WorldManager& operator=(WorldManager&) = delete;
 	void CreateChunk(int x, int y, int z, bool empty = false);
 	bool ModifyBlock(int x, int y, int z, Block::BlockType type = Block::BlockType::Air);
+	bool ModifyBlock(const Position& pos, Block::BlockType type = Block::BlockType::Air);
 	void GenerateMeshes();
 	void RenderChunks(Camera& cam);
 	Block* GetBlock(int x, int y, int z);
+	Block* GetBlock(const Position& pos);
 	Block* GetBlock(const DirectX::XMFLOAT3& pos);
 private:
 	void GenerateMesh(BasicChunk& chunk);
