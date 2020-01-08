@@ -169,7 +169,7 @@ void Player::CastRay()
 	hitBlockPos = { -1, -1, -1 };
 
 	while (cameraRay.Next()) {
-		auto block = wManager.GetBlock(round(hitBlock.x), round(hitBlock.y), round(hitBlock.z));
+		auto block = wManager.GetBlock(hitBlock);
 		if (block != nullptr && block->GetBlockType() != Block::BlockType::Air && !block->IsLiquid()) {
 			auto pos = block->GetPosition();
 			AABB aabb = block->GetAABB();
@@ -407,6 +407,11 @@ void Player::ToggleFlying() noexcept
 		fallVelocity = 0.25f;
 		jumpVelocity = 0.0f;
 	}
+}
+
+Position Player::GetPositon() noexcept
+{
+	return { cam.GetPos() };
 }
 
 #define VALID_BLOCK(x) x != nullptr && x->IsCollideable()

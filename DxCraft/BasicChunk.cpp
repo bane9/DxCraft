@@ -2,9 +2,9 @@
 #include "MathFunctions.h"
 
 BasicChunk::BasicChunk(int x, int y, int z, bool empty)
-	: x(x), y(y), z(z), aabb({16.0f, 16.0f, 16.0f})
+	: blocks(chunkSize* chunkSize* chunkSize), x(x), y(y), z(z), aabb({ 16.0f, 16.0f, 16.0f })
 {
-	blocks.resize(chunkSize * chunkSize * chunkSize);
+	aabb.SetPosition({ static_cast<float>(x), static_cast<float>(y), static_cast<float>(z) });
 	for (int ix = 0; ix < chunkSize; ix++) {
 		for (int iy = 0; iy < chunkSize; iy++) {
 			for (int iz = 0; iz < chunkSize; iz++) {

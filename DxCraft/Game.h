@@ -5,6 +5,7 @@
 #include "WorldManager.h"
 #include "Player.h"
 #include "RenderData.h"
+#include "FastNoise.h"
 
 class Game
 {
@@ -16,6 +17,7 @@ public:
 	int start();
 private:
 	void doFrame();
+	void MakeChunkThread();
 	Window wnd;
 	bool exit = false;
 	bool showCursor = true;
@@ -25,4 +27,6 @@ private:
 	Timer jumpTimer;
 	Timer sprintTimer;
 	RenderData test;
+	FastNoise noise;
+	int chunkCount = 0;
 };

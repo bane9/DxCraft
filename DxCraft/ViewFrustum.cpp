@@ -20,7 +20,7 @@ float Plane::DistanceToPoint(const DirectX::XMFLOAT3& point) const
 void ViewFrustum::Update(const DirectX::XMMATRIX& camMatrix) noexcept
 {
 	DirectX::XMFLOAT4X4 mat;
-	DirectX::XMStoreFloat4x4(&mat, camMatrix * DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f / 16.0f, 0.5f, 100.0f));
+	DirectX::XMStoreFloat4x4(&mat, camMatrix * DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f / 16.0f, 0.4999f, 1001.0f));
 
 	planes[Planes::Left].normal.x = mat._14 + mat._11;
 	planes[Planes::Left].normal.y = mat._24 + mat._21;

@@ -17,8 +17,7 @@ WorldManager::WorldManager(Graphics& gfx)
 BasicChunk* WorldManager::CreateChunk(int x, int y, int z, bool empty)
 {
 	if (y < 0) return nullptr;
-	return &(*chunks.emplace(Position(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize),
-		BasicChunk(x * BasicChunk::chunkSize, y * BasicChunk::chunkSize, z * BasicChunk::chunkSize, empty)).first).second;
+	return &(*chunks.emplace(Position(x, y, z), BasicChunk(x, y, z, empty)).first).second;
 }
 
 bool WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
@@ -73,7 +72,7 @@ void WorldManager::GenerateMeshes() {
 void WorldManager::RenderChunks(Camera& cam)
 {
 	for (auto& chunk : chunks) {
-		//if(!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
+		if(!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
 
 		const Transforms tf =
@@ -90,7 +89,7 @@ void WorldManager::RenderChunks(Camera& cam)
 	}
 
 	for (auto& chunk : chunks) {
-		//if (!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
+		if (!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
 
 		const Transforms tf =
@@ -141,6 +140,19 @@ BasicChunk* WorldManager::GetChunkFromBlock(int x, int y, int z)
 	if (chunk == chunks.end())
 		return nullptr;
 	else return &chunk->second;
+}
+
+BasicChunk* WorldManager::CreateChunkAtPlayerPos(const Position& pos)
+{
+	Position chunkPosition(
+		(pos.x - FixedMod(pos.x, BasicChunk::chunkSize)),
+		0,
+		(pos.z - FixedMod(pos.z, BasicChunk::chunkSize))
+	);
+	if (chunks.find(chunkPosition) == chunks.end())
+		return CreateChunk(chunkPosition.x, 0, chunkPosition.z);
+	else return nullptr;
+
 }
 
 Block* WorldManager::GetBlock(int x, int y, int z)

@@ -11,6 +11,9 @@ struct Position {
 	bool operator==(const Position& other) const {
 		return x == other.x && y == other.y && z == other.z;
 	}
+	bool operator!=(const Position& other) const {
+		return !this->operator==(other);
+	}
 	Position operator+(const Position& other) const {
 		return { x + other.x, y + other.y, z + other.z };
 	}

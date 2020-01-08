@@ -26,7 +26,8 @@ public:
 	Block* GetBlock(const Position& pos);
 	Block* GetBlock(const DirectX::XMFLOAT3& pos);
 	BasicChunk* GetChunkFromBlock(int x, int y, int z);
-private:
+	BasicChunk* CreateChunkAtPlayerPos(const Position& pos);
+public:
 	void GenerateMesh(BasicChunk& chunk);
 	template<typename Container, typename UVs>
 	void AppendMesh(const Container& mesh,

@@ -34,7 +34,7 @@ public:
 	void ChangeBlock(bool decrement = false);
 	Camera& GetCamera() noexcept;
 	void ToggleFlying() noexcept;
-
+	Position GetPositon() noexcept;
 private:
 	void CastRay();
 	void PlaceLiquid();

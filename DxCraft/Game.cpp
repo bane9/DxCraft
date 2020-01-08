@@ -9,7 +9,7 @@
 #include "BillBoard.h"
 #include "FastNoise.h"
 #include <algorithm>
-
+#include <ctime>
 GDIPlusManager gdipm;
 
 Game::Game(size_t width, size_t height)
@@ -17,29 +17,13 @@ Game::Game(size_t width, size_t height)
 {
 
 	const int area = 25;
-	FastNoise noise;
-	noise.SetNoiseType(FastNoise::NoiseType::Value);
-	noise.SetFrequency(0.03f);
-	std::vector<std::vector<float>> hMap;
-	
-	for (int x = 0; x < area; x++) {
-		for (int y = 0; y < 1; y++) {
-			for (int z = 0; z < area; z++) {
-				auto& chunk = *wManager.CreateChunk(x, y, z);
-				for (int ix = 0; ix < BasicChunk::chunkSize; ix++) {
-					for (int iz = 0; iz < BasicChunk::chunkSize; iz++) {
-						float height = (noise.GetNoise((x * 16 - 16) + ix, (z * 16 - 16) + iz) / 2.0f + 0.5f) * 15.0f;
-						for (int iy = 0; iy < height; iy++) {
-							chunk.blocks[chunk.FlatIndex(ix, iy, iz)].SetBlockType(Block::BlockType::Grass);
-						}
-					}
-				}
-			}
-		}
-	}
 
-	wManager.GenerateMeshes();
-} 
+	noise.SetNoiseType(FastNoise::NoiseType::ValueFractal);
+	noise.SetFractalOctaves(1);
+	noise.SetFractalType(FastNoise::FractalType::Billow);
+	noise.SetFrequency(0.01f);
+	noise.SetSeed(time(0));
+}
 
 void Game::doFrame()
 {
@@ -168,13 +152,58 @@ void Game::doFrame()
 	}
 }
 
+#include "MathFunctions.h"
+
+void Game::MakeChunkThread()
+{
+	while (!exit) {
+		static Position oldpos = {0, 1, 0};
+		Position pos = player.GetPositon();
+		pos = Position(
+			(pos.x - FixedMod(pos.x, BasicChunk::chunkSize)),
+			0,
+			(pos.z - FixedMod(pos.z, BasicChunk::chunkSize))
+		);
+		auto orig = pos;
+		pos.y = 0;
+		BasicChunk* chunk = nullptr;
+		const int area = 50;
+		if (pos != oldpos) {
+			std::string out = "Generating chunk: ";
+			out += std::to_string(chunkCount) + "\n";
+			OutputDebugStringA(out.c_str());
+			for (int areaX = orig.x - area; areaX < orig.x + area; areaX++) {
+				pos.x = areaX;
+				for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ++) {
+					pos.z = areaZ;
+					if ((chunk = wManager.CreateChunkAtPlayerPos(pos)) != nullptr) {
+						++chunkCount;
+						for (int x = 0; x < BasicChunk::chunkSize; x++) {
+							for (int z = 0; z < BasicChunk::chunkSize; z++) {
+								float height = (noise.GetNoise((pos.x) + x, (pos.z) + z) / 2.0f + 0.5f) * 15.0f;
+								for (int y = 0; y < height; y++) {
+									chunk->blocks[chunk->FlatIndex(x, y, z)].SetBlockType(Block::BlockType::Grass);
+								}
+							}
+						}
+						wManager.GenerateMesh(*chunk);
+					}
+				}
+			}
+			oldpos = orig;
+		}
+	}
+}
+
 int Game::start()
 {
 	std::thread tr(&Game::doFrame, this);
+	std::thread chunktr(&Game::MakeChunkThread, this);
 	while (1) {
 		if (const auto result = Window::processMessages()) {
 			exit = true;
 			tr.join();
+			chunktr.join();
 			return result.value();
 		}
 	}
