@@ -114,7 +114,7 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	vp.TopLeftY = 0.0f;
 	pContext->RSSetViewports(1, &vp);
 
-	projection = DirectX::XMMatrixPerspectiveLH(1.0f, vp.Height / vp.Width, 0.5f, 1000.0f);
+	projection = DirectX::XMMatrixPerspectiveLH(1.0f, vp.Height / vp.Width, 0.5f, 100000.0f);
 
 
 	D3D11_RASTERIZER_DESC rasterDesc{};

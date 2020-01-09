@@ -20,7 +20,7 @@ float Plane::DistanceToPoint(const DirectX::XMFLOAT3& point) const
 void ViewFrustum::Update(const DirectX::XMMATRIX& camMatrix) noexcept
 {
 	DirectX::XMFLOAT4X4 mat;
-	DirectX::XMStoreFloat4x4(&mat, camMatrix * DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f / 16.0f, 0.4999f, 1001.0f));
+	DirectX::XMStoreFloat4x4(&mat, camMatrix * DirectX::XMMatrixPerspectiveLH(1.0f, 9.0f / 16.0f, 0.499f, 100001.0f));
 
 	planes[Planes::Left].normal.x = mat._14 + mat._11;
 	planes[Planes::Left].normal.y = mat._24 + mat._21;
@@ -65,17 +65,12 @@ void ViewFrustum::Update(const DirectX::XMMATRIX& camMatrix) noexcept
 
 bool ViewFrustum::IsBoxInFrustum(const AABB& box) const noexcept
 {
-	bool result = true;
 	for (auto& plane : planes)
 	{
 		if (plane.DistanceToPoint(box.GetVP(plane.normal)) < 0)
 		{
 			return false;
 		}
-		else if (plane.DistanceToPoint(box.GetVN(plane.normal)) < 0)
-		{
-			result = true;
-		}
 	}
-	return result;
+	return true;
 }

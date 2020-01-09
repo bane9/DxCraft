@@ -46,13 +46,13 @@ bool TreeGenerator::GenerateTree(BlockEventManager& blockMgr, const Position& po
 			BlockEventManager::Event evt =
 			{
 				blockPos,
-				{0, 0, 0},
+				{},
 				Block::BlockType::Leaves,
 				BlockEventManager::Event::EventType::UPDATE_BLOCK,
 				0, 0.0f, 0,
 				{pos + Position(0, 4, 0), Block::BlockType::Oak_Wood}
 			};
-			blockMgr.AddEvent(evt);
+			//blockMgr.AddEvent(evt);
 		}
 	}
 	return true;

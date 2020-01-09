@@ -142,17 +142,24 @@ BasicChunk* WorldManager::GetChunkFromBlock(int x, int y, int z)
 	else return &chunk->second;
 }
 
-BasicChunk* WorldManager::CreateChunkAtPlayerPos(const Position& pos)
+std::optional<std::vector<BasicChunk*>> WorldManager::CreateChunkAtPlayerPos(const Position& pos)
 {
 	Position chunkPosition(
 		(pos.x - FixedMod(pos.x, BasicChunk::chunkSize)),
 		0,
 		(pos.z - FixedMod(pos.z, BasicChunk::chunkSize))
 	);
-	if (chunks.find(chunkPosition) == chunks.end())
-		return CreateChunk(chunkPosition.x, 0, chunkPosition.z);
-	else return nullptr;
-
+	std::vector<BasicChunk*> out(16);
+	if (chunks.find(chunkPosition) == chunks.end()) {
+		for (int i = 0; i < 16; i++) {
+			out[i] = CreateChunk(chunkPosition.x, i * 16, chunkPosition.z);
+		}
+		for (int i = 0; i < 16; i++) {
+			out[i] = &chunks.at(Position(chunkPosition.x, i * 16, chunkPosition.z));
+		}
+		return out;
+	}
+	return {};
 }
 
 Block* WorldManager::GetBlock(int x, int y, int z)

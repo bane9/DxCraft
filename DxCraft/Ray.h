@@ -6,7 +6,7 @@
 
 class Ray {
 public:
-	Ray(float limit = 8.0f)
+	Ray(float limit = 5.0f)
 		: rayLimit(limit)
 	{}
 

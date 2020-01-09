@@ -161,6 +161,7 @@ void Player::MoveDown(bool external)
 
 void Player::CastRay()
 {
+	//return;
 	cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw());
 	previousHitBlock = cameraRay.GetVector();
 	hitBlock = previousHitBlock;

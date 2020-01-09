@@ -161,32 +161,40 @@ void Game::MakeChunkThread()
 		Position pos = player.GetPositon();
 		pos = Position(
 			(pos.x - FixedMod(pos.x, BasicChunk::chunkSize)),
-			0,
+			(pos.y - FixedMod(pos.y, BasicChunk::chunkSize)),
 			(pos.z - FixedMod(pos.z, BasicChunk::chunkSize))
 		);
 		auto orig = pos;
 		pos.y = 0;
-		BasicChunk* chunk = nullptr;
-		const int area = 50;
+		std::optional<std::vector<BasicChunk*>> chunks;
+		auto GetBlock = [&chunks](int x, int y, int z) {
+			auto chunk = (*chunks)[y / 16];
+			return &chunk->blocks[chunk->FlatIndex(x, y, z)];
+		};
+		const int area = 5 * BasicChunk::chunkSize;
 		if (pos != oldpos) {
-			std::string out = "Generating chunk: ";
-			out += std::to_string(chunkCount) + "\n";
-			OutputDebugStringA(out.c_str());
-			for (int areaX = orig.x - area; areaX < orig.x + area; areaX++) {
+			for (int areaX = orig.x - area; areaX < orig.x + area; areaX += BasicChunk::chunkSize) {
 				pos.x = areaX;
-				for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ++) {
+				for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += BasicChunk::chunkSize) {
 					pos.z = areaZ;
-					if ((chunk = wManager.CreateChunkAtPlayerPos(pos)) != nullptr) {
-						++chunkCount;
+					if ((chunks = wManager.CreateChunkAtPlayerPos(pos)) != std::nullopt) {
 						for (int x = 0; x < BasicChunk::chunkSize; x++) {
 							for (int z = 0; z < BasicChunk::chunkSize; z++) {
-								float height = (noise.GetNoise((pos.x) + x, (pos.z) + z) / 2.0f + 0.5f) * 15.0f;
-								for (int y = 0; y < height; y++) {
-									chunk->blocks[chunk->FlatIndex(x, y, z)].SetBlockType(Block::BlockType::Grass);
+								float height = (noise.GetNoise(pos.x + x, pos.z + z) / 2.0f + 0.5f) * 15.0f;
+								for (int y = 0; y < height * 16; y++) {
+									auto block = GetBlock(x, y, z);
+									if((float)y > (height * 16) * 0.975f)
+										block->SetBlockType(Block::BlockType::Grass);
+									else if ((float)y > (height * 16) * 0.8f && (float)y < (height * 16) * 0.975f)
+										block->SetBlockType(Block::BlockType::Dirt);
+									else
+										block->SetBlockType(Block::BlockType::Stone);
 								}
 							}
 						}
-						wManager.GenerateMesh(*chunk);
+						for (auto& chunk : *chunks) {
+							wManager.GenerateMesh(*chunk);
+						}
 					}
 				}
 			}
