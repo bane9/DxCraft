@@ -161,7 +161,7 @@ void Player::MoveDown(bool external)
 
 void Player::CastRay()
 {
-	//return;
+	return; // TODO: make this thread safe as it's pretty much a guaranteed crash
 	cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw());
 	previousHitBlock = cameraRay.GetVector();
 	hitBlock = previousHitBlock;

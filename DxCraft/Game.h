@@ -29,4 +29,6 @@ private:
 	RenderData test;
 	FastNoise noise;
 	int chunkCount = 0;
+	int worldScale, waterScale;
+	bool meshEverything = false;
 };

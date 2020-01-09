@@ -75,10 +75,10 @@ void RenderData::Create2DTexture(const char* filePath)
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	/*samplerDesc.MinLOD = 0.0f;
+	samplerDesc.MinLOD = 0.0f;
 	samplerDesc.MipLODBias = 0.0f;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;*/
+	samplerDesc.MaxAnisotropy = D3D11_REQ_MAXANISOTROPY;
 
 
 	GFX_EXCEPT_INFO(gfx.pDevice->CreateSamplerState(&samplerDesc, pSampler.ReleaseAndGetAddressOf()));

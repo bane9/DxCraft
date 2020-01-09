@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "BillBoard.h"
 #include "FastNoise.h"
+#include "TreeGenerator.h"
 #include <algorithm>
 #include <ctime>
 GDIPlusManager gdipm;
@@ -17,6 +18,11 @@ Game::Game(size_t width, size_t height)
 {
 
 	const int area = 25;
+
+	srand(time(0));
+
+	worldScale = (rand() % (7 - 2 + 1)) + 7;
+	waterScale = (worldScale - 1) * 5;
 
 	noise.SetNoiseType(FastNoise::NoiseType::ValueFractal);
 	noise.SetFractalOctaves(1);
@@ -62,6 +68,9 @@ void Game::doFrame()
 				break;
 			case 'N':
 				player.ChangeBlock();
+				break;
+			case 'O':
+				meshEverything = true;
 				break;
 			case VK_SPACE:
 				if (jumpTimer.GetTime() < 0.2f) player.ToggleFlying();
@@ -157,6 +166,10 @@ void Game::doFrame()
 void Game::MakeChunkThread()
 {
 	while (!exit) {
+		if (meshEverything) {
+			wManager.GenerateMeshes();
+			meshEverything = false;
+		}
 		static Position oldpos = {0, 1, 0};
 		Position pos = player.GetPositon();
 		pos = Position(
@@ -180,15 +193,33 @@ void Game::MakeChunkThread()
 					if ((chunks = wManager.CreateChunkAtPlayerPos(pos)) != std::nullopt) {
 						for (int x = 0; x < BasicChunk::chunkSize; x++) {
 							for (int z = 0; z < BasicChunk::chunkSize; z++) {
-								float height = (noise.GetNoise(pos.x + x, pos.z + z) / 2.0f + 0.5f) * 15.0f;
-								for (int y = 0; y < height * 16; y++) {
+								float height = (noise.GetNoise(pos.x + x, pos.z + z) / 2.0f + 0.5f) * BasicChunk::chunkSize;
+								if (height < 2.0f) height = 2.0f;
+								for (int y = 0; y < height * worldScale; y++) {
 									auto block = GetBlock(x, y, z);
-									if((float)y > (height * 16) * 0.975f)
-										block->SetBlockType(Block::BlockType::Grass);
-									else if ((float)y > (height * 16) * 0.8f && (float)y < (height * 16) * 0.975f)
-										block->SetBlockType(Block::BlockType::Dirt);
-									else
-										block->SetBlockType(Block::BlockType::Stone);
+									if(y == 0) block->SetBlockType(Block::BlockType::Bedrock);
+									else if (y >= waterScale) {
+										if ((float)y > (height * worldScale) * 0.85f) {
+											block->SetBlockType(Block::BlockType::Grass);
+											//if (rand() % 1000 == 999) TreeGenerator::GenerateTree(player.evtManager, {pos.x + x, y + 1, pos.z + z});
+										}
+										else if ((float)y > (height * worldScale) * 0.65f && (float)y < (height * worldScale) * 0.85f)
+											block->SetBlockType(Block::BlockType::Dirt);
+										else
+											block->SetBlockType(Block::BlockType::Stone);
+									}
+									else {
+										if ((float)y > (height * worldScale) * 0.95f)
+											block->SetBlockType(Block::BlockType::Dirt);
+										else
+											block->SetBlockType(Block::BlockType::Stone);
+									}
+								}
+								for (int y = 1; y < waterScale; y++) {
+									auto block = GetBlock(x, y, z);
+									if (block->GetBlockType() == Block::BlockType::Air) {
+										block->SetBlockType(Block::BlockType::Water);
+									}
 								}
 							}
 						}

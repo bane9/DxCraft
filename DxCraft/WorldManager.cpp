@@ -151,6 +151,11 @@ std::optional<std::vector<BasicChunk*>> WorldManager::CreateChunkAtPlayerPos(con
 	);
 	std::vector<BasicChunk*> out(16);
 	if (chunks.find(chunkPosition) == chunks.end()) {
+		for (auto it = chunks.begin(); it != chunks.end(); ++it) {
+			if (abs(PointDistance3D((*it).first, pos)) > 15 * BasicChunk::chunkSize) {
+				if ((it = chunks.erase(it)) == chunks.end()) break;
+			}
+		}
 		for (int i = 0; i < 16; i++) {
 			out[i] = CreateChunk(chunkPosition.x, i * 16, chunkPosition.z);
 		}
