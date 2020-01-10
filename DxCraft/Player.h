@@ -10,7 +10,7 @@
 #include "BlockSelector.h"
 #include <DirectXMath.h>
 #include "XM_Structs.h"
-#include "EventManager.h"
+#include "BlockEventManager.h"
 
 class Player
 {
@@ -93,7 +93,7 @@ private:
 
 	const float flyingSpeedModifier = 4.0f;
 
-	const float blockFace = 0.05f;
+	const float blockFace = 0.0501f;
 
 	const float diagonalBlockFace = blockFace;
 

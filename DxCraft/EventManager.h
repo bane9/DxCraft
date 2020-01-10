@@ -1,50 +1,76 @@
 #pragma once
-#include "Block.h"
-#include "Timer.h"
-#include "Position.h"
-#include <vector>
-#include "WorldManager.h"
+#include <string>
+#include <tuple>
 #include <functional>
-#include <random>
+#include <any>
+#include <vector>
+#include <map>
+#include <mutex>
+#include <sstream>
 
-class BlockEventManager
-{
-	friend class TreeGenerator;
-	BlockEventManager(const BlockEventManager&) = delete;
-	BlockEventManager& operator=(const BlockEventManager&) = delete;
-public:
-	struct Event {
-		enum EventType {
-			PLACE_BLOCK,
-			REMOVE_BLOCK,
-			UPDATE_BLOCK
-		};
-		Position blockPosition;
-		Position placeDirection;
-		Block::BlockType blockType;
-		EventType eventType;
-		float StartTime = 0.0f;
-		float DelayUntilUpdate = 0.0f;
-		int UpdateDepth = 0;
-		struct DependantOnBlock {
-			Position pos = { 0, 0, 0 };
-			Block::BlockType type = Block::BlockType::None;
-		};
-		DependantOnBlock dependantOnBlock;
-		int water_level = 7;
+namespace Evt {
+	
+	struct DataHolder {
+		DataHolder(const DataHolder&) = delete;
+		DataHolder& operator=(const DataHolder&) = delete;
+
+		DataHolder() = default;
+
+		template<typename T>
+		DataHolder(const T& rhs)
+		{
+			operator=(rhs);
+		}
+
+		DataHolder(DataHolder&& other) noexcept
+			: data(std::move(data))
+		{
+		}
+
+		DataHolder& operator=(DataHolder&& other) noexcept
+		{
+			data = std::move(other.data);
+			return *this;
+		}
+		
+		template<typename T>
+		DataHolder& operator=(const T& data) {
+			this->data = data;
+			return *this;
+		}
+
+		template<typename T>
+		operator T&() {
+			T* out = nullptr;
+			if ((out = std::any_cast<T>(&data)) == nullptr) {
+				std::ostringstream oss;
+				oss << "Type cast mismatch in DataHolder\nTarget type: " << typeid(T).name()
+					<< "\nActual type: " << data.type().name();
+				throw std::exception(oss.str().c_str());
+			}
+			return *out;
+		}
+
+	private:
+		std::any data;
 	};
-	BlockEventManager(WorldManager& wManager);
-	bool PlaceBlock(const Position& BlockPosition, const Position& PlaceDirection, Block::BlockType BlockType, Event evt = {});
-	bool RemoveBlock(const Position& BlockPosition, Event evt = {});
-	void Loop();
-	void AddEvent(const Event& event);
-	void CreateSurroundingUpdates(const Position& BlockPosition, int updateDepth = 0);
-	Timer EventTimer;
-	std::mt19937 gen;
-	std::uniform_real_distribution<> DestroyDelayRand;
-private:
-	WorldManager& wManager;
-	std::vector<Event> Events;
-	std::random_device rd;
-};
 
+	class EventManager
+	{
+		EventManager(const EventManager&) = delete;
+		EventManager& operator=(const EventManager&) = delete;
+	public:
+		EventManager() = default;
+		DataHolder& operator[](const char* key) {
+			return data[std::string(key)];
+		}
+		DataHolder& operator[](const std::string& key) {
+			return data[key];
+		}
+		
+	private:
+		std::map<std::string, DataHolder> data;
+	};
+
+	inline EventManager GlobalEvt;
+}

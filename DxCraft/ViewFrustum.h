@@ -14,7 +14,7 @@ struct Plane
 class ViewFrustum
 {
 public:
-	void Update(const DirectX::XMMATRIX& projViewMatrix) noexcept;
+	void Update(const DirectX::XMMATRIX& camMatrix) noexcept;
 
 	bool IsBoxInFrustum(const AABB& box) const noexcept;
 

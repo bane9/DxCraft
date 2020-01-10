@@ -6,6 +6,7 @@
 #include "imgui/imgui_impl_win32.h"
 #include "Surface.h"
 #include "ThreadSettings.h"
+#include "EventManager.h"
 
 #pragma comment(lib, "dxgi.lib")
 
@@ -54,7 +55,7 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	if (adapter < 0) adapter = 0;
 
 	GFX_EXCEPT_INFO(D3D11CreateDeviceAndSwapChain(
-		vAdapters[0],
+		vAdapters[1],
 		D3D_DRIVER_TYPE_UNKNOWN,
 		nullptr,
 		swapCreateFlags,
@@ -115,7 +116,6 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	pContext->RSSetViewports(1, &vp);
 
 	projection = DirectX::XMMatrixPerspectiveLH(1.0f, vp.Height / vp.Width, 0.5f, 500.0);
-
 
 	D3D11_RASTERIZER_DESC rasterDesc{};
 	rasterDesc.AntialiasedLineEnable = TRUE;

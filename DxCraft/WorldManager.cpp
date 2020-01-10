@@ -108,6 +108,15 @@ void WorldManager::RenderChunks(Camera& cam)
 	}
 }
 
+void WorldManager::UnloadChunks(const Position& pos, int area)
+{
+	for (auto it = chunks.begin(); it != chunks.end(); ++it) {
+		if (abs(PointDistance3D(Position((*it).first.x, 0, (*it).first.z), Position(pos.x, 0, pos.z))) > area * BasicChunk::chunkSize) {
+			if ((it = chunks.erase(it)) == chunks.end()) break;
+		}
+	}
+}
+
 bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z, Block::BlockType type)
 {
 	if (y < 0) return true;
@@ -153,11 +162,6 @@ std::optional<std::vector<BasicChunk*>> WorldManager::CreateChunkAtPlayerPos(con
 	);
 	std::vector<BasicChunk*> out(16);
 	if (chunks.find(chunkPosition) == chunks.end()) {
-		for (auto it = chunks.begin(); it != chunks.end(); ++it) {
-			if (abs(PointDistance3D((*it).first, chunkPosition)) > 25 * BasicChunk::chunkSize) {
-				if ((it = chunks.erase(it)) == chunks.end()) break;
-			}
-		}
 		for (int i = 0; i < 16; i++) {
 			out[i] = CreateChunk(chunkPosition.x, i * 16, chunkPosition.z);
 		}

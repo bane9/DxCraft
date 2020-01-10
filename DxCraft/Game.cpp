@@ -11,6 +11,8 @@
 #include "TreeGenerator.h"
 #include <algorithm>
 #include <ctime>
+#include "EventManager.h"
+
 GDIPlusManager gdipm;
 
 Game::Game(size_t width, size_t height)
@@ -18,14 +20,17 @@ Game::Game(size_t width, size_t height)
 {
 	srand(time(0));
 
-	worldScale = (rand() % (4 - 2 + 1)) + 2;
+	constexpr int maxScale = 4;
+	constexpr int minScale = 2;
+	worldScale = (rand() % (maxScale - minScale + 1)) + minScale;
 	waterScale = (worldScale - 1) * 5;
 
-	noise.SetNoiseType(FastNoise::NoiseType::Simplex);
+	noise.SetNoiseType(FastNoise::NoiseType::SimplexFractal);
 	noise.SetFractalOctaves(1);
 	noise.SetFractalType(FastNoise::FractalType::Billow);
 	noise.SetFrequency(0.01f);
 	noise.SetSeed(time(0));
+
 }
 
 void Game::doFrame()
@@ -175,14 +180,14 @@ void Game::MakeChunkThread()
 			(pos.z - FixedMod(pos.z, BasicChunk::chunkSize))
 		);
 		auto orig = pos;
-		pos.y = 0;
 		std::optional<std::vector<BasicChunk*>> chunks;
 		auto GetBlock = [&chunks](int x, int y, int z) {
 			auto chunk = (*chunks)[y / 16];
 			return &chunk->blocks[chunk->FlatIndex(x, y, z)];
 		};
-		const int area = 5 * BasicChunk::chunkSize;
+		constexpr int area = 5 * BasicChunk::chunkSize;
 		if (pos != oldpos) {
+			wManager.UnloadChunks(orig, (float)(area / BasicChunk::chunkSize) * 2.3f);
 			for (int areaX = orig.x - area; areaX < orig.x + area; areaX += BasicChunk::chunkSize) {
 				pos.x = areaX;
 				for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += BasicChunk::chunkSize) {
@@ -194,29 +199,27 @@ void Game::MakeChunkThread()
 								float height = prescale + std::clamp(
 									(noise.GetNoise(pos.x + x, pos.z + z) / 2.0f + 0.5f) * (BasicChunk::chunkSize - 1) * worldScale,
 									0.0f,
-									206.0f);
-								if (height < 2.0f) height = 2.0f;
+									205.0f);
 								for (int y = 0; y < height; y++) {
 									auto block = GetBlock(x, y, z);
+									const float scale = height;
 									if(y == 0) block->SetBlockType(Block::BlockType::Bedrock);
-									else if (y >= waterScale) {
-										if ((float)y > height * 0.85f) {
+									else if (y >= prescale + waterScale) {
+										if (y > scale * 0.98f)
 											block->SetBlockType(Block::BlockType::Grass);
-											//if (rand() % 1000 == 999) TreeGenerator::GenerateTree(player.evtManager, {pos.x + x, y + 1, pos.z + z});
-										}
-										else if ((float)y > height * 0.65f && (float)y < height * 0.85f)
+										else if (y > scale * 0.75f && y < scale * 0.98f)
 											block->SetBlockType(Block::BlockType::Dirt);
 										else
 											block->SetBlockType(Block::BlockType::Stone);
 									}
 									else {
-										if ((float)y > height * 0.95f)
+										if (y > scale * 0.95f)
 											block->SetBlockType(Block::BlockType::Dirt);
 										else
 											block->SetBlockType(Block::BlockType::Stone);
 									}
 								}
-								for (int y = prescale; y < prescale + waterScale; y++) {
+								for (int y = prescale; y < prescale + waterScale + 1; y++) {
 									auto block = GetBlock(x, y, z);
 									if (block->GetBlockType() == Block::BlockType::Air) {
 										block->SetBlockType(Block::BlockType::Water);

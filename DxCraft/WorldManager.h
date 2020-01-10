@@ -22,6 +22,7 @@ public:
 	bool ModifyBlock(const Position& pos, Block::BlockType type = Block::BlockType::Air);
 	void GenerateMeshes();
 	void RenderChunks(Camera& cam);
+	void UnloadChunks(const Position& pos, int area = 20);
 	Block* GetBlock(int x, int y, int z);
 	Block* GetBlock(const Position& pos);
 	Block* GetBlock(const DirectX::XMFLOAT3& pos);
