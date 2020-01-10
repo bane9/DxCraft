@@ -13,9 +13,9 @@ DxCraft is a work in progress Minecraft clone made in C++17 and DirectX11
   - [X] Frustum culling
   - [x] Metadata system
   - [x] Plants/trees
-  - [ ] Water/lava
-  - [ ] Biomes
-  - [ ] Dynamic world generation
+  - [ ] Water/lava (in progress)
+  - [ ] Biomes (in progress)
+  - [ ] Dynamic world generation (in progress)
   - [ ] Shading
   - [ ] (maybe) Redstone
   - [ ] (maybe) Mobs
@@ -27,6 +27,7 @@ Secondly, I thank a lot of people on Discord servers that helped me with stuff w
 
 # Third party libraries used
 
+ - [FastNoise](https://github.com/Auburns/FastNoise)
  - [robin-hood-hashing](https://github.com/martinus/robin-hood-hashing)
  - [ImGui](https://github.com/ocornut/imgui)
 
