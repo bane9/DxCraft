@@ -17,7 +17,9 @@ WorldManager::WorldManager(Graphics& gfx)
 BasicChunk* WorldManager::CreateChunk(int x, int y, int z, bool empty)
 {
 	if (y < 0) return nullptr;
-	return &(*chunks.emplace(Position(x, y, z), BasicChunk(x, y, z, empty)).first).second;
+	auto emplaced = chunks.emplace(Position(x, y, z), BasicChunk(x, y, z, empty));
+	if (emplaced.second == false) return nullptr;
+	return &(*emplaced.first).second;
 }
 
 bool WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
@@ -152,7 +154,7 @@ std::optional<std::vector<BasicChunk*>> WorldManager::CreateChunkAtPlayerPos(con
 	std::vector<BasicChunk*> out(16);
 	if (chunks.find(chunkPosition) == chunks.end()) {
 		for (auto it = chunks.begin(); it != chunks.end(); ++it) {
-			if (abs(PointDistance3D((*it).first, pos)) > 15 * BasicChunk::chunkSize) {
+			if (abs(PointDistance3D((*it).first, chunkPosition)) > 25 * BasicChunk::chunkSize) {
 				if ((it = chunks.erase(it)) == chunks.end()) break;
 			}
 		}
