@@ -23,7 +23,7 @@ namespace Evt {
 		}
 
 		DataHolder(DataHolder&& other) noexcept
-			: data(std::move(data))
+			: data(std::move(other.data))
 		{
 		}
 
@@ -55,21 +55,90 @@ namespace Evt {
 		std::any data;
 	};
 
+	struct FunctionHolder {
+		FunctionHolder(const FunctionHolder&) = delete;
+		FunctionHolder& operator=(const FunctionHolder&) = delete;
+		
+		FunctionHolder() = default;
+
+		template<typename ...Args>
+		FunctionHolder(void(*fn)(Args...)) 
+			: function(fn)
+		{
+		}
+
+		FunctionHolder(FunctionHolder&& other) noexcept
+			: function(std::move(other.function))
+		{
+		}
+
+		FunctionHolder& operator=(FunctionHolder&& other) noexcept
+		{
+			function = std::move(other.function);
+			return *this;
+		}
+
+		template<typename ...Args>
+		FunctionHolder& operator=(void(*fn)(Args...))
+		{
+			function = fn;
+		}
+
+		template<typename ...Args>
+		void operator()(Args... args) {
+			try {
+				std::any_cast<void(*)(Args...)>(function)(args...);
+			}
+			catch (const std::bad_any_cast&) {
+				std::ostringstream oss;
+				const char* targetSignature[] = { typeid(Args).name()... };
+				std::string signature = "void (__cdecl*)(";
+				std::size_t size = std::tuple_size<std::tuple<Args...>>::value;
+				for (int i = 0; i < size; i++) {
+					signature += targetSignature[i];
+					if(i < size - 1)signature += ", ";
+				}
+				signature += ")";
+				oss << "Function signature mismatch in FunctionHolder\nTarget signature: " << signature
+					<< "\nActual signature: " << function.type().name();
+				throw std::exception(oss.str().c_str());
+			}
+		}
+
+
+	private:
+		std::any function;
+	};
+
 	class EventManager
 	{
 		EventManager(const EventManager&) = delete;
 		EventManager& operator=(const EventManager&) = delete;
 	public:
+
 		EventManager() = default;
+
 		DataHolder& operator[](const char* key) {
 			return data[std::string(key)];
 		}
+
 		DataHolder& operator[](const std::string& key) {
 			return data[key];
 		}
 		
+		template<typename ...Args>
+		void Subscribe(std::string key, Args... args) {
+			functions[key] = FunctionHolder(args...);
+		}
+
+		template<typename ...Args>
+		void operator()(std::string key, Args... args) {
+			functions[key](args...);
+		}
+
 	private:
 		std::map<std::string, DataHolder> data;
+		std::map<std::string, FunctionHolder> functions;
 	};
 
 	inline EventManager GlobalEvt;

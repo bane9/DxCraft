@@ -12,8 +12,15 @@
 #include <algorithm>
 #include <ctime>
 #include "EventManager.h"
+#include "MathFunctions.h"
 
 GDIPlusManager gdipm;
+
+void asd(int n) {
+	std::string s;
+	s += std::to_string(n) + "\n";
+	OutputDebugStringA(s.c_str());
+}
 
 Game::Game(size_t width, size_t height)
 	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager), test(wnd.Gfx())
@@ -31,12 +38,17 @@ Game::Game(size_t width, size_t height)
 	noise.SetFrequency(0.01f);
 	noise.SetSeed(time(0));
 
+
+	Evt::GlobalEvt.Subscribe("test", asd);
+
 }
 
 void Game::doFrame()
 {
 	while (!exit) {
 		wnd.Gfx().BeginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
+
+		Evt::GlobalEvt("test", 5);
 
 		while (auto e = wnd.kbd.ReadKey())
 		{
@@ -162,8 +174,6 @@ void Game::doFrame()
 		wnd.Gfx().EndFrame();
 	}
 }
-
-#include "MathFunctions.h"
 
 void Game::MakeChunkThread()
 {
