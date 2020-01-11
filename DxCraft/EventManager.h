@@ -11,6 +11,7 @@
 namespace Evt {
 	
 	struct DataHolder {
+		friend class EventManager;
 		DataHolder(const DataHolder&) = delete;
 		DataHolder& operator=(const DataHolder&) = delete;
 
@@ -68,6 +69,12 @@ namespace Evt {
 		{
 		}
 
+		template<typename ...Args>
+		FunctionHolder(Args... args...)
+			: function(args...)
+		{
+		}
+
 		FunctionHolder(FunctionHolder&& other) noexcept
 			: function(std::move(other.function))
 		{
@@ -113,7 +120,7 @@ namespace Evt {
 				return oss.str().c_str();
 			}
 			else {
-				return "";
+				return "Function signature mismatch in FunctionHolder, but the target signature was of size 0.";
 			}
 		}
 
@@ -174,7 +181,7 @@ namespace Evt {
 
 		bool HasDataKey(const std::string& key) {
 			for (auto& [k, v] : data) {
-				if (key == k) return true;
+				if (key == k && v.data.type() != typeid(void)) return true;
 			}
 			return false;
 		}

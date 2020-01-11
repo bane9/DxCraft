@@ -15,7 +15,6 @@ public:
 	Game& operator=(Game&) = delete;
 	~Game();
 	int start();
-	void asd();
 private:
 	void doFrame();
 	void MakeChunkThread();
@@ -32,4 +31,5 @@ private:
 	int chunkCount = 0;
 	int worldScale, waterScale;
 	bool meshEverything = false;
+	int area = 10 * BasicChunk::chunkSize;
 };

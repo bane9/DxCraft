@@ -3,9 +3,11 @@
 #include <algorithm>
 #include "EventManager.h"
 
+DirectX::XMMATRIX Camera::viewProjection;
+
 Camera::Camera()
 {
-	Evt::GlobalEvt["Camera Instance Pointer"] = this;
+	Evt::GlobalEvt.Subscribe("Frustum Update", Camera::UpdateProjection);
 }
 
 DirectX::XMMATRIX Camera::GetMatrix() const noexcept
@@ -43,11 +45,21 @@ ViewFrustum Camera::GetFrustum() noexcept
 	return frustum;
 }
 
+void Camera::UpdateProjection(float aspectRatio, float farZ)
+{
+	viewProjection = DirectX::XMMatrixPerspectiveLH(1.0f, aspectRatio, 0.5f, farZ);
+}
+
+const DirectX::XMMATRIX& Camera::GetProjection()
+{
+	return viewProjection;
+}
+
 void Camera::Rotate(float dx, float dy) noexcept
 {
 	yaw = wrap_angle(yaw + dx * rotationSpeed);
 	pitch = std::clamp(pitch + dy * rotationSpeed, 0.995f * -PI / 2.0f, 0.995f * PI / 2.0f);
-	frustum.Update(GetMatrix());
+	frustum.Update(GetMatrix() * viewProjection);
 }
 
 DirectX::XMFLOAT3 Camera::Translate(DirectX::XMFLOAT3 translation, float travelSpeed, bool flying) noexcept
@@ -66,7 +78,7 @@ DirectX::XMFLOAT3 Camera::Translate(DirectX::XMFLOAT3 translation, float travelS
 		));
 	}
 
-	frustum.Update(GetMatrix());
+	frustum.Update(GetMatrix() * viewProjection);
 
 	return { translation.x, translation.y, translation.z };
 }

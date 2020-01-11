@@ -14,9 +14,11 @@ public:
 	float GetPitch() noexcept;
 	float GetYaw() noexcept;
 	ViewFrustum GetFrustum() noexcept;
-	//void UpdateFrustum(float aspectRatio, float farZ);
+	static void UpdateProjection(float aspectRatio, float farZ);
+	const DirectX::XMMATRIX& GetProjection();
 private:
 	DirectX::XMFLOAT3 pos{0.0f, 0.0f, 0.0f};
+	static DirectX::XMMATRIX viewProjection;
 	float pitch = 0.0f;
 	float yaw = 0.0f;
 	float travelSpeed = 12.0f;

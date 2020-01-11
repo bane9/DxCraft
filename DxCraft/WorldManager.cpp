@@ -79,7 +79,7 @@ void WorldManager::RenderChunks(Camera& cam)
 
 		const Transforms tf =
 		{
-			DirectX::XMMatrixTranspose(model * gfx.getCamera() * gfx.getProjection()),
+			DirectX::XMMatrixTranspose(model * gfx.getCamera() * cam.GetProjection()),
 			DirectX::XMMatrixTranspose(model)
 		};
 		
@@ -96,7 +96,7 @@ void WorldManager::RenderChunks(Camera& cam)
 
 		const Transforms tf =
 		{
-			DirectX::XMMatrixTranspose(model * gfx.getCamera() * gfx.getProjection()),
+			DirectX::XMMatrixTranspose(model * gfx.getCamera() * cam.GetProjection()),
 			DirectX::XMMatrixTranspose(model)
 		};
 

@@ -16,17 +16,13 @@
 
 GDIPlusManager gdipm;
 
-void Game::asd() {
-	OutputDebugStringA("k\n");
-}
-
 Game::Game(size_t width, size_t height)
 	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager), test(wnd.Gfx())
 {
 	srand(time(0));
 
-	constexpr int maxScale = 1;
-	constexpr int minScale = 1;
+	constexpr int maxScale = 14;
+	constexpr int minScale = 14;
 	worldScale = (rand() % (maxScale - minScale + 1)) + minScale;
 	waterScale = (worldScale - 1) * 5;
 
@@ -35,10 +31,7 @@ Game::Game(size_t width, size_t height)
 	noise.SetFractalType(FastNoise::FractalType::Billow);
 	noise.SetFrequency(0.003f);
 	noise.SetSeed(time(0));
-
-	Evt::GlobalEvt.Subscribe("test", Game::asd);
-
-	Evt::GlobalEvt("test");
+	
 }
 
 void Game::doFrame()
@@ -86,6 +79,28 @@ void Game::doFrame()
 				if (jumpTimer.GetTime() < 0.2f) player.ToggleFlying();
 				jumpTimer.Mark();
 				break;
+			case 'U':
+			{
+				if (!Evt::GlobalEvt.HasDataKey("farZ") || !Evt::GlobalEvt.HasDataKey("aspect ratio")) break;
+				float farZ = Evt::GlobalEvt["farZ"];
+				farZ -= 250.0f;
+				area--;
+				float aspectRatio = Evt::GlobalEvt["aspect ratio"];
+				Evt::GlobalEvt["farZ"] = farZ;
+				Evt::GlobalEvt("Frustum Update", aspectRatio, farZ);
+				break;
+			}
+			case 'I':
+			{
+				if (!Evt::GlobalEvt.HasDataKey("farZ") || !Evt::GlobalEvt.HasDataKey("aspect ratio")) break;
+				float farZ = Evt::GlobalEvt["farZ"];
+				farZ += 250.0f;
+				area++;
+				float aspectRatio = Evt::GlobalEvt["aspect ratio"];
+				Evt::GlobalEvt["farZ"] = farZ;
+				Evt::GlobalEvt("Frustum Update", aspectRatio, farZ);
+				break;
+			}
 			}
 		}
 
@@ -190,7 +205,6 @@ void Game::MakeChunkThread()
 		auto GetBlock = [&chunks](int x, int y, int z) {
 			return &(*(*chunks)[y / 16])(x, y, z);
 		};
-		constexpr int area = 10 * BasicChunk::chunkSize;
 		if (pos != oldpos) {
 			wManager.UnloadChunks(pos, area * 1.5f);
 			for (int areaX = orig.x - area; areaX < orig.x + area; areaX += BasicChunk::chunkSize / 2) {
