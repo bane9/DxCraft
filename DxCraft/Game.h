@@ -15,6 +15,7 @@ public:
 	Game& operator=(Game&) = delete;
 	~Game();
 	int start();
+	void asd();
 private:
 	void doFrame();
 	void MakeChunkThread();

@@ -16,10 +16,8 @@
 
 GDIPlusManager gdipm;
 
-void asd(int n) {
-	std::string s;
-	s += std::to_string(n) + "\n";
-	OutputDebugStringA(s.c_str());
+void Game::asd() {
+	OutputDebugStringA("k\n");
 }
 
 Game::Game(size_t width, size_t height)
@@ -27,28 +25,26 @@ Game::Game(size_t width, size_t height)
 {
 	srand(time(0));
 
-	constexpr int maxScale = 4;
-	constexpr int minScale = 2;
+	constexpr int maxScale = 1;
+	constexpr int minScale = 1;
 	worldScale = (rand() % (maxScale - minScale + 1)) + minScale;
 	waterScale = (worldScale - 1) * 5;
 
 	noise.SetNoiseType(FastNoise::NoiseType::SimplexFractal);
 	noise.SetFractalOctaves(1);
 	noise.SetFractalType(FastNoise::FractalType::Billow);
-	noise.SetFrequency(0.01f);
+	noise.SetFrequency(0.003f);
 	noise.SetSeed(time(0));
 
+	Evt::GlobalEvt.Subscribe("test", Game::asd);
 
-	Evt::GlobalEvt.Subscribe("test", asd);
-
+	Evt::GlobalEvt("test");
 }
 
 void Game::doFrame()
 {
 	while (!exit) {
 		wnd.Gfx().BeginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
-
-		Evt::GlobalEvt("test", 5);
 
 		while (auto e = wnd.kbd.ReadKey())
 		{
@@ -192,15 +188,14 @@ void Game::MakeChunkThread()
 		auto orig = pos;
 		std::optional<std::vector<BasicChunk*>> chunks;
 		auto GetBlock = [&chunks](int x, int y, int z) {
-			auto chunk = (*chunks)[y / 16];
-			return &chunk->blocks[chunk->FlatIndex(x, y, z)];
+			return &(*(*chunks)[y / 16])(x, y, z);
 		};
-		constexpr int area = 5 * BasicChunk::chunkSize;
+		constexpr int area = 10 * BasicChunk::chunkSize;
 		if (pos != oldpos) {
-			wManager.UnloadChunks(orig, (float)(area / BasicChunk::chunkSize) * 2.3f);
-			for (int areaX = orig.x - area; areaX < orig.x + area; areaX += BasicChunk::chunkSize) {
+			wManager.UnloadChunks(pos, area * 1.5f);
+			for (int areaX = orig.x - area; areaX < orig.x + area; areaX += BasicChunk::chunkSize / 2) {
 				pos.x = areaX;
-				for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += BasicChunk::chunkSize) {
+				for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += BasicChunk::chunkSize / 2) {
 					pos.z = areaZ;
 					if ((chunks = wManager.CreateChunkAtPlayerPos(pos)) != std::nullopt) {
 						for (int x = 0; x < BasicChunk::chunkSize; x++) {

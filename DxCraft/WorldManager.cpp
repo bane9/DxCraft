@@ -111,7 +111,7 @@ void WorldManager::RenderChunks(Camera& cam)
 void WorldManager::UnloadChunks(const Position& pos, int area)
 {
 	for (auto it = chunks.begin(); it != chunks.end(); ++it) {
-		if (abs(PointDistance3D(Position((*it).first.x, 0, (*it).first.z), Position(pos.x, 0, pos.z))) > area * BasicChunk::chunkSize) {
+		if (abs(PointDistance3D(Position((*it).first.x, 0, (*it).first.z), Position(pos.x, 0, pos.z))) > area) {
 			if ((it = chunks.erase(it)) == chunks.end()) break;
 		}
 	}

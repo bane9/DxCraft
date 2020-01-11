@@ -1,9 +1,11 @@
 #include "Camera.h"
 #include "MathFunctions.h"
 #include <algorithm>
+#include "EventManager.h"
 
-Camera::Camera() noexcept
+Camera::Camera()
 {
+	Evt::GlobalEvt["Camera Instance Pointer"] = this;
 }
 
 DirectX::XMMATRIX Camera::GetMatrix() const noexcept

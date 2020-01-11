@@ -5,7 +5,7 @@
 class Camera
 {
 public:
-	Camera() noexcept;
+	Camera();
 	DirectX::XMMATRIX GetMatrix() const noexcept;
 	void Rotate(float dx, float dy) noexcept;
 	DirectX::XMFLOAT3 Translate(DirectX::XMFLOAT3 translation, float travelSpeed = 12.0f, bool flying = false) noexcept;
@@ -14,6 +14,7 @@ public:
 	float GetPitch() noexcept;
 	float GetYaw() noexcept;
 	ViewFrustum GetFrustum() noexcept;
+	//void UpdateFrustum(float aspectRatio, float farZ);
 private:
 	DirectX::XMFLOAT3 pos{0.0f, 0.0f, 0.0f};
 	float pitch = 0.0f;

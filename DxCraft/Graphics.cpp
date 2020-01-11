@@ -116,6 +116,7 @@ Graphics::Graphics(HWND hWnd, size_t width, size_t height)
 	pContext->RSSetViewports(1, &vp);
 
 	projection = DirectX::XMMatrixPerspectiveLH(1.0f, vp.Height / vp.Width, 0.5f, 500.0f);
+	Evt::GlobalEvt["farZ"] = 500.0f;
 
 	D3D11_RASTERIZER_DESC rasterDesc{};
 	rasterDesc.AntialiasedLineEnable = TRUE;
@@ -198,7 +199,10 @@ void Graphics::EndFrame()
 		vp.TopLeftX = 0.0f;
 		vp.TopLeftY = 0.0f;
 		pContext->RSSetViewports(1, &vp);
-		//projection = DirectX::XMMatrixPerspectiveLH(1.0f, vp.Height / vp.Width, 0.5f, 100.0f);
+		float farZ = 500.0f;
+		if (Evt::GlobalEvt.HasDataKey("farZ")) farZ = Evt::GlobalEvt["farZ"];
+		projection = DirectX::XMMatrixPerspectiveLH(1.0f, vp.Height / vp.Width, 0.5f, farZ);
+		Evt::GlobalEvt("Frustum Update", vp.Height / vp.Width, farZ);
 		temp_viewport = false;
 	}
 	pContext->OMSetRenderTargets(1, pTarget.GetAddressOf(), pDSV.Get());

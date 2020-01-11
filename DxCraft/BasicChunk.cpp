@@ -22,6 +22,11 @@ Position BasicChunk::GetPosition() const noexcept
 	return { x, y, z };
 }
 
+Block& BasicChunk::operator()(int x, int y, int z)
+{
+	return blocks[FlatIndex(x, y, z)];
+}
+
 inline Position BasicChunk::Normalize(int x, int y, int z) const noexcept
 {
 	return { FixedMod(x - this->x, chunkSize), FixedMod(y - this->y, chunkSize), FixedMod(z - this->z, chunkSize) };
