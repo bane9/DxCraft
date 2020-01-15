@@ -9,7 +9,7 @@ int CALLBACK WinMain(
 	_In_ int nShowCmd)
 {
 	try {
-		return Game{1280, 720}.start();
+		return Game{1280, 720}.Start();
 	}
 	catch (const CustomException & e) {
 		MessageBoxA(nullptr, e.what(), "App Exception", MB_OK | MB_ICONERROR);

@@ -21,20 +21,20 @@ Game::Game(size_t width, size_t height)
 {
 	srand(time(0));
 
-	constexpr int maxScale = 14;
-	constexpr int minScale = 14;
+	constexpr int maxScale = 10;
+	constexpr int minScale = 8;
 	worldScale = (rand() % (maxScale - minScale + 1)) + minScale;
 	waterScale = (worldScale - 1) * 5;
 
-	noise.SetNoiseType(FastNoise::NoiseType::SimplexFractal);
+	noise.SetNoiseType(FastNoise::NoiseType::ValueFractal);
 	noise.SetFractalOctaves(1);
-	noise.SetFractalType(FastNoise::FractalType::Billow);
-	noise.SetFrequency(0.003f);
+	//noise.SetFractalType(FastNoise::FractalType::Billow);
+	noise.SetFrequency(0.01f);
 	noise.SetSeed(time(0));
 	
 }
 
-void Game::doFrame()
+void Game::DoFrame()
 {
 	while (!exit) {
 		wnd.Gfx().BeginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
@@ -83,8 +83,8 @@ void Game::doFrame()
 			{
 				if (!Evt::GlobalEvt.HasDataKey("farZ") || !Evt::GlobalEvt.HasDataKey("aspect ratio")) break;
 				float farZ = Evt::GlobalEvt["farZ"];
-				farZ -= 250.0f;
-				area--;
+				farZ -= 250.0f; 
+				area -= BasicChunk::chunkSize;
 				float aspectRatio = Evt::GlobalEvt["aspect ratio"];
 				Evt::GlobalEvt["farZ"] = farZ;
 				Evt::GlobalEvt("Frustum Update", aspectRatio, farZ);
@@ -95,7 +95,7 @@ void Game::doFrame()
 				if (!Evt::GlobalEvt.HasDataKey("farZ") || !Evt::GlobalEvt.HasDataKey("aspect ratio")) break;
 				float farZ = Evt::GlobalEvt["farZ"];
 				farZ += 250.0f;
-				area++;
+				area += BasicChunk::chunkSize;
 				float aspectRatio = Evt::GlobalEvt["aspect ratio"];
 				Evt::GlobalEvt["farZ"] = farZ;
 				Evt::GlobalEvt("Frustum Update", aspectRatio, farZ);
@@ -216,7 +216,7 @@ void Game::MakeChunkThread()
 							for (int z = 0; z < BasicChunk::chunkSize; z++) {
 								constexpr float prescale = 50.0f;
 								float height = prescale + std::clamp(
-									(noise.GetNoise(pos.x + x, pos.z + z) / 2.0f + 0.5f) * (BasicChunk::chunkSize - 1) * worldScale,
+									(noise.GetNoise(pos.x + x, pos.z + z) /*/ 2.0f + 0.5f*/) * (BasicChunk::chunkSize - 1) * worldScale,
 									0.0f,
 									205.0f);
 								for (int y = 0; y < height; y++) {
@@ -243,6 +243,47 @@ void Game::MakeChunkThread()
 									if (block->GetBlockType() == Block::BlockType::Air) {
 										block->SetBlockType(Block::BlockType::Water);
 									}
+									else {
+										static const auto InBounds = [](const int x, const int y, const int z) {
+											return x >= 0 && y >= 0 && z >= 0 && x < 16 && y < 16 * 16 && z < 16;
+										};
+										if (InBounds(x + 1, y, z)) {
+											auto blk = GetBlock(x + 1, y, z);
+											if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
+												block->SetBlockType(Block::BlockType::Wooden_Plank);
+											}
+										}
+										if (InBounds(x - 1, y, z)) {
+											auto blk = GetBlock(x - 1, y, z);
+											if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
+												block->SetBlockType(Block::BlockType::Wooden_Plank);
+											}
+										}
+										if (InBounds(x, y + 1, z)) {
+											auto blk = GetBlock(x, y + 1, z);
+											if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
+												block->SetBlockType(Block::BlockType::Wooden_Plank);
+											}
+										}
+										if (InBounds(x, y - 1, z)) {
+											auto blk = GetBlock(x, y - 1, z);
+											if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
+												block->SetBlockType(Block::BlockType::Wooden_Plank);
+											}
+										}
+										if (InBounds(x, y, z + 1)) {
+											auto blk = GetBlock(x, y, z + 1);
+											if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
+												block->SetBlockType(Block::BlockType::Wooden_Plank);
+											}
+										}
+										if (InBounds(x, y, z - 1)) {
+											auto blk = GetBlock(x, y, z - 1);
+											if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
+												block->SetBlockType(Block::BlockType::Wooden_Plank);
+											}
+										}
+									}
 								}
 							}
 						}
@@ -257,9 +298,9 @@ void Game::MakeChunkThread()
 	}
 }
 
-int Game::start()
+int Game::Start()
 {
-	std::thread tr(&Game::doFrame, this);
+	std::thread tr(&Game::DoFrame, this);
 	std::thread chunktr(&Game::MakeChunkThread, this);
 	while (1) {
 		if (const auto result = Window::processMessages()) {

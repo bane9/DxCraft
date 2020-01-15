@@ -10,6 +10,7 @@
 #include <DirectXMath.h>
 #include <algorithm>
 #include <type_traits>
+#include <map>
 
 class WorldManager
 {
@@ -36,6 +37,7 @@ public:
 		const UVs& textures, float offsetX, float offsetY, float offsetZ);
 	bool BlockVisible(const BasicChunk& chunk, int x, int y, int z, Block::BlockType type = Block::BlockType::None);
 	robin_hood::unordered_flat_map <Position, BasicChunk, PositionHash> chunks;
+	//std::map<Position, BasicChunk> chunks;
 	Graphics& gfx;
 	const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 	{

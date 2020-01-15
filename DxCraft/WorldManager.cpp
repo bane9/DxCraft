@@ -73,14 +73,24 @@ void WorldManager::GenerateMeshes() {
 
 void WorldManager::RenderChunks(Camera& cam)
 {
+	struct TextureTransforms
+	{
+		DirectX::XMMATRIX modelViewProj;
+		DirectX::XMMATRIX model;
+		DirectX::XMMATRIX transformMatrix;
+		DirectX::XMMATRIX projMatrix;
+	};
+
 	for (auto& chunk : chunks) {
 		if(!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
 
-		const Transforms tf =
+		const TextureTransforms tf =
 		{
 			DirectX::XMMatrixTranspose(model * gfx.getCamera() * cam.GetProjection()),
-			DirectX::XMMatrixTranspose(model)
+			DirectX::XMMatrixTranspose(model),
+			gfx.getCamera() * cam.GetProjection(),
+			cam.GetProjection()
 		};
 		
 		renderData.UpdateVScBuf(tf);
@@ -94,10 +104,12 @@ void WorldManager::RenderChunks(Camera& cam)
 		if (!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
 
-		const Transforms tf =
+		const TextureTransforms tf =
 		{
 			DirectX::XMMatrixTranspose(model * gfx.getCamera() * cam.GetProjection()),
-			DirectX::XMMatrixTranspose(model)
+			DirectX::XMMatrixTranspose(model),
+			gfx.getCamera() * cam.GetProjection(),
+			cam.GetProjection()
 		};
 
 		renderData.UpdateVScBuf(tf);
@@ -163,7 +175,7 @@ std::optional<std::vector<BasicChunk*>> WorldManager::CreateChunkAtPlayerPos(con
 	std::vector<BasicChunk*> out(16);
 	if (chunks.find(chunkPosition) == chunks.end()) {
 		for (int i = 0; i < 16; i++) {
-			out[i] = CreateChunk(chunkPosition.x, i * 16, chunkPosition.z);
+			CreateChunk(chunkPosition.x, i * 16, chunkPosition.z);
 		}
 		for (int i = 0; i < 16; i++) {
 			out[i] = &chunks.at(Position(chunkPosition.x, i * 16, chunkPosition.z));

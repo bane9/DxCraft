@@ -8,14 +8,19 @@ struct Position {
 	Position() = default;
 	Position(const DirectX::XMFLOAT3& pos) { XMFLOAT3ToPos(pos); }
 	Position& operator=(const DirectX::XMFLOAT3& pos) { XMFLOAT3ToPos(pos); return *this; }
-	bool operator==(const Position& other) const {
+	bool operator==(const Position& other) const noexcept{
 		return x == other.x && y == other.y && z == other.z;
 	}
-	bool operator!=(const Position& other) const {
-		return !this->operator==(other);
+	bool operator!=(const Position& other) const noexcept{
+		return !operator==(other);
 	}
-	Position operator+(const Position& other) const {
+	Position operator+(const Position& other) const noexcept{
 		return { x + other.x, y + other.y, z + other.z };
+	}
+	bool operator<(const Position& rhs) const noexcept{
+		if (x != rhs.x) return x < rhs.x;
+		else if (y != rhs.y) return y < rhs.y;
+		else return z < rhs.z;
 	}
 	int x = 0, y = 0, z = 0;
 private:
