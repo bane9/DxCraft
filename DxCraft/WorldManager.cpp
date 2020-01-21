@@ -14,48 +14,46 @@ WorldManager::WorldManager(Graphics& gfx)
 	renderData.Create2DTexture("images\\terrain.png");
 }
 
-BasicChunk* WorldManager::CreateChunk(int x, int y, int z, bool empty)
+std::shared_ptr<BasicChunk> WorldManager::CreateChunk(int x, int y, int z, bool empty)
 {
 	if (y < 0) return nullptr;
-	auto emplaced = chunks.emplace(Position(x, y, z), BasicChunk(x, y, z, empty));
-	if (emplaced.second == false) return nullptr;
-	return &(*emplaced.first).second;
+	return chunks[{x, y, z}] = std::make_shared<BasicChunk>(x, y, z, empty);
 }
 
 bool WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
 {
 	if (y < 0) return false;
-	BasicChunk* chunk = GetChunkFromBlock(x, y, z);
+	auto chunk = GetChunkFromBlock(x, y, z);
 	if (chunk == nullptr) return false;
 	Position normalized = chunk->Normalize(x, y, z);
 	Block& block = chunk->blocks[chunk->FlatIndex(x, y, z)];
 	if (block.GetBlockType() == Block::BlockType::Bedrock) return false;
 	block.SetBlockType(type);
-	GenerateMesh(*chunk);
+	GenerateMesh(chunk);
 	if (block.GetBlockType() != Block::BlockType::Air) return true;
 	if (normalized.x + 1 >= BasicChunk::chunkSize) {
-		BasicChunk* neighbourChunk = GetChunkFromBlock(x + 1, y, z);
-		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+		auto neighbourChunk = GetChunkFromBlock(x + 1, y, z);
+		if (neighbourChunk != nullptr) GenerateMesh(neighbourChunk);
 	}
 	if (normalized.x - 1 < 0) {
-		BasicChunk* neighbourChunk = GetChunkFromBlock(x - 1, y, z);
-		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+		auto neighbourChunk = GetChunkFromBlock(x - 1, y, z);
+		if (neighbourChunk != nullptr) GenerateMesh(neighbourChunk);
 	}
 	if (normalized.y + 1 >= BasicChunk::chunkSize) {
-		BasicChunk* neighbourChunk = GetChunkFromBlock(x, y + 1, z);
-		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+		auto neighbourChunk = GetChunkFromBlock(x, y + 1, z);
+		if (neighbourChunk != nullptr) GenerateMesh(neighbourChunk);
 	}
 	if (normalized.y - 1 < 0) {
-		BasicChunk* neighbourChunk = GetChunkFromBlock(x, y - 1, z);
-		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+		auto neighbourChunk = GetChunkFromBlock(x, y - 1, z);
+		if (neighbourChunk != nullptr) GenerateMesh(neighbourChunk);
 	}
 	if (normalized.z + 1 >= BasicChunk::chunkSize) {
-		BasicChunk* neighbourChunk = GetChunkFromBlock(x, y, z + 1);
-		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+		auto neighbourChunk = GetChunkFromBlock(x, y, z + 1);
+		if (neighbourChunk != nullptr) GenerateMesh(neighbourChunk);
 	}
 	if (normalized.z - 1 < 0) {
-		BasicChunk* neighbourChunk = GetChunkFromBlock(x, y, z - 1);
-		if (neighbourChunk != nullptr) GenerateMesh(*neighbourChunk);
+		auto neighbourChunk = GetChunkFromBlock(x, y, z - 1);
+		if (neighbourChunk != nullptr) GenerateMesh(neighbourChunk);
 	}
 	return true;
 }
@@ -81,9 +79,11 @@ void WorldManager::RenderChunks(Camera& cam)
 		DirectX::XMMATRIX projMatrix;
 	};
 
-	for (auto& chunk : chunks) {
-		if(!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
-		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
+	for (auto& chunkIt : chunks) {
+		auto chunk = chunkIt.second;
+		if (chunk == nullptr) continue;
+		if(!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
+		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
 		const TextureTransforms tf =
 		{
@@ -95,14 +95,16 @@ void WorldManager::RenderChunks(Camera& cam)
 		
 		renderData.UpdateVScBuf(tf);
 
-		if(chunk.second.IndexBufferSize > 0)
-			RenderData::Render(renderData, chunk.second.VertexBuffer, chunk.second.IndexBuffer,
-				chunk.second.IndexBufferSize, sizeof(Vertex));
+		if(chunk->IndexBufferSize > 0)
+			RenderData::Render(renderData, chunk->VertexBuffer, chunk->IndexBuffer,
+				chunk->IndexBufferSize, sizeof(Vertex));
 	}
 
-	for (auto& chunk : chunks) {
-		if (!cam.GetFrustum().IsBoxInFrustum(chunk.second.aabb)) continue;
-		auto model = DirectX::XMMatrixTranslation(chunk.second.x, chunk.second.y, chunk.second.z);
+	for (auto& chunkIt : chunks) {
+		auto chunk = chunkIt.second;
+		if (chunk == nullptr) continue;
+		if (!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
+		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
 		const TextureTransforms tf =
 		{
@@ -114,40 +116,45 @@ void WorldManager::RenderChunks(Camera& cam)
 
 		renderData.UpdateVScBuf(tf);
 
-		if (chunk.second.AdditionalIndexBufferSize > 0)
-			RenderData::Render(renderData, chunk.second.AdditionalVertexBuffer, chunk.second.AdditionalIndexBuffer,
-				chunk.second.AdditionalIndexBufferSize, sizeof(Vertex));
+		if (chunk->AdditionalIndexBufferSize > 0)
+			RenderData::Render(renderData, chunk->AdditionalVertexBuffer, chunk->AdditionalIndexBuffer,
+				chunk->AdditionalIndexBufferSize, sizeof(Vertex));
 	}
 }
 
-void WorldManager::UnloadChunks(const Position& pos, int area)
+void WorldManager::UnloadChunks(const Position& pos, float area)
 {
 	for (auto it = chunks.begin(); it != chunks.end(); ++it) {
-		if (abs(PointDistance3D(Position((*it).first.x, 0, (*it).first.z), Position(pos.x, 0, pos.z))) > area) {
+		float x = (*it).first.x, z = (*it).first.z;
+		if (pos.x < x - area || pos.x > x + area ||
+			pos.z < z - area || pos.z > z + area) {
 			if ((it = chunks.erase(it)) == chunks.end()) break;
 		}
 	}
 }
 
-bool WorldManager::BlockVisible(const BasicChunk& chunk, int x, int y, int z, Block::BlockType type)
+bool WorldManager::BlockVisible(std::shared_ptr<BasicChunk> chunkPtr, int x, int y, int z, Block::BlockType type)
 {
+	if (chunkPtr == nullptr) return true;
+	auto& chunk = *chunkPtr;
 	if (y < 0) return true;
 	if (x < BasicChunk::chunkSize - 1 && y < BasicChunk::chunkSize - 1 && z < BasicChunk::chunkSize - 1
 		&& x > 0 && y > 0 && z > 0)
 	{
-		auto block = chunk.blocks[chunk.FlatIndex(x, y, z)];
+		auto block = chunk(x, y, z);
 		return block.IsTransparent() && block.GetBlockType() != type;
 	}
 	else
 	{
-		auto block = GetBlock(x, y, z);
-		if (block == nullptr) return true;
-		return block->IsTransparent() && block->GetBlockType() != type;
+		auto chunk = GetChunkFromBlock(x, y, z);
+		if (chunk == nullptr) return true;
+		auto& block = chunk->operator()(x, y, z);
+		return block.IsTransparent() && block.GetBlockType() != type;
 	}
 	return false;
 }
 
-BasicChunk* WorldManager::GetChunkFromBlock(int x, int y, int z)
+std::shared_ptr<BasicChunk> WorldManager::GetChunkFromBlock(int x, int y, int z)
 {
 	if (y < 0)
 		return nullptr;
@@ -162,30 +169,27 @@ BasicChunk* WorldManager::GetChunkFromBlock(int x, int y, int z)
 
 	if (chunk == chunks.end())
 		return nullptr;
-	else return &chunk->second;
+	else return chunk->second;
 }
 
-std::optional<std::vector<BasicChunk*>> WorldManager::CreateChunkAtPlayerPos(const Position& pos)
+std::optional<std::vector<std::shared_ptr<BasicChunk>>> WorldManager::CreateChunkAtPlayerPos(const Position& pos)
 {
 	Position chunkPosition(
 		(pos.x - FixedMod(pos.x, BasicChunk::chunkSize)),
 		0,
 		(pos.z - FixedMod(pos.z, BasicChunk::chunkSize))
 	);
-	std::vector<BasicChunk*> out(16);
+	std::vector<std::shared_ptr<BasicChunk>> out(16);
 	if (chunks.find(chunkPosition) == chunks.end()) {
 		for (int i = 0; i < 16; i++) {
-			CreateChunk(chunkPosition.x, i * 16, chunkPosition.z);
-		}
-		for (int i = 0; i < 16; i++) {
-			out[i] = &chunks.at(Position(chunkPosition.x, i * 16, chunkPosition.z));
+			out[i] = CreateChunk(chunkPosition.x, i * 16, chunkPosition.z);
 		}
 		return out;
 	}
 	return {};
 }
 
-Block* WorldManager::GetBlock(int x, int y, int z)
+std::shared_ptr<Block> WorldManager::GetBlock(int x, int y, int z)
 {
 	if (y < 0) return nullptr;
 	auto chunk = GetChunkFromBlock(x, y, z);
@@ -193,21 +197,23 @@ Block* WorldManager::GetBlock(int x, int y, int z)
 	if (chunk == nullptr) 
 		return nullptr;
 
-	return &chunk->blocks[chunk->FlatIndex(x, y, z)];
+	return std::shared_ptr<Block>(chunk, &chunk->operator()(x, y, z));
 }
 
-Block* WorldManager::GetBlock(const Position& pos)
+std::shared_ptr<Block> WorldManager::GetBlock(const Position& pos)
 {
 	return GetBlock(pos.x, pos.y, pos.z);
 }
 
-Block* WorldManager::GetBlock(const DirectX::XMFLOAT3& pos)
+std::shared_ptr<Block> WorldManager::GetBlock(const DirectX::XMFLOAT3& pos)
 {
 	return GetBlock(round(pos.x), round(pos.y), round(pos.z));
 }
 
-void WorldManager::GenerateMesh(BasicChunk& chunk)
+void WorldManager::GenerateMesh(std::shared_ptr<BasicChunk> chunkPtr)
 {
+	if (chunkPtr == nullptr) return;
+	BasicChunk& chunk = *chunkPtr;
 	std::vector<Vertex> VertexBuffer;
 	std::vector<uint16_t> IndexBuffer;
 
@@ -217,7 +223,7 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 	for (int x = 0; x < BasicChunk::chunkSize; x++) {
 		for (int y = 0; y < BasicChunk::chunkSize; y++) {
 			for (int z = 0; z < BasicChunk::chunkSize; z++) {
-				const Block& block = chunk.blocks[chunk.FlatIndex(x, y, z)];
+				const Block& block = chunk(x, y, z);
 				if (block.GetBlockType() == Block::BlockType::Air) continue;
 				auto pos = block.GetPosition();
 
@@ -240,53 +246,53 @@ void WorldManager::GenerateMesh(BasicChunk& chunk)
 				}
 
 				if (!block.IsTransparent()) {
-					if (BlockVisible(chunk, pos.x + 1, pos.y, pos.z)) {
+					if (BlockVisible(chunkPtr, pos.x + 1, pos.y, pos.z)) {
 						AppendMesh(Faces::RightSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[3],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, pos.x - 1, pos.y, pos.z)) {
+					if (BlockVisible(chunkPtr, pos.x - 1, pos.y, pos.z)) {
 						AppendMesh(Faces::LeftSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[2],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, pos.x, pos.y + 1, pos.z)) {
+					if (BlockVisible(chunkPtr, pos.x, pos.y + 1, pos.z)) {
 						AppendMesh(Faces::TopSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[5],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, pos.x, pos.y - 1, pos.z)) {
+					if (BlockVisible(chunkPtr, pos.x, pos.y - 1, pos.z)) {
 						AppendMesh(Faces::BottomSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[4],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, pos.x, pos.y, pos.z + 1)) {
+					if (BlockVisible(chunkPtr, pos.x, pos.y, pos.z + 1)) {
 						AppendMesh(Faces::FarSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[0],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, pos.x, pos.y, pos.z - 1)) {
+					if (BlockVisible(chunkPtr, pos.x, pos.y, pos.z - 1)) {
 						AppendMesh(Faces::NearSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[1],
 							x, y, z);
 					}
 				}
 				else {
-					if (BlockVisible(chunk, pos.x + 1, pos.y, pos.z, block.GetBlockType())) {
+					if (BlockVisible(chunkPtr, pos.x + 1, pos.y, pos.z, block.GetBlockType())) {
 						AppendMesh(Faces::RightSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[3],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, pos.x - 1, pos.y, pos.z, block.GetBlockType())) {
+					if (BlockVisible(chunkPtr, pos.x - 1, pos.y, pos.z, block.GetBlockType())) {
 						AppendMesh(Faces::LeftSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[2],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, pos.x, pos.y + 1, pos.z, block.GetBlockType())) {
+					if (BlockVisible(chunkPtr, pos.x, pos.y + 1, pos.z, block.GetBlockType())) {
 						AppendMesh(Faces::TopSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[5],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, pos.x, pos.y - 1, pos.z, block.GetBlockType())) {
+					if (BlockVisible(chunkPtr, pos.x, pos.y - 1, pos.z, block.GetBlockType())) {
 						AppendMesh(Faces::BottomSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[4],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, pos.x, pos.y, pos.z + 1, block.GetBlockType())) {
+					if (BlockVisible(chunkPtr, pos.x, pos.y, pos.z + 1, block.GetBlockType())) {
 						AppendMesh(Faces::FarSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[0],
 							x, y, z);
 					}
-					if (BlockVisible(chunk, pos.x, pos.y, pos.z - 1, block.GetBlockType())) {
+					if (BlockVisible(chunkPtr, pos.x, pos.y, pos.z - 1, block.GetBlockType())) {
 						AppendMesh(Faces::NearSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[1],
 							x, y, z);
 					}

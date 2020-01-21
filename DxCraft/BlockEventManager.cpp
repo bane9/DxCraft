@@ -9,7 +9,7 @@ using PlaceSignature = bool(PLACE_PARAMATERS);
 
 inline bool HandleLiquid(WorldManager& wManager, BlockEventManager& blockEvt, BlockEventManager::Event& evt) {
 	if (evt.water_level < 1) return true;
-	Block* block = nullptr;
+	std::shared_ptr<Block> block = nullptr;
 	
 	bool stop = false;
 
@@ -222,14 +222,14 @@ std::array<std::function<PlaceSignature>, 6> PlaceEvent = {
 		return wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
 	},
 	[](PLACE_PARAMATERS) { //Liquid
-		if (evt.water_level < 1) return true;
-		wManager.ModifyBlock(evt.blockPosition, Block::BlockType::Water);
-		auto block = wManager.GetBlock(evt.blockPosition);
-		block->liquidInfo.level = evt.water_level;
-		if (evt.UpdateDepth > 0) return true;
-		bool result = HandleLiquid(wManager, blockEvt, evt);
-		//blockEvt.CreateSurroundingUpdates(evt.blockPosition, 1);
-		return result;
+		//if (evt.water_level < 1) return true;
+		//wManager.ModifyBlock(evt.blockPosition, Block::BlockType::Water);
+		//auto block = wManager.GetBlock(evt.blockPosition);
+		//block->liquidInfo.level = evt.water_level;
+		//if (evt.UpdateDepth > 0) return true;
+		//bool result = HandleLiquid(wManager, blockEvt, evt);
+		////blockEvt.CreateSurroundingUpdates(evt.blockPosition, 1);
+		return true;
 	},
 };
 #undef PLACE_PARAMATERS
@@ -405,11 +405,11 @@ void BlockEventManager::Loop()
 				break;
 			case Block::BlockType::Water:
 			{
-				auto block = wManager.GetBlock(evt.blockPosition);
-				evt.water_level = block->liquidInfo.level;
-				evt.blockType = block->GetBlockType();
+				//auto block = wManager.GetBlock(evt.blockPosition);
+				//evt.water_level = block->liquidInfo.level;
+				//evt.blockType = block->GetBlockType();
 				//result = UpdateEvent[3](wManager, *this, evt);
-				break;
+				//break;
 			}
 			default:
 				result = UpdateEvent[0](wManager, *this, evt);

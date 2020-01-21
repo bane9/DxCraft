@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include "Block.h"
 #include "BasicChunk.h"
 #include "Graphics.h"
@@ -12,32 +13,32 @@
 #include <type_traits>
 #include <map>
 
+
 class WorldManager
 {
 public:
 	WorldManager(Graphics& gfx);
 	WorldManager(WorldManager&) = delete;
 	WorldManager& operator=(WorldManager&) = delete;
-	BasicChunk* CreateChunk(int x, int y, int z, bool empty = false);
+	std::shared_ptr<BasicChunk> CreateChunk(int x, int y, int z, bool empty = false);
 	bool ModifyBlock(int x, int y, int z, Block::BlockType type = Block::BlockType::Air);
 	bool ModifyBlock(const Position& pos, Block::BlockType type = Block::BlockType::Air);
 	void GenerateMeshes();
 	void RenderChunks(Camera& cam);
-	void UnloadChunks(const Position& pos, int area = 20);
-	Block* GetBlock(int x, int y, int z);
-	Block* GetBlock(const Position& pos);
-	Block* GetBlock(const DirectX::XMFLOAT3& pos);
-	BasicChunk* GetChunkFromBlock(int x, int y, int z);
-	std::optional<std::vector<BasicChunk*>> CreateChunkAtPlayerPos(const Position& pos);
+	void UnloadChunks(const Position& pos, float area = 20.0f);
+	std::shared_ptr<Block> GetBlock(int x, int y, int z);
+	std::shared_ptr<Block> GetBlock(const Position& pos);
+	std::shared_ptr<Block> GetBlock(const DirectX::XMFLOAT3& pos);
+	std::shared_ptr<BasicChunk> GetChunkFromBlock(int x, int y, int z);
+	std::optional<std::vector<std::shared_ptr<BasicChunk>>> CreateChunkAtPlayerPos(const Position& pos);
 public:
-	void GenerateMesh(BasicChunk& chunk);
+	void GenerateMesh(std::shared_ptr<BasicChunk> chunkPtr);
 	template<typename Container, typename UVs>
 	void AppendMesh(const Container& mesh,
 		std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,
 		const UVs& textures, float offsetX, float offsetY, float offsetZ);
-	bool BlockVisible(const BasicChunk& chunk, int x, int y, int z, Block::BlockType type = Block::BlockType::None);
-	robin_hood::unordered_flat_map <Position, BasicChunk, PositionHash> chunks;
-	//std::map<Position, BasicChunk> chunks;
+	bool BlockVisible(std::shared_ptr<BasicChunk>, int x, int y, int z, Block::BlockType type = Block::BlockType::None);
+	robin_hood::unordered_flat_map <Position, std::shared_ptr<BasicChunk>, PositionHash> chunks;
 	Graphics& gfx;
 	const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 	{

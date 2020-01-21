@@ -6,7 +6,7 @@
 class Block {
 	friend class BasicChunk;
 public:
-	enum class BlockType {
+	enum class BlockType : int16_t {
 		Air,
 		Stone,
 		Grass,
@@ -31,7 +31,7 @@ public:
 		None
 	};
 
-	enum class MeshType {
+	enum class MeshType : int16_t {
 		INDEPENDANT_CUBE,
 		FULL_MESH_L,
 		FULL_MESH_M,
@@ -39,7 +39,7 @@ public:
 		SAPLING
 	};
 
-	enum class SelectorType {
+	enum class SelectorType : int16_t {
 		BLOCK,
 		BILBOARD_FULL_L,
 		MUSHROOM,
@@ -61,27 +61,12 @@ public:
 	bool IsFullMesh() const noexcept;
 	MeshType GetMeshType() const noexcept;
 	SelectorType GetSelectorType() const noexcept;
-	void SetBlockType(BlockType type) noexcept;
+	void SetBlockType(Block::BlockType type) noexcept;
 	const std::array<std::array<float, 2>, 6>& GetTexCoords() const noexcept;
 	AABB GetAABB() const noexcept;
 	bool NeedsSeperateDrawCall() const noexcept;
 	bool IsLiquid() const noexcept;
-	struct LiquidInfo {
-		static constexpr int water_spread = 7;
-		static constexpr int lava_spread = 4;
-		int level = 7;
-		enum class Direction {
-			FORWARD,
-			BACKWARD,
-			RIGHT,
-			LEFT,
-			DOWNWARD
-		} direction;
-	};
-	LiquidInfo liquidInfo;
 private:
 	Position pos;
 	BlockType blockType = Block::BlockType::Air;
-	MeshType meshType;
-	SelectorType selectorType;
 };

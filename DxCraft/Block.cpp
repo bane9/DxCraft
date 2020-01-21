@@ -165,15 +165,13 @@ Block::Block()
 }
 
 Block::Block(int x, int y, int z, BlockType blockType)
-	: pos(x, y, z)
+	: pos(x, y, z), blockType(blockType)
 {
-	SetBlockType(blockType);
 }
 
 Block::Block(Position pos, BlockType blockType)
-	: pos(pos)
+	: pos(pos), blockType(blockType)
 {
-	SetBlockType(blockType);
 }
 
 Position Block::GetPosition() const noexcept
@@ -189,6 +187,7 @@ Block::BlockType Block::GetBlockType() const noexcept
 
 bool Block::IsTransparent() const noexcept
 {
+	if (this == nullptr) return false; //TODO: Fix later lmao
 	switch (blockType)
 	{
 	case Block::BlockType::Air:
@@ -234,50 +233,62 @@ bool Block::IsCollideable() const noexcept
 
 bool Block::IsFullMesh() const noexcept
 {
-	return meshType != Block::MeshType::INDEPENDANT_CUBE;
+	return GetMeshType() != Block::MeshType::INDEPENDANT_CUBE;
 }
 
 Block::MeshType Block::GetMeshType() const noexcept
 {
-	return meshType;
+	switch (blockType) {
+	case Block::BlockType::Oak_Sapling:
+	case Block::BlockType::Birch_Sapling:
+	case Block::BlockType::Dark_Oak_Sapling:
+		return Block::MeshType::SAPLING;
+		break;
+	case Block::BlockType::Sugar_Cane:
+		return Block::MeshType::FULL_MESH_L;
+		break;
+	case Block::BlockType::Dandelion:
+	case Block::BlockType::Poppy:
+		return Block::MeshType::FULL_MESH_S;
+		break;
+	case Block::BlockType::Brown_Mushroom:
+	case Block::BlockType::Red_Mushroom:
+		return Block::MeshType::FULL_MESH_S;
+		break;
+	default:
+		return Block::MeshType::INDEPENDANT_CUBE;
+		break;
+	}
 }
 
 Block::SelectorType Block::GetSelectorType() const noexcept
 {
-	return selectorType;
-}
-
-void Block::SetBlockType(BlockType type) noexcept
-{
-	blockType = type;
-
-	switch (type) {
+	switch (blockType) {
 	case Block::BlockType::Oak_Sapling:
 	case Block::BlockType::Birch_Sapling:
 	case Block::BlockType::Dark_Oak_Sapling:
-		meshType = Block::MeshType::SAPLING;
-		selectorType = Block::SelectorType::SAPLING;
+		return Block::SelectorType::SAPLING;
 		break;
 	case Block::BlockType::Sugar_Cane:
-		meshType = Block::MeshType::FULL_MESH_L;
-		selectorType = Block::SelectorType::BILBOARD_FULL_L;
+		return Block::SelectorType::BILBOARD_FULL_L;
 		break;
 	case Block::BlockType::Dandelion:
 	case Block::BlockType::Poppy:
-		meshType = Block::MeshType::FULL_MESH_S;
-		selectorType = Block::SelectorType::FLOWER;
+		return Block::SelectorType::FLOWER;
 		break;
 	case Block::BlockType::Brown_Mushroom:
 	case Block::BlockType::Red_Mushroom:
-		meshType = Block::MeshType::FULL_MESH_S;
-		selectorType = Block::SelectorType::MUSHROOM;
+		return Block::SelectorType::MUSHROOM;
 		break;
 	default:
-		meshType = Block::MeshType::INDEPENDANT_CUBE;
-		selectorType = Block::SelectorType::BLOCK;
+		return Block::SelectorType::BLOCK;
 		break;
 	}
+}
 
+void Block::SetBlockType(Block::BlockType type) noexcept
+{
+	blockType = type;
 }
 
 const std::array<std::array<float, 2>, 6>& Block::GetTexCoords() const noexcept
@@ -287,7 +298,7 @@ const std::array<std::array<float, 2>, 6>& Block::GetTexCoords() const noexcept
 
 AABB Block::GetAABB() const noexcept
 {
-	switch (selectorType) {
+	switch (GetSelectorType()) {
 	case Block::SelectorType::BILBOARD_FULL_L:
 		return AABB({ 0.8f, 2.0f, 0.8f });
 	case Block::SelectorType::SAPLING:

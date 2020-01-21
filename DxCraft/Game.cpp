@@ -21,8 +21,8 @@ Game::Game(size_t width, size_t height)
 {
 	srand(time(0));
 
-	constexpr int maxScale = 10;
-	constexpr int minScale = 8;
+	constexpr int maxScale = 4;
+	constexpr int minScale = 2;
 	worldScale = (rand() % (maxScale - minScale + 1)) + minScale;
 	waterScale = (worldScale - 1) * 5;
 
@@ -201,12 +201,12 @@ void Game::MakeChunkThread()
 			(pos.z - FixedMod(pos.z, BasicChunk::chunkSize))
 		);
 		auto orig = pos;
-		std::optional<std::vector<BasicChunk*>> chunks;
+		std::optional<std::vector<std::shared_ptr<BasicChunk>>> chunks;
 		auto GetBlock = [&chunks](int x, int y, int z) {
 			return &(*(*chunks)[y / 16])(x, y, z);
 		};
 		if (pos != oldpos) {
-			wManager.UnloadChunks(pos, area * 1.5f);
+			wManager.UnloadChunks(pos, area);
 			for (int areaX = orig.x - area; areaX < orig.x + area; areaX += BasicChunk::chunkSize / 2) {
 				pos.x = areaX;
 				for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += BasicChunk::chunkSize / 2) {
@@ -216,7 +216,7 @@ void Game::MakeChunkThread()
 							for (int z = 0; z < BasicChunk::chunkSize; z++) {
 								constexpr float prescale = 50.0f;
 								float height = prescale + std::clamp(
-									(noise.GetNoise(pos.x + x, pos.z + z) /*/ 2.0f + 0.5f*/) * (BasicChunk::chunkSize - 1) * worldScale,
+									(noise.GetNoise(pos.x + x, pos.z + z) / 2.0f + 0.5f) * (BasicChunk::chunkSize - 1) * worldScale,
 									0.0f,
 									205.0f);
 								for (int y = 0; y < height; y++) {
@@ -287,8 +287,17 @@ void Game::MakeChunkThread()
 								}
 							}
 						}
+						BasicChunk* neigbourChunk = nullptr;
 						for (auto& chunk : *chunks) {
-							wManager.GenerateMesh(*chunk);
+							wManager.GenerateMesh(chunk);
+							/*neigbourChunk = wManager.GetChunkFromBlock(chunk->x + 16, chunk->y, chunk->z);
+							if (neigbourChunk != nullptr && (neigbourChunk->IndexBufferSize > 0 || neigbourChunk->AdditionalIndexBufferSize > 0)) wManager.GenerateMesh(*neigbourChunk);
+							neigbourChunk = wManager.GetChunkFromBlock(chunk->x - 16, chunk->y, chunk->z);
+							if (neigbourChunk != nullptr && (neigbourChunk->IndexBufferSize > 0 || neigbourChunk->AdditionalIndexBufferSize > 0)) wManager.GenerateMesh(*neigbourChunk);
+							neigbourChunk = wManager.GetChunkFromBlock(chunk->x, chunk->y, chunk->z + 16);
+							if (neigbourChunk != nullptr && (neigbourChunk->IndexBufferSize > 0 || neigbourChunk->AdditionalIndexBufferSize > 0)) wManager.GenerateMesh(*neigbourChunk);
+							neigbourChunk = wManager.GetChunkFromBlock(chunk->x, chunk->y, chunk->z - 16);
+							if (neigbourChunk != nullptr && (neigbourChunk->IndexBufferSize > 0 || neigbourChunk->AdditionalIndexBufferSize > 0)) wManager.GenerateMesh(*neigbourChunk);*/
 						}
 					}
 				}
