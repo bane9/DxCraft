@@ -41,7 +41,8 @@ void WorldGenerator::Loop()
 	for (auto it = chunkActions.begin(); it != chunkActions.end(); ++it) {
 		for (auto& thread : threads) {
 			if (!thread.running) {
-				chunkActionThreadData[thread.index] = *it;
+				chunkActionThreadData[thread.index].action = it->action;
+				chunkActionThreadData[thread.index].chunk = it->chunk;
 				threadLocks[thread.index].cv.notify_one();
 				if ((it = chunkActions.erase(it)) == chunkActions.end()) return;
 				//thread.running = true;
@@ -89,6 +90,11 @@ void WorldGenerator::ThreadLoop(int index)
 		if (!running) return;
 		thread.running = true;
 		ChunkAction action = chunkActionThreadData[index];
+		chunkActionThreadData[index] = {};
+		if (action.chunk.use_count() < 2) {
+			thread.running = false;
+			continue;
+		}
 
 		if (action.action == ChunkAction::Actions::Generate) {
 			GenerateChunk(action.chunk);
@@ -102,7 +108,7 @@ void WorldGenerator::ThreadLoop(int index)
 
 void WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 {
-	if (chunkPtr == nullptr || chunkPtr->blocks.empty()) return;
+	if (chunkPtr == nullptr) return;
 	Chunk& chunk = *chunkPtr;
 	std::vector<Vertex> VertexBuffer;
 	std::vector<uint16_t> IndexBuffer;
