@@ -4,7 +4,8 @@
 #include "AABB.h"
 
 class Block {
-	friend class BasicChunk;
+	friend class Chunk;
+	friend class WorldGenerator;
 public:
 	enum class BlockType : int16_t {
 		Air,

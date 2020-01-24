@@ -9,16 +9,17 @@
 #include "AABB.h"
 #include "RenderData.h"
 
-class BasicChunk
+class Chunk
 {
 	friend class WorldManager;
-	friend class MeshRenderer;
+	friend class WorldGenerator;
 public:
-	BasicChunk(int x, int y, int z, bool empty = false);
+	Chunk(int x, int y, int z, bool empty = false);
 	Position GetPosition() const noexcept;
-	static constexpr int chunkSize = 16;
+	static constexpr int ChunkSize = 16;
 
 	Block& operator()(int x, int y, int z);
+	bool SafeToWrite = false;
 public:
 	Position Normalize(int x, int y, int z) const noexcept;
 	inline int FlatIndex(int x, int y, int z) const noexcept;

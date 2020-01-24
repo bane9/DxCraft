@@ -31,5 +31,5 @@ private:
 	int chunkCount = 0;
 	int worldScale, waterScale;
 	bool meshEverything = false;
-	int area = 10 * BasicChunk::chunkSize;
+	int area = 10 * Chunk::ChunkSize;
 };

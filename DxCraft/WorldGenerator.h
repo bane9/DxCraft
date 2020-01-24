@@ -1,64 +1,78 @@
 #pragma once
 #include <memory>
-#include "Block.h"
-#include "BasicChunk.h"
-#include "Graphics.h"
+#include <list>
 #include <vector>
-#include "XM_Structs.h"
-#include "robin_hood.h"
-#include "Camera.h"
-#include "RenderData.h"
-#include <DirectXMath.h>
-#include <algorithm>
-#include <type_traits>
-#include <map>
-#include "WorldGenerator.h"
+#include <thread>
+#include "Block.h"
+#include "Graphics.h"
+#include "BasicChunk.h"
+#include "FastNoise.h"
+#include <mutex>
 
-class WorldManager
+class WorldGenerator
 {
+private:
+	struct ChunkAction {
+		enum class Actions {
+			Invalid, 
+			Generate,
+			Mesh
+		};
+		Actions action = Actions::Invalid;
+		std::shared_ptr<Chunk> chunk;
+	};
+
+	struct ThreadLocks {
+		std::mutex mutex;
+		std::unique_lock<std::mutex> lock;
+		std::condition_variable cv;
+		ThreadLocks() : lock(mutex) {}
+	};
+
+	struct Threads {
+		std::thread thread;
+		int index;
+		bool running = false;
+		Threads(WorldGenerator* wGenInstance, int index) : index(index), thread(&WorldGenerator::ThreadLoop, wGenInstance, index) {};
+	};
+
 public:
-	WorldManager(Graphics& gfx);
-	WorldManager(WorldManager&) = delete;
-	WorldManager& operator=(WorldManager&) = delete;
-	void CreateChunk(int x, int y, int z, bool empty = false);
-	bool ModifyBlock(int x, int y, int z, Block::BlockType type = Block::BlockType::Air);
-	bool ModifyBlock(const Position& pos, Block::BlockType type = Block::BlockType::Air);
-	void GenerateMeshes();
-	void RenderChunks(Camera& cam);
-	void UnloadChunks(const Position& pos, float area = 20.0f);
-	std::shared_ptr<Block> GetBlock(int x, int y, int z);
-	std::shared_ptr<Block> GetBlock(const Position& pos);
-	std::shared_ptr<Block> GetBlock(const DirectX::XMFLOAT3& pos);
-	std::shared_ptr<Chunk> GetChunkFromBlock(int x, int y, int z);
-	void CreateChunkAtPlayerPos(const Position& pos);
-public:
+	WorldGenerator(Graphics& gfx);
+	~WorldGenerator();
+	void Loop();
+	void AddNewChunk(std::shared_ptr<Chunk> chunk);
+	void AddChunkForMeshing(std::shared_ptr<Chunk> chunk);
+	
+private:
+	void ThreadLoop(int index);
 	void GenerateMesh(std::shared_ptr<Chunk> chunkPtr);
+	void GenerateChunk(std::shared_ptr<Chunk> chunkPtr);
 	template<typename Container, typename UVs>
 	void AppendMesh(const Container& mesh,
 		std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,
 		const UVs& textures, float offsetX, float offsetY, float offsetZ);
 	bool BlockVisible(std::shared_ptr<Chunk>, int x, int y, int z, Block::BlockType type = Block::BlockType::None);
-	robin_hood::unordered_flat_map <Position, std::shared_ptr<Chunk>, PositionHash> chunks;
-	Graphics& gfx;
-	WorldGenerator wGen;
-	const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
-	{
-		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "Normal",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "TexCoord",0,DXGI_FORMAT_R32G32_FLOAT,0,24,D3D11_INPUT_PER_VERTEX_DATA,0 }
-	};
 
-	RenderData renderData;
+	int coreCount = std::thread::hardware_concurrency();
+	std::vector<Threads> threads;
+	std::vector<ThreadLocks> threadLocks;
+	std::vector<ChunkAction> chunkActionThreadData;
+
+	bool running = true;
+	Graphics& gfx;
+	FastNoise noise;
+	int worldScale, waterScale;
+	std::list<ChunkAction> chunkActions;
 };
 
-//template <class>
-//static constexpr bool is_array_of_array_v = false;
-//
-//template <class T, std::size_t N, std::size_t M>
-//static constexpr bool is_array_of_array_v<std::array<std::array<T, N>, M>> = true;
+template <class>
+static constexpr bool is_array_of_array_v = false;
+
+template <class T, std::size_t N, std::size_t M>
+static constexpr bool is_array_of_array_v<std::array<std::array<T, N>, M>> = true;
 
 template<typename Container, typename UVs>
-inline void WorldManager::AppendMesh(const Container& mesh,
+inline void WorldGenerator::AppendMesh(const Container& mesh,
 	std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,
 	const UVs& textures, float offsetX, float offsetY, float offsetZ)
 {
@@ -97,6 +111,8 @@ inline void WorldManager::AppendMesh(const Container& mesh,
 			});
 	}
 	const int offset = vertexBuffer.size() > 0 ? (vertexBuffer.size() / mesh.first.size() - 1) * mesh.first.size() : 0;
-	std::transform(mesh.second.begin(), mesh.second.end(), std::back_inserter(indexBuffer), 
-		[offset](int a) {return offset + a;});
+	std::transform(mesh.second.begin(), mesh.second.end(), std::back_inserter(indexBuffer),
+		[offset](int a) {return offset + a; });
 }
+
+
