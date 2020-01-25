@@ -1122,7 +1122,7 @@ private:
 
         // prefix increment. Undefined behavior if we are at end()!
         Iter& operator++() noexcept {
-           mInfo++;
+            mInfo++;
             mKeyVals++;
             fastForward();
             return *this;
