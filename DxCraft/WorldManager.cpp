@@ -81,6 +81,7 @@ void WorldManager::RenderChunks(Camera& cam)
 		DirectX::XMMATRIX projMatrix;
 	};
 
+	rendering = true;
 	for (auto chunkIt : chunks) {
 		auto& chunk = chunkIt.second;
 		if (chunk == nullptr || !chunk->SafeToAccess) continue;
@@ -122,6 +123,7 @@ void WorldManager::RenderChunks(Camera& cam)
 			RenderData::Render(renderData, chunk->AdditionalVertexBuffer, chunk->AdditionalIndexBuffer,
 				chunk->AdditionalIndexBufferSize, sizeof(Vertex));
 	}
+	rendering = false;
 }
 
 void WorldManager::UnloadChunks(const Position& pos, float area)
@@ -174,8 +176,9 @@ std::shared_ptr<Chunk> WorldManager::GetChunkFromBlock(int x, int y, int z, bool
 	else return chunk->second;
 }
 
-void WorldManager::CreateChunkAtPlayerPos(const Position& pos)
+bool WorldManager::CreateChunkAtPlayerPos(const Position& pos)
 {
+	while (rendering) std::this_thread::yield();
 	Position chunkPosition(
 		(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
 		0,
@@ -185,7 +188,9 @@ void WorldManager::CreateChunkAtPlayerPos(const Position& pos)
 		for (int i = 0; i < 16; i++) {
 			CreateChunk(chunkPosition.x, i * 16, chunkPosition.z);
 		}
+		return true;
 	}
+	return false;
 }
 
 std::shared_ptr<Block> WorldManager::GetBlock(int x, int y, int z)

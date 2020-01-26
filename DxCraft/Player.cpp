@@ -174,7 +174,7 @@ void Player::CastRay()
 	while (cameraRay.Next()) {
 		auto block = wManager.GetBlock(hitBlock);
   		if (block != nullptr && block->GetBlockType() != Block::BlockType::Air && !block->IsLiquid()) {
-			auto pos = block->GetPosition();
+			auto pos = Position(hitBlock);
 			AABB aabb = block->GetAABB();
 			aabb.SetPosition({static_cast<float>(pos.x), static_cast<float>(pos.y) - 0.5f, static_cast<float>(pos.z)});
 			if (aabb.IsPointInside(hitBlock)) {
@@ -215,7 +215,7 @@ void Player::RightClickEvent()
 		auto camPosLower = Position(DirectX::XMFLOAT3(camPos.x, camPos.y - 1.0f, camPos.z));
 		auto block = wManager.GetBlock(previousHitBlock);
 		if (block != nullptr) {
-			auto p = block->GetPosition();
+			auto p = Position(previousHitBlock);
 			if (!(p == camPosUpper || p == camPosLower)) {
 				auto checkSapling = wManager.GetBlock(hitBlock);
 				if (checkSapling != nullptr && checkSapling->GetBlockType() == Block::BlockType::Oak_Sapling) {

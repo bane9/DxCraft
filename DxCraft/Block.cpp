@@ -160,23 +160,17 @@ static constexpr std::array<std::array<std::array<float, 2>, 6>, static_cast<int
 
 
 Block::Block()
-	: pos(0, 0, 0)
 {
 }
 
 Block::Block(int x, int y, int z, BlockType blockType)
-	: pos(x, y, z), blockType(blockType)
+	: blockType(blockType)
 {
 }
 
 Block::Block(Position pos, BlockType blockType)
-	: pos(pos), blockType(blockType)
+	: blockType(blockType)
 {
-}
-
-Position Block::GetPosition() const noexcept
-{
-	return pos;
 }
 
 Block::BlockType Block::GetBlockType() const noexcept

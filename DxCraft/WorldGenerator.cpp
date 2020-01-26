@@ -73,11 +73,13 @@ void WorldGenerator::ThreadLoop()
 		while (running && chunkActions.empty()) std::this_thread::sleep_for(10ms);
 		if (!running) return;
 		ChunkAction action = chunkActions.pop();
-		if (action.action == ChunkAction::Actions::Generate) {
-			GenerateChunk(action.chunk);
-		}
-		else if (action.action == ChunkAction::Actions::Mesh) {
-			GenerateMesh(action.chunk);
+		if (action.chunk.use_count() > 1) {
+			if (action.action == ChunkAction::Actions::Generate) {
+				GenerateChunk(action.chunk);
+			}
+			else if (action.action == ChunkAction::Actions::Mesh) {
+				GenerateMesh(action.chunk);
+			}
 		}
 	}
 }
@@ -97,7 +99,10 @@ void WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 			for (int z = 0; z < Chunk::ChunkSize; z++) {
 				const Block& block = chunk(x, y, z);
 				if (block.GetBlockType() == Block::BlockType::Air) continue;
-				auto pos = block.GetPosition();
+				auto pos = chunk.GetPosition();
+				pos.x += x;
+				pos.y += y;
+				pos.z += z;
 
 				auto& TargetVertexBuffer = block.NeedsSeperateDrawCall() ? AdditionalVertexBuffer : VertexBuffer;
 				auto& TargetIndexBuffer = block.NeedsSeperateDrawCall() ? AdditionalIndexBuffer : IndexBuffer;
@@ -192,16 +197,6 @@ void WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 void WorldGenerator::GenerateChunk(std::shared_ptr<Chunk> chunkPtr)
 {
 	chunkPtr->blocks.resize(Chunk::ChunkSize * Chunk::ChunkSize * Chunk::ChunkSize);
-	for (int x = 0; x < Chunk::ChunkSize; x++) {
-		for (int y = 0; y < Chunk::ChunkSize; y++) {
-			for (int z = 0; z < Chunk::ChunkSize; z++) {
-				Block& block = chunkPtr->operator()(x, y, z);
-				block.pos.x = x + chunkPtr->x;
-				block.pos.y = y + chunkPtr->y;
-				block.pos.z = z + chunkPtr->z;
-			}
-		}
-	}
 	Position pos = chunkPtr->GetPosition();
 	for (int x = 0; x < Chunk::ChunkSize; x++) {
 		for (int z = 0; z < Chunk::ChunkSize; z++) {

@@ -7,7 +7,7 @@ class Block {
 	friend class Chunk;
 	friend class WorldGenerator;
 public:
-	enum class BlockType : int16_t {
+	enum class BlockType : uint8_t {
 		Air,
 		Stone,
 		Grass,
@@ -32,7 +32,7 @@ public:
 		None
 	};
 
-	enum class MeshType : int16_t {
+	enum class MeshType : uint8_t {
 		INDEPENDANT_CUBE,
 		FULL_MESH_L,
 		FULL_MESH_M,
@@ -40,7 +40,7 @@ public:
 		SAPLING
 	};
 
-	enum class SelectorType : int16_t {
+	enum class SelectorType : uint8_t {
 		BLOCK,
 		BILBOARD_FULL_L,
 		MUSHROOM,
@@ -55,7 +55,6 @@ public:
 
 	~Block() = default;
 
-	Position GetPosition() const noexcept;
 	BlockType GetBlockType() const noexcept;
 	bool IsTransparent() const noexcept;
 	bool IsCollideable() const noexcept;
@@ -68,6 +67,5 @@ public:
 	bool NeedsSeperateDrawCall() const noexcept;
 	bool IsLiquid() const noexcept;
 private:
-	Position pos;
 	BlockType blockType = Block::BlockType::Air;
 };

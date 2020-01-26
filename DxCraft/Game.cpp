@@ -23,10 +23,10 @@ Game::Game(size_t width, size_t height)
 
 void Game::DoFrame()
 {
+	Position oldpos = { 0, 1, 0 };
 	while (!exit) {
 		wnd.Gfx().BeginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
 		
-		static Position oldpos = { 0, 1, 0 };
 		Position pos = player.GetPositon();
 		pos = Position(
 			(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
@@ -34,7 +34,10 @@ void Game::DoFrame()
 			(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
 		);
 		if (pos != oldpos) {
+			while (!positionQueue.empty()) std::this_thread::yield();
+			wManager.UnloadChunks(pos, area);
 			positionQueue.push(pos);
+			oldpos = pos;
 		}
 
 		while (auto e = wnd.kbd.ReadKey()) {
@@ -191,7 +194,6 @@ void Game::MakeChunkThread()
 		if (exit) return;
 		Position pos = positionQueue.pop();
 		auto orig = pos;
-		wManager.UnloadChunks(pos, area);
 		for (int areaX = orig.x - area; areaX < orig.x + area; areaX += Chunk::ChunkSize / 2) {
 			pos.x = areaX;
 			for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += Chunk::ChunkSize / 2) {

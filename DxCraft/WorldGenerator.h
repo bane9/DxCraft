@@ -30,7 +30,7 @@ public:
 	void AddNewChunk(std::shared_ptr<Chunk> chunk);
 	void AddChunkForMeshing(std::shared_ptr<Chunk> chunk);
 	
-private:
+public:
 	void ThreadLoop();
 	void GenerateMesh(std::shared_ptr<Chunk> chunkPtr);
 	void GenerateChunk(std::shared_ptr<Chunk> chunkPtr);
@@ -40,7 +40,7 @@ private:
 		const UVs& textures, float offsetX, float offsetY, float offsetZ);
 	bool BlockVisible(std::shared_ptr<Chunk>, int x, int y, int z, Block::BlockType type = Block::BlockType::None);
 
-	int threadCount = std::thread::hardware_concurrency() * 1.5f;
+	int threadCount = std::thread::hardware_concurrency();
 	std::vector<std::thread> threads;
 	std::vector<ChunkAction> chunkActionThreadData;
 
