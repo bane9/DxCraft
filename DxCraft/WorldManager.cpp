@@ -81,8 +81,8 @@ void WorldManager::RenderChunks(Camera& cam)
 		DirectX::XMMATRIX projMatrix;
 	};
 
-	for (auto& chunkIt : chunks) {
-		auto chunk = chunkIt.second;
+	for (auto chunkIt : chunks) {
+		auto& chunk = chunkIt.second;
 		if (chunk == nullptr || !chunk->SafeToAccess) continue;
 		if(!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
@@ -102,8 +102,8 @@ void WorldManager::RenderChunks(Camera& cam)
 				chunk->IndexBufferSize, sizeof(Vertex));
 	}
 
-	for (auto& chunkIt : chunks) {
-		auto chunk = chunkIt.second;
+	for (auto chunkIt : chunks) {
+		auto& chunk = chunkIt.second;
 		if (chunk == nullptr || !chunk->SafeToAccess) continue;
 		if (!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
@@ -169,7 +169,7 @@ std::shared_ptr<Chunk> WorldManager::GetChunkFromBlock(int x, int y, int z, bool
 	
 	auto chunk = chunks.find(chunkPosition);
 
-	if (chunk == chunks.end() || (!chunk->second->SafeToAccess && safetyCheck))
+	if (chunk == chunks.end() || chunk->second == nullptr || (!chunk->second->SafeToAccess && safetyCheck))
 		return nullptr;
 	else return chunk->second;
 }

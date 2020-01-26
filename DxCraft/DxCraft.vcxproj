@@ -203,6 +203,7 @@
     <ClInclude Include="Block.h" />
     <ClInclude Include="BlockSelector.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ConcurrentQueue.h" />
     <ClInclude Include="Crosshair.h" />
     <ClInclude Include="CustomException.h" />
     <ClInclude Include="DxgiInfoManager.h" />

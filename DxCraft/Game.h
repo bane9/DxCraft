@@ -6,6 +6,9 @@
 #include "Player.h"
 #include "RenderData.h"
 #include "FastNoise.h"
+#include <mutex>
+#include "ConcurrentQueue.h"
+#include <utility>
 
 class Game
 {
@@ -32,4 +35,5 @@ private:
 	int worldScale, waterScale;
 	bool meshEverything = false;
 	int area = 10 * Chunk::ChunkSize;
+	ConcurentQueue<Position> positionQueue;
 };

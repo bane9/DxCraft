@@ -16,46 +16,25 @@
 
 GDIPlusManager gdipm;
 
-static constexpr bool seperateGen = true;
-
 Game::Game(size_t width, size_t height)
 	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager), test(wnd.Gfx())
 {
-	int area = 5;
-	/*for (int x = -area; x < area * 2; x++) {
-		for (int z = -area; z < area * 2; z++) {
-			wManager.CreateChunk(x * 16, 0, z * 16);
-		}
-	}*/
-	
 }
 
 void Game::DoFrame()
 {
 	while (!exit) {
 		wnd.Gfx().BeginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
-
-		if constexpr (!seperateGen) {
-			static Position oldpos = { 0, 1, 0 };
-			Position pos = player.GetPositon();
-			pos = Position(
-				(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
-				0,
-				(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
-			);
-			auto orig = pos;
-			if (pos != oldpos) {
-				wManager.UnloadChunks(pos, area);
-				for (int areaX = orig.x - area; areaX < orig.x + area; areaX += Chunk::ChunkSize / 2) {
-					pos.x = areaX;
-					for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += Chunk::ChunkSize / 2) {
-						pos.z = areaZ;
-						wManager.CreateChunkAtPlayerPos(pos);
-					}
-				}
-				oldpos = orig;
-			}
-			wManager.wGen.Loop();
+		
+		static Position oldpos = { 0, 1, 0 };
+		Position pos = player.GetPositon();
+		pos = Position(
+			(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
+			0,
+			(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
+		);
+		if (pos != oldpos) {
+			positionQueue.push(pos);
 		}
 
 		while (auto e = wnd.kbd.ReadKey()) {
@@ -206,52 +185,33 @@ void Game::DoFrame()
 
 void Game::MakeChunkThread()
 {
+	using namespace std::chrono_literals;
 	while (!exit) {
-		static Position oldpos = { 0, 1, 0 };
-		Position pos = player.GetPositon();
-		pos = Position(
-			(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
-			0,
-			(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
-		);
+		while (!exit && positionQueue.empty()) std::this_thread::sleep_for(10ms);
+		if (exit) return;
+		Position pos = positionQueue.pop();
 		auto orig = pos;
-		if (pos != oldpos) {
-			wManager.UnloadChunks(pos, area);
-			for (int areaX = orig.x - area; areaX < orig.x + area; areaX += Chunk::ChunkSize / 2) {
-				pos.x = areaX;
-				for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += Chunk::ChunkSize / 2) {
-					pos.z = areaZ;
-					wManager.CreateChunkAtPlayerPos(pos);
-				}
+		wManager.UnloadChunks(pos, area);
+		for (int areaX = orig.x - area; areaX < orig.x + area; areaX += Chunk::ChunkSize / 2) {
+			pos.x = areaX;
+			for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += Chunk::ChunkSize / 2) {
+				pos.z = areaZ;
+				wManager.CreateChunkAtPlayerPos(pos);
 			}
-			oldpos = orig;
 		}
-		wManager.wGen.Loop();
 	}
 }
 
 int Game::Start()
 {
-	if constexpr (seperateGen) {
-		std::thread tr(&Game::DoFrame, this);
-		std::thread chunktr(&Game::MakeChunkThread, this);
-		while (1) {
-			if (const auto result = Window::processMessages()) {
-				exit = true;
-				tr.join();
-				chunktr.join();
-				return result.value();
-			}
-		}
-	}
-	else {
-		std::thread tr(&Game::DoFrame, this);
-		while (1) {
-			if (const auto result = Window::processMessages()) {
-				exit = true;
-				tr.join();
-				return result.value();
-			}
+	std::thread tr(&Game::DoFrame, this);
+	std::thread chunktr(&Game::MakeChunkThread, this);
+	while (1) {
+		if (const auto result = Window::processMessages()) {
+			exit = true;
+			tr.join();
+			chunktr.join();
+			return result.value();
 		}
 	}
 }

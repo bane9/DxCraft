@@ -7,6 +7,8 @@
 #include "Graphics.h"
 #include "BasicChunk.h"
 #include "FastNoise.h"
+#include "ConcurrentQueue.h"
+#include <queue>
 #include <mutex>
 
 class WorldGenerator
@@ -22,29 +24,14 @@ private:
 		std::shared_ptr<Chunk> chunk;
 	};
 
-	struct ThreadLocks {
-		std::mutex mutex;
-		std::unique_lock<std::mutex> lock;
-		std::condition_variable cv;
-		ThreadLocks() : lock(mutex) {}
-	};
-
-	struct Threads {
-		std::thread thread;
-		int index;
-		bool running = false;
-		Threads(WorldGenerator* wGenInstance, int index) : index(index), thread(&WorldGenerator::ThreadLoop, wGenInstance, index) {};
-	};
-
 public:
 	WorldGenerator(Graphics& gfx);
 	~WorldGenerator();
-	void Loop();
 	void AddNewChunk(std::shared_ptr<Chunk> chunk);
 	void AddChunkForMeshing(std::shared_ptr<Chunk> chunk);
 	
 private:
-	void ThreadLoop(int index);
+	void ThreadLoop();
 	void GenerateMesh(std::shared_ptr<Chunk> chunkPtr);
 	void GenerateChunk(std::shared_ptr<Chunk> chunkPtr);
 	template<typename Container, typename UVs>
@@ -53,16 +40,15 @@ private:
 		const UVs& textures, float offsetX, float offsetY, float offsetZ);
 	bool BlockVisible(std::shared_ptr<Chunk>, int x, int y, int z, Block::BlockType type = Block::BlockType::None);
 
-	int coreCount = std::thread::hardware_concurrency();
-	std::vector<Threads> threads;
-	std::vector<ThreadLocks> threadLocks;
+	int threadCount = std::thread::hardware_concurrency() * 1.5f;
+	std::vector<std::thread> threads;
 	std::vector<ChunkAction> chunkActionThreadData;
 
 	bool running = true;
 	Graphics& gfx;
 	FastNoise noise;
 	int worldScale, waterScale;
-	std::list<ChunkAction> chunkActions;
+	ConcurentQueue<ChunkAction> chunkActions;
 };
 
 template <class>

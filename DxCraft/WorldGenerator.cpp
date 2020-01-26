@@ -4,15 +4,13 @@
 #include "BillBoard.h"
 #include <algorithm>
 
-static constexpr bool useThreading = false;
-
 static auto GetChunkFromBlock = [&](int x, int y, int z) {
 	static WorldManager& wManager = *((WorldManager*)Evt::GlobalEvt["wManager"]);
 	return wManager.GetChunkFromBlock(x, y, z, false);
 };
 
 WorldGenerator::WorldGenerator(Graphics& gfx)
-	: gfx(gfx), threadLocks(coreCount), chunkActionThreadData(coreCount)
+	: gfx(gfx), chunkActionThreadData(threadCount)
 {
 	constexpr int maxScale = 4;
 	constexpr int minScale = 2;
@@ -24,10 +22,8 @@ WorldGenerator::WorldGenerator(Graphics& gfx)
 	noise.SetFrequency(0.01f);
 	noise.SetSeed(time(0));
 
-	if constexpr (useThreading) {
-		for (int i = 0; i < coreCount; i++) {
-			threads.push_back(Threads(this, i));
-		}
+	for (int i = 0; i < threadCount; i++) {
+		threads.push_back(std::thread(&WorldGenerator::ThreadLoop, this));
 	}
 }
 
@@ -35,59 +31,18 @@ WorldGenerator::~WorldGenerator()
 {
 	running = false;
 	for(int i = 0; i < threads.size(); i++){
-		threadLocks[i].cv.notify_all();
-		if (threads[i].thread.joinable()) threads[i].thread.join();
-	}
-}
-
-void WorldGenerator::Loop()
-{
-	for (auto it = chunkActions.begin(); it != chunkActions.end(); ++it) {
-		if (it->action == ChunkAction::Actions::Mesh) {
-			Position pos = it->chunk->GetPosition();
-			static auto CheckChunk = [&](const Position& chunkPos) {
-				auto chunk = GetChunkFromBlock(chunkPos.x, chunkPos.y, chunkPos.z);
-				if (chunk == nullptr || chunk->blocks.size() != Chunk::ChunkSize * Chunk::ChunkSize * Chunk::ChunkSize) return false;
-				else return true;
-			};
-			if (!CheckChunk({ pos.x + 1, pos.y, pos.z }) ||
-				!CheckChunk({ pos.x - 1, pos.y, pos.z }) ||
-				!CheckChunk({ pos.x, pos.y + 1, pos.z }) ||
-				(pos.y != 0 && !CheckChunk({ pos.x, pos.y - 1, pos.z })) ||
-				!CheckChunk({ pos.x, pos.y, pos.z - 1 }) ||
-				!CheckChunk({ pos.x, pos.y, pos.z - 1 })) {
-				
-				if (it->chunk.use_count() < 2) {
-					if ((it = chunkActions.erase(it)) == chunkActions.end()) return;
-				}
-				continue;
-			}
-		}
-		if constexpr (useThreading) {
-			for (auto& thread : threads) {
-				if (!thread.running) {
-					chunkActionThreadData[thread.index] = *it;
-					threadLocks[thread.index].cv.notify_one();
-					if ((it = chunkActions.erase(it)) == chunkActions.end()) return;
-				}
-			}
-		}
-		else {
-			chunkActionThreadData[0] = *it;
-			ThreadLoop(0);
-			if ((it = chunkActions.erase(it)) == chunkActions.end()) return;
-		}
+		if (threads[i].joinable()) threads[i].join();
 	}
 }
 
 void WorldGenerator::AddNewChunk(std::shared_ptr<Chunk> chunk)
 {
-	chunkActions.push_back({ ChunkAction::Actions::Generate, chunk });
+	chunkActions.push({ ChunkAction::Actions::Generate, chunk });
 }
 
 void WorldGenerator::AddChunkForMeshing(std::shared_ptr<Chunk> chunk)
 {
-	chunkActions.push_back({ ChunkAction::Actions::Mesh, chunk });
+	chunkActions.push({ ChunkAction::Actions::Mesh, chunk });
 }
 
 bool WorldGenerator::BlockVisible(std::shared_ptr<Chunk> chunkPtr, int x, int y, int z, Block::BlockType type)
@@ -111,28 +66,13 @@ bool WorldGenerator::BlockVisible(std::shared_ptr<Chunk> chunkPtr, int x, int y,
 	return false;
 }
 
-void WorldGenerator::ThreadLoop(int index)
+void WorldGenerator::ThreadLoop()
 {
-	if constexpr (useThreading) {
-		Threads& thread = threads[index];
-		while (running) {
-			threadLocks[index].cv.wait(threadLocks[index].lock);
-			if (!running) return;
-			thread.running = true;
-			ChunkAction action = chunkActionThreadData[index];
-
-			if (action.action == ChunkAction::Actions::Generate) {
-				GenerateChunk(action.chunk);
-			}
-			else if (action.action == ChunkAction::Actions::Mesh) {
-				GenerateMesh(action.chunk);
-			}
-			thread.running = false;
-		}
-	}
-	else {
-		ChunkAction action = chunkActionThreadData[index];
-
+	using namespace std::chrono_literals;
+	while (running) {
+		while (running && chunkActions.empty()) std::this_thread::sleep_for(10ms);
+		if (!running) return;
+		ChunkAction action = chunkActions.pop();
 		if (action.action == ChunkAction::Actions::Generate) {
 			GenerateChunk(action.chunk);
 		}
@@ -144,6 +84,7 @@ void WorldGenerator::ThreadLoop(int index)
 
 void WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 {
+	chunkPtr->SafeToAccess = false;
 	Chunk& chunk = *chunkPtr;
 	std::vector<Vertex> VertexBuffer;
 	std::vector<uint16_t> IndexBuffer;
@@ -294,6 +235,6 @@ void WorldGenerator::GenerateChunk(std::shared_ptr<Chunk> chunkPtr)
 			}
 		}
 	}
-	//GenerateMesh(chunkPtr);
+
 	AddChunkForMeshing(chunkPtr);
 }
