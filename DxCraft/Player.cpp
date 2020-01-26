@@ -4,6 +4,8 @@
 #include <algorithm>
 #include "TreeGenerator.h"
 
+static constexpr bool checkBlocks = true;
+
 #define FRAMETIME_COMPESATED(x) ((x) * (gfx.GetFrametime() / 16.667f))
 
 Player::Player(Graphics& gfx, WorldManager& wManager)
@@ -161,7 +163,7 @@ void Player::MoveDown(bool external)
 
 void Player::CastRay()
 {
-	return;
+	if constexpr (!checkBlocks) return;
 	cameraRay.SetPositionAndDirection(cam.GetPos(), cam.GetPitch(), cam.GetYaw());
 	previousHitBlock = cameraRay.GetVector();
 	hitBlock = previousHitBlock;
@@ -265,11 +267,13 @@ void Player::LoopThenDraw()
 		fallVelocity += FRAMETIME_COMPESATED(0.125f * fallSpeedModifier);
 		fallVelocity = std::clamp(fallVelocity, fallMinBound, 100.0f);
 		auto cPos = cam.GetPos();
-		/*auto block = wManager.GetBlock(DirectX::XMFLOAT3{cPos.x, cPos.y - 1.0f, cPos.z});
-		if (block == nullptr || !block->IsCollideable()) {
-			bool fall = true;
-			if(fall) MoveDown(true);
-		}*/
+		if constexpr (checkBlocks) {
+			auto block = wManager.GetBlock(DirectX::XMFLOAT3{cPos.x, cPos.y - 1.0f, cPos.z});
+			if (block == nullptr || !block->IsCollideable()) {
+				bool fall = true;
+				if(fall) MoveDown(true);
+			}
+		}
 		if (cam.GetPos().y < -15.0f) cam.SetPos(0.0f, 25.0f, 0.0f);
 	}
 	if (jumping && !falling) {
@@ -425,7 +429,7 @@ void Player::ResolveCollision(DirectX::XMFLOAT3 delta)
 		cam.SetPos(pos.x + delta.x, pos.y + delta.y, pos.z + delta.z);
 		return;
 	}
-	return;
+	if constexpr (!checkBlocks) return;
 	if (delta.x == 0 && delta.z == 0) {
 		moveVelocity = 0.0f;
 	}

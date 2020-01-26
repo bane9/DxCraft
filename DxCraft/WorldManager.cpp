@@ -18,8 +18,8 @@ WorldManager::WorldManager(Graphics& gfx)
 
 void WorldManager::CreateChunk(int x, int y, int z, bool empty)
 {
-	auto& chunk = chunks[{x, y, z}] = std::make_shared<Chunk>(x, y, z, empty);
-	wGen.AddNewChunk(chunk);
+	if (y < 0) return;
+	wGen.AddNewChunk(chunks[{x, y, z}] = std::make_shared<Chunk>(x, y, z));
 }
 
 bool WorldManager::ModifyBlock(int x, int y, int z, Block::BlockType type)
@@ -83,8 +83,8 @@ void WorldManager::RenderChunks(Camera& cam)
 
 	for (auto& chunkIt : chunks) {
 		auto chunk = chunkIt.second;
-		if (chunk == nullptr) continue;
-		//if(!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
+		if (chunk == nullptr || !chunk->SafeToAccess) continue;
+		if(!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
 		const TextureTransforms tf =
@@ -97,15 +97,15 @@ void WorldManager::RenderChunks(Camera& cam)
 		
 		renderData.UpdateVScBuf(tf);
 
-		if(chunk->IndexBufferSize > 0 && chunk->IndexBufferSize < 999999)
+		if(chunk->IndexBufferSize > 0)
 			RenderData::Render(renderData, chunk->VertexBuffer, chunk->IndexBuffer,
 				chunk->IndexBufferSize, sizeof(Vertex));
 	}
 
 	for (auto& chunkIt : chunks) {
 		auto chunk = chunkIt.second;
-		if (chunk == nullptr) continue;
-		//if (!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
+		if (chunk == nullptr || !chunk->SafeToAccess) continue;
+		if (!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
 		const TextureTransforms tf =
@@ -118,7 +118,7 @@ void WorldManager::RenderChunks(Camera& cam)
 
 		renderData.UpdateVScBuf(tf);
 
-		if (chunk->AdditionalIndexBufferSize > 0 && chunk->IndexBufferSize < 999999)
+		if (chunk->AdditionalIndexBufferSize > 0)
 			RenderData::Render(renderData, chunk->AdditionalVertexBuffer, chunk->AdditionalIndexBuffer,
 				chunk->AdditionalIndexBufferSize, sizeof(Vertex));
 	}
@@ -156,7 +156,7 @@ bool WorldManager::BlockVisible(std::shared_ptr<Chunk> chunkPtr, int x, int y, i
 	return false;
 }
 
-std::shared_ptr<Chunk> WorldManager::GetChunkFromBlock(int x, int y, int z)
+std::shared_ptr<Chunk> WorldManager::GetChunkFromBlock(int x, int y, int z, bool safetyCheck)
 {
 	if (y < 0)
 		return nullptr;
@@ -169,7 +169,7 @@ std::shared_ptr<Chunk> WorldManager::GetChunkFromBlock(int x, int y, int z)
 	
 	auto chunk = chunks.find(chunkPosition);
 
-	if (chunk == chunks.end())
+	if (chunk == chunks.end() || (!chunk->second->SafeToAccess && safetyCheck))
 		return nullptr;
 	else return chunk->second;
 }

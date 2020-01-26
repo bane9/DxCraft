@@ -1,7 +1,7 @@
 #include "BasicChunk.h"
 #include "MathFunctions.h"
 
-Chunk::Chunk(int x, int y, int z, bool empty)
+Chunk::Chunk(int x, int y, int z)
 	: x(x), y(y), z(z), aabb({ 16.0f, 16.0f, 16.0f })
 {
 	aabb.SetPosition({ static_cast<float>(x), static_cast<float>(y), static_cast<float>(z) });

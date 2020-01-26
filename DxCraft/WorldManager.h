@@ -29,7 +29,7 @@ public:
 	std::shared_ptr<Block> GetBlock(int x, int y, int z);
 	std::shared_ptr<Block> GetBlock(const Position& pos);
 	std::shared_ptr<Block> GetBlock(const DirectX::XMFLOAT3& pos);
-	std::shared_ptr<Chunk> GetChunkFromBlock(int x, int y, int z);
+	std::shared_ptr<Chunk> GetChunkFromBlock(int x, int y, int z, bool safetyCheck = true);
 	void CreateChunkAtPlayerPos(const Position& pos);
 public:
 	void GenerateMesh(std::shared_ptr<Chunk> chunkPtr);

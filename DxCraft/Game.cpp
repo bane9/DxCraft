@@ -16,6 +16,8 @@
 
 GDIPlusManager gdipm;
 
+static constexpr bool seperateGen = true;
+
 Game::Game(size_t width, size_t height)
 	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager), test(wnd.Gfx())
 {
@@ -33,26 +35,28 @@ void Game::DoFrame()
 	while (!exit) {
 		wnd.Gfx().BeginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
 
-		static Position oldpos = { 0, 1, 0 };
-		Position pos = player.GetPositon();
-		pos = Position(
-			(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
-			0,
-			(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
-		);
-		auto orig = pos;
-		if (pos != oldpos) {
-			wManager.UnloadChunks(pos, area);
-			for (int areaX = orig.x - area; areaX < orig.x + area; areaX += Chunk::ChunkSize / 2) {
-				pos.x = areaX;
-				for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += Chunk::ChunkSize / 2) {
-					pos.z = areaZ;
-					wManager.CreateChunkAtPlayerPos(pos);
+		if constexpr (!seperateGen) {
+			static Position oldpos = { 0, 1, 0 };
+			Position pos = player.GetPositon();
+			pos = Position(
+				(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
+				0,
+				(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
+			);
+			auto orig = pos;
+			if (pos != oldpos) {
+				wManager.UnloadChunks(pos, area);
+				for (int areaX = orig.x - area; areaX < orig.x + area; areaX += Chunk::ChunkSize / 2) {
+					pos.x = areaX;
+					for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += Chunk::ChunkSize / 2) {
+						pos.z = areaZ;
+						wManager.CreateChunkAtPlayerPos(pos);
+					}
 				}
+				oldpos = orig;
 			}
-			oldpos = orig;
+			wManager.wGen.Loop();
 		}
-		wManager.wGen.Loop();
 
 		while (auto e = wnd.kbd.ReadKey()) {
 
@@ -202,136 +206,52 @@ void Game::DoFrame()
 
 void Game::MakeChunkThread()
 {
-	
-	//while (!exit) {
-	//	if (meshEverything) {
-	//		wManager.GenerateMeshes();
-	//		meshEverything = false;
-	//	}
-	//	static Position oldpos = {0, 1, 0};
-	//	Position pos = player.GetPositon();
-	//	pos = Position(
-	//		(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
-	//		0,
-	//		(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
-	//	);
-	//	auto orig = pos;
-	//	std::optional<std::vector<std::shared_ptr<Chunk>>> chunks;
-	//	auto GetBlock = [&chunks](int x, int y, int z) {
-	//		return &(*(*chunks)[y / 16])(x, y, z);
-	//	};
-	//	if (pos != oldpos) {
-	//		wManager.UnloadChunks(pos, area);
-	//		for (int areaX = orig.x - area; areaX < orig.x + area; areaX += Chunk::ChunkSize / 2) {
-	//			pos.x = areaX;
-	//			for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += Chunk::ChunkSize / 2) {
-	//				pos.z = areaZ;
-	//				if ((chunks = wManager.CreateChunkAtPlayerPos(pos)) != std::nullopt) {
-	//					for (int x = 0; x < Chunk::ChunkSize; x++) {
-	//						for (int z = 0; z < Chunk::ChunkSize; z++) {
-	//							constexpr float prescale = 50.0f;
-	//							float height = prescale + std::clamp(
-	//								(noise.GetNoise(pos.x + x, pos.z + z) / 2.0f + 0.5f) * (Chunk::ChunkSize - 1) * worldScale,
-	//								0.0f,
-	//								205.0f);
-	//							for (int y = 0; y < height; y++) {
-	//								auto block = GetBlock(x, y, z);
-	//								const float scale = height;
-	//								if(y == 0) block->SetBlockType(Block::BlockType::Bedrock);
-	//								else if (y >= prescale + waterScale) {
-	//									if (y > scale * 0.98f)
-	//										block->SetBlockType(Block::BlockType::Grass);
-	//									else if (y > scale * 0.75f && y < scale * 0.98f)
-	//										block->SetBlockType(Block::BlockType::Dirt);
-	//									else
-	//										block->SetBlockType(Block::BlockType::Stone);
-	//								}
-	//								else {
-	//									if (y > scale * 0.95f)
-	//										block->SetBlockType(Block::BlockType::Dirt);
-	//									else
-	//										block->SetBlockType(Block::BlockType::Stone);
-	//								}
-	//							}
-	//							for (int y = prescale; y < prescale + waterScale + 1; y++) {
-	//								auto block = GetBlock(x, y, z);
-	//								if (block->GetBlockType() == Block::BlockType::Air) {
-	//									block->SetBlockType(Block::BlockType::Water);
-	//								}
-	//								else {
-	//									static const auto InBounds = [](const int x, const int y, const int z) {
-	//										return x >= 0 && y >= 0 && z >= 0 && x < 16 && y < 16 * 16 && z < 16;
-	//									};
-	//									if (InBounds(x + 1, y, z)) {
-	//										auto blk = GetBlock(x + 1, y, z);
-	//										if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
-	//											block->SetBlockType(Block::BlockType::Wooden_Plank);
-	//										}
-	//									}
-	//									if (InBounds(x - 1, y, z)) {
-	//										auto blk = GetBlock(x - 1, y, z);
-	//										if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
-	//											block->SetBlockType(Block::BlockType::Wooden_Plank);
-	//										}
-	//									}
-	//									if (InBounds(x, y + 1, z)) {
-	//										auto blk = GetBlock(x, y + 1, z);
-	//										if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
-	//											block->SetBlockType(Block::BlockType::Wooden_Plank);
-	//										}
-	//									}
-	//									if (InBounds(x, y - 1, z)) {
-	//										auto blk = GetBlock(x, y - 1, z);
-	//										if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
-	//											block->SetBlockType(Block::BlockType::Wooden_Plank);
-	//										}
-	//									}
-	//									if (InBounds(x, y, z + 1)) {
-	//										auto blk = GetBlock(x, y, z + 1);
-	//										if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
-	//											block->SetBlockType(Block::BlockType::Wooden_Plank);
-	//										}
-	//									}
-	//									if (InBounds(x, y, z - 1)) {
-	//										auto blk = GetBlock(x, y, z - 1);
-	//										if (blk->GetBlockType() == Block::BlockType::Air || blk->GetBlockType() == Block::BlockType::Water) {
-	//											block->SetBlockType(Block::BlockType::Wooden_Plank);
-	//										}
-	//									}
-	//								}
-	//							}
-	//						}
-	//					}
-	//					Chunk* neigbourChunk = nullptr;
-	//					for (auto& chunk : *chunks) {
-	//						wManager.GenerateMesh(chunk);
-	//						/*neigbourChunk = wManager.GetChunkFromBlock(chunk->x + 16, chunk->y, chunk->z);
-	//						if (neigbourChunk != nullptr && (neigbourChunk->IndexBufferSize > 0 || neigbourChunk->AdditionalIndexBufferSize > 0)) wManager.GenerateMesh(*neigbourChunk);
-	//						neigbourChunk = wManager.GetChunkFromBlock(chunk->x - 16, chunk->y, chunk->z);
-	//						if (neigbourChunk != nullptr && (neigbourChunk->IndexBufferSize > 0 || neigbourChunk->AdditionalIndexBufferSize > 0)) wManager.GenerateMesh(*neigbourChunk);
-	//						neigbourChunk = wManager.GetChunkFromBlock(chunk->x, chunk->y, chunk->z + 16);
-	//						if (neigbourChunk != nullptr && (neigbourChunk->IndexBufferSize > 0 || neigbourChunk->AdditionalIndexBufferSize > 0)) wManager.GenerateMesh(*neigbourChunk);
-	//						neigbourChunk = wManager.GetChunkFromBlock(chunk->x, chunk->y, chunk->z - 16);
-	//						if (neigbourChunk != nullptr && (neigbourChunk->IndexBufferSize > 0 || neigbourChunk->AdditionalIndexBufferSize > 0)) wManager.GenerateMesh(*neigbourChunk);*/
-	//					}
-	//				}
-	//			}
-	//		}
-	//		oldpos = orig;
-	//	}
-	//}
+	while (!exit) {
+		static Position oldpos = { 0, 1, 0 };
+		Position pos = player.GetPositon();
+		pos = Position(
+			(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
+			0,
+			(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
+		);
+		auto orig = pos;
+		if (pos != oldpos) {
+			wManager.UnloadChunks(pos, area);
+			for (int areaX = orig.x - area; areaX < orig.x + area; areaX += Chunk::ChunkSize / 2) {
+				pos.x = areaX;
+				for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += Chunk::ChunkSize / 2) {
+					pos.z = areaZ;
+					wManager.CreateChunkAtPlayerPos(pos);
+				}
+			}
+			oldpos = orig;
+		}
+		wManager.wGen.Loop();
+	}
 }
 
 int Game::Start()
 {
-	std::thread tr(&Game::DoFrame, this);
-	//std::thread chunktr(&Game::MakeChunkThread, this);
-	while (1) {
-		if (const auto result = Window::processMessages()) {
-			exit = true;
-			tr.join();
-			//chunktr.join();
-			return result.value();
+	if constexpr (seperateGen) {
+		std::thread tr(&Game::DoFrame, this);
+		std::thread chunktr(&Game::MakeChunkThread, this);
+		while (1) {
+			if (const auto result = Window::processMessages()) {
+				exit = true;
+				tr.join();
+				chunktr.join();
+				return result.value();
+			}
+		}
+	}
+	else {
+		std::thread tr(&Game::DoFrame, this);
+		while (1) {
+			if (const auto result = Window::processMessages()) {
+				exit = true;
+				tr.join();
+				return result.value();
+			}
 		}
 	}
 }
