@@ -49,7 +49,7 @@ public:
 	};
 
 	RenderData renderData;
-	bool rendering = false;
+	bool lockThread = false;
 };
 
 //template <class>

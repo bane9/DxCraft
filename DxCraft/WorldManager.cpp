@@ -81,10 +81,10 @@ void WorldManager::RenderChunks(Camera& cam)
 		DirectX::XMMATRIX projMatrix;
 	};
 
-	rendering = true;
+	lockThread = true;
 	for (auto chunkIt : chunks) {
 		auto& chunk = chunkIt.second;
-		if (chunk == nullptr || !chunk->SafeToAccess) continue;
+		if (chunk == nullptr || !chunk->SafeToAccess || chunk->IndexBufferSize == 0) continue;
 		if(!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
@@ -98,14 +98,13 @@ void WorldManager::RenderChunks(Camera& cam)
 		
 		renderData.UpdateVScBuf(tf);
 
-		if(chunk->IndexBufferSize > 0)
-			RenderData::Render(renderData, chunk->VertexBuffer, chunk->IndexBuffer,
-				chunk->IndexBufferSize, sizeof(Vertex));
+		RenderData::Render(renderData, chunk->VertexBuffer, chunk->IndexBuffer,
+			chunk->IndexBufferSize, sizeof(Vertex));
 	}
 
 	for (auto chunkIt : chunks) {
 		auto& chunk = chunkIt.second;
-		if (chunk == nullptr || !chunk->SafeToAccess) continue;
+		if (chunk == nullptr || !chunk->SafeToAccess || chunk->AdditionalIndexBufferSize == 0) continue;
 		if (!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
@@ -119,15 +118,15 @@ void WorldManager::RenderChunks(Camera& cam)
 
 		renderData.UpdateVScBuf(tf);
 
-		if (chunk->AdditionalIndexBufferSize > 0)
-			RenderData::Render(renderData, chunk->AdditionalVertexBuffer, chunk->AdditionalIndexBuffer,
-				chunk->AdditionalIndexBufferSize, sizeof(Vertex));
+		RenderData::Render(renderData, chunk->AdditionalVertexBuffer, chunk->AdditionalIndexBuffer,
+			chunk->AdditionalIndexBufferSize, sizeof(Vertex));
 	}
-	rendering = false;
+	lockThread = false;
 }
 
 void WorldManager::UnloadChunks(const Position& pos, float area)
 {
+	lockThread = true;
 	for (auto it = chunks.begin(); it != chunks.end(); ++it) {
 		float x = (*it).first.x, z = (*it).first.z;
 		if (pos.x < x - area || pos.x > x + area ||
@@ -135,6 +134,7 @@ void WorldManager::UnloadChunks(const Position& pos, float area)
 			if ((it = chunks.erase(it)) == chunks.end()) break;
 		}
 	}
+	lockThread = false;
 }
 
 bool WorldManager::BlockVisible(std::shared_ptr<Chunk> chunkPtr, int x, int y, int z, Block::BlockType type)
@@ -162,23 +162,32 @@ std::shared_ptr<Chunk> WorldManager::GetChunkFromBlock(int x, int y, int z, bool
 {
 	if (y < 0)
 		return nullptr;
-
+	lockThread = true;
 	Position chunkPosition(
 		x - FixedMod(x, Chunk::ChunkSize),
 		y - FixedMod(y, Chunk::ChunkSize),
 		z - FixedMod(z, Chunk::ChunkSize)
 	);
-	
+		
 	auto chunk = chunks.find(chunkPosition);
+	
+	auto s1 = chunk->second == nullptr;
+	auto s2 = (!chunk->second->SafeToAccess && safetyCheck);
+	auto s3 = chunk == chunks.end();
 
-	if (chunk == chunks.end() || chunk->second == nullptr || (!chunk->second->SafeToAccess && safetyCheck))
+	if (chunk == chunks.end() || chunk->second == nullptr || (!chunk->second->SafeToAccess && safetyCheck)) {
+		lockThread = false;
 		return nullptr;
-	else return chunk->second;
+	}
+	else {
+		lockThread = true;
+		return chunk->second;
+	}
 }
 
 bool WorldManager::CreateChunkAtPlayerPos(const Position& pos)
 {
-	while (rendering) std::this_thread::yield();
+	while (lockThread) std::this_thread::yield();
 	Position chunkPosition(
 		(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
 		0,

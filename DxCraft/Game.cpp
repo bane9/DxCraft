@@ -34,7 +34,6 @@ void Game::DoFrame()
 			(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
 		);
 		if (pos != oldpos) {
-			while (!positionQueue.empty()) std::this_thread::yield();
 			wManager.UnloadChunks(pos, area);
 			positionQueue.push(pos);
 			oldpos = pos;
