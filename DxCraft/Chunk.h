@@ -8,6 +8,7 @@
 #include "Position.h"
 #include "AABB.h"
 #include "RenderData.h"
+#include <array>
 
 class Chunk
 {
@@ -46,6 +47,9 @@ public:
 
 	int x, y, z;
 	AABB aabb;
+
+	std::array<float, ChunkSize * ChunkSize> heightMap;
+	bool HasGenerated = false;
 
 	Biome biome = Biome::None;
 };

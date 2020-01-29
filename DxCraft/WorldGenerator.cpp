@@ -231,6 +231,7 @@ void WorldGenerator::GenerateChunk(std::shared_ptr<Chunk> chunkPtr, ChunkGenerat
 	chunkArea[ChunkGenerator::ChunkPosition::Right] = GetChunkFromBlock(pos.x + 1, pos.y, pos.z + 1);
 
 	chunkGen.ProccessChunk(chunkArea);
+	chunkPtr->HasGenerated = true;
 
 	AddChunkForMeshing(chunkPtr);
 }

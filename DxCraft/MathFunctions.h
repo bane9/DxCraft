@@ -90,3 +90,9 @@ inline constexpr V ValueMap(T val, T valMin, T valMax, V mapMin, V mapMax) noexc
 {
 	return (val - valMin) * (mapMax - mapMin) / (valMax - valMin) + mapMin;
 }
+
+template<typename T>
+inline constexpr T Lerp(T a, T b, T f) noexcept
+{
+	return (a * (1.0f - f)) + (b * f);
+}
