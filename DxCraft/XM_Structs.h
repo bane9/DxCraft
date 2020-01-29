@@ -6,7 +6,6 @@
 struct Vertex
 {
 	DirectX::XMFLOAT3 pos;
-	DirectX::XMFLOAT3 n;
 	DirectX::XMFLOAT2 tc;
 };
 
@@ -20,60 +19,60 @@ struct Faces {
 	static constexpr float side = 0.499999f;
 	static constexpr std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>> NearSide{
 		{
-		Vertex{DirectX::XMFLOAT3(-side ,-side,-side), DirectX::XMFLOAT3(), { 1, 2 }},
-		Vertex{DirectX::XMFLOAT3(side ,-side,-side),  DirectX::XMFLOAT3(), { 2, 2 }},
-		Vertex{DirectX::XMFLOAT3(-side ,side,-side),  DirectX::XMFLOAT3(), { 1, 1 }},
-		Vertex{DirectX::XMFLOAT3(side ,side,-side),	  DirectX::XMFLOAT3(), { 2, 1 }}
+		Vertex{DirectX::XMFLOAT3(-side ,-side,-side), { 1, 2 }},
+		Vertex{DirectX::XMFLOAT3(side ,-side,-side),  { 2, 2 }},
+		Vertex{DirectX::XMFLOAT3(-side ,side,-side),  { 1, 1 }},
+		Vertex{DirectX::XMFLOAT3(side ,side,-side),	  { 2, 1 }}
 		},
 		{0, 2, 1, 2, 3, 1}
 	};
 
 	static constexpr std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>> FarSide{
 		{
-		Vertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 1, 2 }},
-		Vertex{DirectX::XMFLOAT3(side,-side,side),   DirectX::XMFLOAT3(), { 2, 2 }},
-		Vertex{DirectX::XMFLOAT3(-side,side,side),   DirectX::XMFLOAT3(), { 1, 1 }},
-		Vertex{DirectX::XMFLOAT3(side,side,side) ,	 DirectX::XMFLOAT3(), { 2, 1 }}
+		Vertex{DirectX::XMFLOAT3(-side,-side,side), { 1, 2 }},
+		Vertex{DirectX::XMFLOAT3(side,-side,side),  { 2, 2 }},
+		Vertex{DirectX::XMFLOAT3(-side,side,side),  { 1, 1 }},
+		Vertex{DirectX::XMFLOAT3(side,side,side) , { 2, 1 }}
 		},
 		{0, 1, 3, 0, 3, 2}
 	};
 
 	static constexpr std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>> LeftSide{
 		{
-		Vertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 1, 2 }},
-		Vertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 1, 1 }},
-		Vertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 2, 2 }},
-		Vertex{DirectX::XMFLOAT3(-side,side,side),	 DirectX::XMFLOAT3(), { 2, 1 }}
+		Vertex{DirectX::XMFLOAT3(-side,-side,-side), { 1, 2 }},
+		Vertex{DirectX::XMFLOAT3(-side,side,-side),  { 1, 1 }},
+		Vertex{DirectX::XMFLOAT3(-side,-side,side),  { 2, 2 }},
+		Vertex{DirectX::XMFLOAT3(-side,side,side),	 { 2, 1 }}
 		},
 		{0, 2, 1, 2, 3, 1}
 	};
 
 	static constexpr std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>> RightSide{
 		{
-		Vertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 1, 2 }},
-		Vertex{DirectX::XMFLOAT3(side,side,-side),   DirectX::XMFLOAT3(), { 1, 1 }},
-		Vertex{DirectX::XMFLOAT3(side,-side,side),   DirectX::XMFLOAT3(), { 2, 2 }},
-		Vertex{DirectX::XMFLOAT3(side,side,side),	 DirectX::XMFLOAT3(), { 2, 1 }}
+		Vertex{DirectX::XMFLOAT3(side,-side,-side), { 1, 2 }},
+		Vertex{DirectX::XMFLOAT3(side,side,-side),  { 1, 1 }},
+		Vertex{DirectX::XMFLOAT3(side,-side,side),  { 2, 2 }},
+		Vertex{DirectX::XMFLOAT3(side,side,side), { 2, 1 }}
 		},
 		{0, 1, 3, 0, 3, 2}
 	};
 
 	static constexpr std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>> BottomSide{
 		{
-		Vertex{DirectX::XMFLOAT3(-side,-side,-side), DirectX::XMFLOAT3(), { 1, 2 }},
-		Vertex{DirectX::XMFLOAT3(side,-side,-side),  DirectX::XMFLOAT3(), { 2, 2 }},
-		Vertex{DirectX::XMFLOAT3(-side,-side,side),  DirectX::XMFLOAT3(), { 1, 1 }},
-		Vertex{DirectX::XMFLOAT3(side,-side,side),	 DirectX::XMFLOAT3(), { 2, 1 }}
+		Vertex{DirectX::XMFLOAT3(-side,-side,-side), { 1, 2 }},
+		Vertex{DirectX::XMFLOAT3(side,-side,-side), { 2, 2 }},
+		Vertex{DirectX::XMFLOAT3(-side,-side,side), { 1, 1 }},
+		Vertex{DirectX::XMFLOAT3(side,-side,side), { 2, 1 }}
 		},
 		{0, 1, 2, 2, 1, 3}
 	};
 
 	static constexpr std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>> TopSide{
 		{
-		Vertex{DirectX::XMFLOAT3(-side,side,-side),  DirectX::XMFLOAT3(), { 1, 2 }},
-		Vertex{DirectX::XMFLOAT3(side,side,-side),   DirectX::XMFLOAT3(), { 2, 2 }},
-		Vertex{DirectX::XMFLOAT3(-side,side,side),   DirectX::XMFLOAT3(), { 1, 1 }},
-		Vertex{DirectX::XMFLOAT3(side,side,side),	 DirectX::XMFLOAT3(), { 2, 1 }}
+		Vertex{DirectX::XMFLOAT3(-side,side,-side), { 1, 2 }},
+		Vertex{DirectX::XMFLOAT3(side,side,-side),  { 2, 2 }},
+		Vertex{DirectX::XMFLOAT3(-side,side,side),  { 1, 1 }},
+		Vertex{DirectX::XMFLOAT3(side,side,side),	{ 2, 1 }}
 		},
 		{0, 3, 1, 0, 2, 3}
 	};

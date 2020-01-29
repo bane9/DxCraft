@@ -34,6 +34,25 @@ private:
 struct PositionHash {
 	std::size_t operator()(const Position& position) const {
 		static robin_hood::hash<int> hash;
-		return hash(position.x) ^ hash(position.y) ^ hash(position.z);
+		return (73856093 * position.x ^ 19349663 * position.y ^ 83492791 * position.z) & std::numeric_limits<int>::max();
 	}
+};
+
+struct Position2 {
+	Position2(int x, int z) : x(x), z(z) {}
+	Position2() = default;
+	bool operator==(const Position2& other) const noexcept {
+		return x == other.x && z == other.z;
+	}
+	bool operator!=(const Position2& other) const noexcept {
+		return !operator==(other);
+	}
+	Position2 operator+(const Position2& other) const noexcept {
+		return { x + other.x, z + other.z };
+	}
+	bool operator<(const Position2& rhs) const noexcept {
+		if (x != rhs.x) return x < rhs.x;
+		else return z < rhs.z;
+	}
+	int x = 0, z = 0;
 };

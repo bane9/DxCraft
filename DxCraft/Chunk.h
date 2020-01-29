@@ -13,6 +13,7 @@ class Chunk
 {
 	friend class WorldManager;
 	friend class WorldGenerator;
+	friend class ChunkGenerator;
 public:
 	Chunk(int x, int y, int z);
 	Position GetPosition() const noexcept;
@@ -20,6 +21,16 @@ public:
 
 	Block& operator()(int x, int y, int z);
 	bool SafeToAccess = false;
+	enum class Biome {
+		Grass,
+		Sand,
+		Dirt,
+		Stone,
+
+		Biome_count,
+		None,
+	};
+	Biome GetBiome();
 public:
 	Position Normalize(int x, int y, int z) const noexcept;
 	inline int FlatIndex(int x, int y, int z) const noexcept;
@@ -35,4 +46,6 @@ public:
 
 	int x, y, z;
 	AABB aabb;
+
+	Biome biome = Biome::None;
 };

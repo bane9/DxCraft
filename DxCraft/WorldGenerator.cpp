@@ -3,10 +3,18 @@
 #include "WorldManager.h"
 #include "BillBoard.h"
 #include <algorithm>
+#include <execution>
+#include "ChunkGenerator.h"
+#include <bitset>
 
 static auto GetChunkFromBlock = [&](int x, int y, int z) {
 	static WorldManager& wManager = *((WorldManager*)Evt::GlobalEvt["wManager"]);
 	return wManager.GetChunkFromBlock(x, y, z, false);
+};
+
+static auto GetWorldBlock = [&](int x, int y, int z) {
+	static WorldManager& wManager = *((WorldManager*)Evt::GlobalEvt["wManager"]);
+	return wManager.GetBlock(x, y, z);
 };
 
 WorldGenerator::WorldGenerator(Graphics& gfx)
@@ -20,7 +28,6 @@ WorldGenerator::WorldGenerator(Graphics& gfx)
 	noise.SetNoiseType(FastNoise::NoiseType::ValueFractal);
 	noise.SetFractalOctaves(1);
 	noise.SetFrequency(0.01f);
-	noise.SetSeed(time(0));
 
 	for (int i = 0; i < threadCount; i++) {
 		threads.push_back(std::thread(&WorldGenerator::ThreadLoop, this));
@@ -69,41 +76,56 @@ bool WorldGenerator::BlockVisible(std::shared_ptr<Chunk> chunkPtr, int x, int y,
 void WorldGenerator::ThreadLoop()
 {
 	using namespace std::chrono_literals;
+	ChunkGenerator chunkGen;
 	while (running) {
 		while (running && chunkActions.empty()) std::this_thread::sleep_for(10ms);
 		if (!running) return;
 		ChunkAction action = chunkActions.pop();
 		if (action.chunk.use_count() > 1) {
 			if (action.action == ChunkAction::Actions::Generate) {
-				GenerateChunk(action.chunk);
+				GenerateChunk(action.chunk, chunkGen);
 			}
 			else if (action.action == ChunkAction::Actions::Mesh) {
 				GenerateMesh(action.chunk);
+				//if (!GenerateMesh(action.chunk)) chunkActions.push(action);
 			}
 		}
 	}
 }
 
-void WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
+bool WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 {
 	chunkPtr->SafeToAccess = false;
 	Chunk& chunk = *chunkPtr;
+	/*Position pos = chunk.GetPosition();
+	static auto IsChunkInvalid = [&](int x, int y, int z) {
+		auto chunk = GetChunkFromBlock(x, y, z);
+		if (chunk == nullptr || chunk->blocks.size() != Chunk::ChunkSize * Chunk::ChunkSize * Chunk::ChunkSize) return true;
+		else return false;
+	};
+	if (IsChunkInvalid(pos.x + 24, pos.y, pos.z) ||
+		IsChunkInvalid(pos.x - 8, pos.y, pos.z) ||
+		IsChunkInvalid(pos.x, pos.y, pos.z + 24) ||
+		IsChunkInvalid(pos.x, pos.y, pos.z - 8)) return false;*/
+
+	if (std::all_of(std::execution::par_unseq, chunk.blocks.begin(), chunk.blocks.end(), [](Block& block) {return block.GetBlockType() == Block::BlockType::Air; })) return true;
+
 	std::vector<Vertex> VertexBuffer;
 	std::vector<uint16_t> IndexBuffer;
 
 	std::vector<Vertex> AdditionalVertexBuffer;
 	std::vector<uint16_t> AdditionalIndexBuffer;
 
-	for (int x = 0; x < Chunk::ChunkSize; x++) {
-		for (int y = 0; y < Chunk::ChunkSize; y++) {
-			for (int z = 0; z < Chunk::ChunkSize; z++) {
+	for (int y = Chunk::ChunkSize - 1; y >= 0; --y) {
+		for (int x = Chunk::ChunkSize - 1; x >= 0; --x) {
+			for (int z = Chunk::ChunkSize - 1; z >= 0 ; --z) {
 				const Block& block = chunk(x, y, z);
-				if (block.GetBlockType() == Block::BlockType::Air) continue;
 				auto pos = chunk.GetPosition();
 				pos.x += x;
 				pos.y += y;
 				pos.z += z;
-
+				if (block.GetBlockType() == Block::BlockType::Air) continue;
+				
 				auto& TargetVertexBuffer = block.NeedsSeperateDrawCall() ? AdditionalVertexBuffer : VertexBuffer;
 				auto& TargetIndexBuffer = block.NeedsSeperateDrawCall() ? AdditionalIndexBuffer : IndexBuffer;
 
@@ -192,44 +214,23 @@ void WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 	}
 	else chunk.AdditionalIndexBufferSize = 0;
 	chunkPtr->SafeToAccess = true;
+	
+	return true;
 }
 
-void WorldGenerator::GenerateChunk(std::shared_ptr<Chunk> chunkPtr)
+void WorldGenerator::GenerateChunk(std::shared_ptr<Chunk> chunkPtr, ChunkGenerator& chunkGen)
 {
 	chunkPtr->blocks.resize(Chunk::ChunkSize * Chunk::ChunkSize * Chunk::ChunkSize);
+	ChunkGenerator::chunkArray chunkArea;
+	chunkArea[ChunkGenerator::ChunkPosition::Origin] = chunkPtr;
+
 	Position pos = chunkPtr->GetPosition();
-	for (int x = 0; x < Chunk::ChunkSize; x++) {
-		for (int z = 0; z < Chunk::ChunkSize; z++) {
-			auto GetBlock = [chunkPtr](int x, int y, int z) {
-				Position normalized = chunkPtr->Normalize(x, y, z);
-				return &chunkPtr->operator()(normalized.x, normalized.y, normalized.z);
-			};
-			constexpr float prescale = 50.0f;
-			float height = prescale + std::clamp(
-				(noise.GetNoise(pos.x + x, pos.z + z) / 2.0f + 0.5f) * (Chunk::ChunkSize - 1) * worldScale,
-				0.0f,
-				205.0f);
-			for (int y = 0; y < std::clamp((int)height - chunkPtr->y, 0, Chunk::ChunkSize); y++) {
-				auto block = GetBlock(x, y, z);
-				const float scale = height / (worldScale * 16);
-				if (chunkPtr->y + y == 0) block->SetBlockType(Block::BlockType::Bedrock);
-				else if (height >= prescale + waterScale) {
-					if (height > scale * 0.98f)
-						block->SetBlockType(Block::BlockType::Grass);
-					else if (height > scale * 0.75f && height + y < scale * 0.98f)
-						block->SetBlockType(Block::BlockType::Dirt);
-					else
-						block->SetBlockType(Block::BlockType::Stone);
-				}
-				else {
-					if (height > scale * 0.95f)
-						block->SetBlockType(Block::BlockType::Dirt);
-					else
-						block->SetBlockType(Block::BlockType::Stone);
-				}
-			}
-		}
-	}
+	chunkArea[ChunkGenerator::ChunkPosition::Top] = GetChunkFromBlock(pos.x, pos.y, pos.z + 1);
+	chunkArea[ChunkGenerator::ChunkPosition::Bottom] = GetChunkFromBlock(pos.x, pos.y, pos.z - 1);
+	chunkArea[ChunkGenerator::ChunkPosition::Left] = GetChunkFromBlock(pos.x - 1, pos.y, pos.z);
+	chunkArea[ChunkGenerator::ChunkPosition::Right] = GetChunkFromBlock(pos.x + 1, pos.y, pos.z + 1);
+
+	chunkGen.ProccessChunk(chunkArea);
 
 	AddChunkForMeshing(chunkPtr);
 }

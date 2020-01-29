@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include "Block.h"
-#include "BasicChunk.h"
+#include "Chunk.h"
 #include "Graphics.h"
 #include <vector>
 #include "XM_Structs.h"
@@ -26,9 +26,9 @@ public:
 	void GenerateMeshes();
 	void RenderChunks(Camera& cam);
 	void UnloadChunks(const Position& pos, float area = 20.0f);
-	std::shared_ptr<Block> GetBlock(int x, int y, int z);
-	std::shared_ptr<Block> GetBlock(const Position& pos);
-	std::shared_ptr<Block> GetBlock(const DirectX::XMFLOAT3& pos);
+	std::shared_ptr<Block> GetBlock(int x, int y, int z, bool safetyCheck = true);
+	std::shared_ptr<Block> GetBlock(const Position& pos, bool safetyCheck = true);
+	std::shared_ptr<Block> GetBlock(const DirectX::XMFLOAT3& pos, bool safetyCheck = true);
 	std::shared_ptr<Chunk> GetChunkFromBlock(int x, int y, int z, bool safetyCheck = true);
 	bool CreateChunkAtPlayerPos(const Position& pos);
 public:
@@ -44,8 +44,7 @@ public:
 	const std::vector<D3D11_INPUT_ELEMENT_DESC> ied =
 	{
 		{ "Position",0,DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "Normal",0,DXGI_FORMAT_R32G32B32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA,0 },
-		{ "TexCoord",0,DXGI_FORMAT_R32G32_FLOAT,0,24,D3D11_INPUT_PER_VERTEX_DATA,0 }
+		{ "TexCoord",0,DXGI_FORMAT_R32G32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA,0 }
 	};
 
 	RenderData renderData;

@@ -5,11 +5,12 @@
 #include <thread>
 #include "Block.h"
 #include "Graphics.h"
-#include "BasicChunk.h"
+#include "Chunk.h"
 #include "FastNoise.h"
 #include "ConcurrentQueue.h"
 #include <queue>
 #include <mutex>
+#include "ChunkGenerator.h"
 
 class WorldGenerator
 {
@@ -32,8 +33,8 @@ public:
 	
 public:
 	void ThreadLoop();
-	void GenerateMesh(std::shared_ptr<Chunk> chunkPtr);
-	void GenerateChunk(std::shared_ptr<Chunk> chunkPtr);
+	bool GenerateMesh(std::shared_ptr<Chunk> chunkPtr);
+	void GenerateChunk(std::shared_ptr<Chunk> chunkPtr, ChunkGenerator& chunkGen);
 	template<typename Container, typename UVs>
 	void AppendMesh(const Container& mesh,
 		std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,

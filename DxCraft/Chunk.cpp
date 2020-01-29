@@ -1,4 +1,4 @@
-#include "BasicChunk.h"
+#include "Chunk.h"
 #include "MathFunctions.h"
 
 Chunk::Chunk(int x, int y, int z)
@@ -15,6 +15,11 @@ Position Chunk::GetPosition() const noexcept
 Block& Chunk::operator()(int x, int y, int z)
 {
 	return blocks[FlatIndex(x, y, z)];
+}
+
+Chunk::Biome Chunk::GetBiome()
+{
+	return biome;
 }
 
 inline Position Chunk::Normalize(int x, int y, int z) const noexcept

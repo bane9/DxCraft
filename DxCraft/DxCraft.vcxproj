@@ -168,10 +168,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AABB.cpp" />
-    <ClCompile Include="BasicChunk.cpp" />
+    <ClCompile Include="BiomeManager.cpp" />
+    <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="BlockSelector.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ChunkGenerator.cpp" />
     <ClCompile Include="DxgiInfoManager.cpp" />
     <ClCompile Include="BlockEventManager.cpp" />
     <ClCompile Include="EventManager.cpp" />
@@ -199,10 +201,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h" />
-    <ClInclude Include="BasicChunk.h" />
+    <ClInclude Include="BiomeManager.h" />
+    <ClInclude Include="Chunk.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="BlockSelector.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ChunkGenerator.h" />
     <ClInclude Include="ConcurrentQueue.h" />
     <ClInclude Include="Crosshair.h" />
     <ClInclude Include="CustomException.h" />

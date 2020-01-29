@@ -73,3 +73,20 @@ inline constexpr float PointDistance3D(const T& n1, const V& n2) noexcept
 {
 	return powf(sq(n2.x - n1.x) + sq(n2.y - n1.y) + sq(n2.z - n1.z), 0.5f);
 }
+
+template<typename T>
+inline constexpr float BilinearInterpolation(T q11, T q12, T q21, T q22, T x1, T x2, T y1, T y2, T x, T y) noexcept
+{
+	return (T)1.0 /
+		((x2 - x1) * (y2 - y1)) * (
+		q11 * (x2 - x) * (y2 - y) +
+		q21 * (x - x1) * (y2 - y) +
+		q12 * (x2 - x) * (y - y1) +
+		q22 * (x - x1) * (y - y1));
+}
+
+template<typename T, typename V>
+inline constexpr V ValueMap(T val, T valMin, T valMax, V mapMin, V mapMax) noexcept 
+{
+	return (val - valMin) * (mapMax - mapMin) / (valMax - valMin) + mapMin;
+}

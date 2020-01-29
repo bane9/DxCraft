@@ -154,6 +154,14 @@ static constexpr std::array<std::array<std::array<float, 2>, 6>, static_cast<int
 			{14, 15},
 			{14, 15},
 			{14, 15},
+		}},
+		{{ //Sand
+			{2, 1},
+			{2, 1},
+			{2, 1},
+			{2, 1},
+			{2, 1},
+			{2, 1},
 		}}
 
 }};
@@ -181,8 +189,7 @@ Block::BlockType Block::GetBlockType() const noexcept
 
 bool Block::IsTransparent() const noexcept
 {
-	if (this == nullptr) return false; //TODO: Fix later lmao
-	switch (blockType)
+  	switch (blockType)
 	{
 	case Block::BlockType::Air:
 	case Block::BlockType::Glass:

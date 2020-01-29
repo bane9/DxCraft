@@ -27,6 +27,7 @@ public:
 		Leaves,
 		Water,
 		Lava,
+		Sand,
 
 		block_count,
 		None

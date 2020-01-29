@@ -324,8 +324,8 @@ void Player::ChangeBlock(bool decrement)
 		++blockIndex;
 	else
 		--blockIndex;
-	if (blockIndex > 17) blockIndex = 1;
-	else if (blockIndex < 1) blockIndex = 17;
+	if (blockIndex > static_cast<int>(Block::BlockType::block_count)) blockIndex = 1;
+	else if (blockIndex < 1) blockIndex = static_cast<int>(Block::BlockType::block_count);
 	
 	switch (blockIndex) {
 		case 1:
@@ -395,6 +395,10 @@ void Player::ChangeBlock(bool decrement)
 		case 17:
 			type = Block::BlockType::Lava;
 			blockName = "Lava";
+			break;
+		case 18:
+			type = Block::BlockType::Sand;
+			blockName = "Sand";
 			break;
 	}
 }
