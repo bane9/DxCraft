@@ -50,6 +50,7 @@ public:
 
 	std::array<float, ChunkSize * ChunkSize> heightMap;
 	bool HasGenerated = false;
+	bool OcludedOnNull = false;
 
 	Biome biome = Biome::None;
 };

@@ -66,7 +66,6 @@ void WorldGenerator::ThreadLoop()
 			}
 			else if (action.action == ChunkAction::Actions::Mesh) {
 				GenerateMesh(action.chunk);
-				//if (!GenerateMesh(action.chunk)) chunkActions.push(action);
 			}
 		}
 	}
@@ -74,9 +73,10 @@ void WorldGenerator::ThreadLoop()
 
 
 
-bool WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
+void WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 {
 	chunkPtr->SafeToAccess = false;
+	chunkPtr->OcludedOnNull = false;
 	Chunk& chunk = *chunkPtr;
 		
 	std::array<std::shared_ptr<Chunk>, 7> chunks;
@@ -101,13 +101,15 @@ bool WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 	chunks[6] = GetChunkFromBlock(chunkPtr->x, chunkPtr->y, chunkPtr->z - 1);
 	if (chunks[6] != nullptr && !chunks[6]->HasGenerated) chunks[6] = nullptr;
 
-	/*for (auto& chunk : chunks) {
-		if (!chunk) return false;
-	}*/
+	enum class Visibility {
+		Visible,
+		NotVisible,
+		Null
+	};
 
 	auto BlockVisible = [&chunks](int x, int y, int z, 
 		Block::BlockType type = Block::BlockType::None) {
-		if (y < 0) return true;
+		if (y < 0) return Visibility::Visible;
 
 		Position chunkPosition(
 			x - FixedMod(x, Chunk::ChunkSize),
@@ -119,16 +121,16 @@ bool WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 			if (chunk != nullptr && chunkPosition == chunk->GetPosition()) {
 				Position normalized = chunk->Normalize(x, y, z);
 				auto& block = chunk->operator()(normalized.x, normalized.y, normalized.z);
-				return block.IsTransparent() && block.GetBlockType() != type;
+				return (block.IsTransparent() && block.GetBlockType() != type) ? Visibility::Visible : Visibility::NotVisible;
 			}
 			else if (chunk == nullptr) {
 				Position offset = chunks[0]->GetPosition() - chunkPosition;
-				if (offset.x == Chunk::ChunkSize && chunks[2] == nullptr) return false;
-				else if (offset.x == -Chunk::ChunkSize && chunks[1] == nullptr) return false;
-				else if (offset.y == Chunk::ChunkSize && chunks[4] == nullptr) return false;
-				else if (offset.y == -Chunk::ChunkSize && chunks[3] == nullptr) return false;
-				else if (offset.z == Chunk::ChunkSize && chunks[6] == nullptr) return false;
-				else if (offset.z == -Chunk::ChunkSize && chunks[5] == nullptr) return false;
+				if (offset.x == Chunk::ChunkSize && chunks[2] == nullptr) return Visibility::Null;
+				else if (offset.x == -Chunk::ChunkSize && chunks[1] == nullptr) return Visibility::Null;
+				else if (offset.y == Chunk::ChunkSize && chunks[4] == nullptr) return Visibility::Null;
+				else if (offset.y == -Chunk::ChunkSize && chunks[3] == nullptr) return Visibility::Null;
+				else if (offset.z == Chunk::ChunkSize && chunks[6] == nullptr) return Visibility::Null;
+				else if (offset.z == -Chunk::ChunkSize && chunks[5] == nullptr) return Visibility::Null;
 			}
 		}
 		
@@ -169,56 +171,90 @@ bool WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 				}
 
 				if (!block.IsTransparent()) {
-					if (BlockVisible(pos.x + 1, pos.y, pos.z)) {
+					auto result = BlockVisible(pos.x + 1, pos.y, pos.z);
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::RightSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[3],
 							x, y, z);
 					}
-					if (BlockVisible(pos.x - 1, pos.y, pos.z)) {
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
+
+					result = BlockVisible(pos.x - 1, pos.y, pos.z);
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::LeftSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[2],
 							x, y, z);
 					}
-					if (BlockVisible(pos.x, pos.y + 1, pos.z)) {
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
+
+					result = BlockVisible(pos.x, pos.y + 1, pos.z);
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::TopSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[5],
 							x, y, z);
 					}
-					if (BlockVisible(pos.x, pos.y - 1, pos.z)) {
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
+
+					result = BlockVisible(pos.x, pos.y - 1, pos.z);
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::BottomSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[4],
 							x, y, z);
 					}
-					if (BlockVisible(pos.x, pos.y, pos.z + 1)) {
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
+
+					result = BlockVisible(pos.x, pos.y, pos.z + 1);
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::FarSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[0],
 							x, y, z);
 					}
-					if (BlockVisible(pos.x, pos.y, pos.z - 1)) {
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
+
+					result = BlockVisible(pos.x, pos.y, pos.z - 1);
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::NearSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[1],
 							x, y, z);
 					}
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
 				}
 				else {
-					if (BlockVisible(pos.x + 1, pos.y, pos.z, block.GetBlockType())) {
+					auto result = BlockVisible(pos.x + 1, pos.y, pos.z, block.GetBlockType());
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::RightSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[3],
 							x, y, z);
 					}
-					if (BlockVisible(pos.x - 1, pos.y, pos.z, block.GetBlockType())) {
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
+
+					result = BlockVisible(pos.x - 1, pos.y, pos.z, block.GetBlockType());
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::LeftSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[2],
 							x, y, z);
 					}
-					if (BlockVisible(pos.x, pos.y + 1, pos.z, block.GetBlockType())) {
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
+
+					result = BlockVisible(pos.x, pos.y + 1, pos.z, block.GetBlockType());
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::TopSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[5],
 							x, y, z);
 					}
-					if (BlockVisible(pos.x, pos.y - 1, pos.z, block.GetBlockType())) {
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
+
+					result = BlockVisible(pos.x, pos.y - 1, pos.z, block.GetBlockType());
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::BottomSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[4],
 							x, y, z);
 					}
-					if (BlockVisible(pos.x, pos.y, pos.z + 1, block.GetBlockType())) {
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
+
+					result = BlockVisible(pos.x, pos.y, pos.z + 1, block.GetBlockType());
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::FarSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[0],
 							x, y, z);
 					}
-					if (BlockVisible(pos.x, pos.y, pos.z - 1, block.GetBlockType())) {
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
+
+					result = BlockVisible(pos.x, pos.y, pos.z - 1, block.GetBlockType());
+					if (result == Visibility::Visible) {
 						AppendMesh(Faces::NearSide, TargetVertexBuffer, TargetIndexBuffer, block.GetTexCoords()[1],
 							x, y, z);
 					}
+					else if (result == Visibility::Null) chunk.OcludedOnNull = true;
 				}
 			}
 		}
@@ -239,7 +275,6 @@ bool WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 	else chunk.AdditionalIndexBufferSize = 0;
 	chunkPtr->SafeToAccess = true;
 
-	return true;
 }
 
 void WorldGenerator::GenerateChunk(std::shared_ptr<Chunk> chunkPtr, ChunkGenerator& chunkGen)
@@ -260,22 +295,22 @@ void WorldGenerator::GenerateChunk(std::shared_ptr<Chunk> chunkPtr, ChunkGenerat
 	std::array<std::shared_ptr<Chunk>, 6> chunks;
 
 	chunks[0] = GetChunkFromBlock(chunkPtr->x + Chunk::ChunkSize, chunkPtr->y, chunkPtr->z);
-	if (chunks[0] != nullptr && !chunks[0]->SafeToAccess) chunks[0] = nullptr;
+	if (chunks[0] != nullptr && !chunks[0]->SafeToAccess && !chunks[0]->OcludedOnNull) chunks[0] = nullptr;
 
 	chunks[1] = GetChunkFromBlock(chunkPtr->x - 1, chunkPtr->y, chunkPtr->z);
-	if (chunks[1] != nullptr && !chunks[1]->SafeToAccess) chunks[1] = nullptr;
+	if (chunks[1] != nullptr && !chunks[1]->SafeToAccess && !chunks[1]->OcludedOnNull) chunks[1] = nullptr;
 
 	chunks[2] = GetChunkFromBlock(chunkPtr->x, chunkPtr->y + Chunk::ChunkSize, chunkPtr->z);
-	if (chunks[2] != nullptr && !chunks[2]->SafeToAccess) chunks[2] = nullptr;
+	if (chunks[2] != nullptr && !chunks[2]->SafeToAccess && !chunks[2]->OcludedOnNull) chunks[2] = nullptr;
 
 	chunks[3] = GetChunkFromBlock(chunkPtr->x, chunkPtr->y - 1, chunkPtr->z);
-	if (chunks[3] != nullptr && !chunks[3]->SafeToAccess) chunks[3] = nullptr;
+	if (chunks[3] != nullptr && !chunks[3]->SafeToAccess && !chunks[3]->OcludedOnNull) chunks[3] = nullptr;
 
 	chunks[4] = GetChunkFromBlock(chunkPtr->x, chunkPtr->y, chunkPtr->z + Chunk::ChunkSize);
-	if (chunks[4] != nullptr && !chunks[4]->SafeToAccess) chunks[4] = nullptr;
+	if (chunks[4] != nullptr && !chunks[4]->SafeToAccess && !chunks[4]->OcludedOnNull) chunks[4] = nullptr;
 
 	chunks[5] = GetChunkFromBlock(chunkPtr->x, chunkPtr->y, chunkPtr->z - 1);
-	if (chunks[5] != nullptr && !chunks[5]->SafeToAccess) chunks[5] = nullptr;
+	if (chunks[5] != nullptr && !chunks[5]->SafeToAccess && !chunks[5]->OcludedOnNull) chunks[5] = nullptr;
 
 	for (auto& chunk : chunks) {
 		if(chunk != nullptr) AddChunkForMeshing(chunk);

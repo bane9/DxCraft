@@ -33,7 +33,7 @@ public:
 	
 public:
 	void ThreadLoop();
-	bool GenerateMesh(std::shared_ptr<Chunk> chunkPtr);
+	void GenerateMesh(std::shared_ptr<Chunk> chunkPtr);
 	void GenerateChunk(std::shared_ptr<Chunk> chunkPtr, ChunkGenerator& chunkGen);
 	template<typename Container, typename UVs>
 	void AppendMesh(const Container& mesh,
