@@ -29,11 +29,6 @@ private:
 	Player player;
 	Timer jumpTimer;
 	Timer sprintTimer;
-	RenderData test;
-	FastNoise noise;
-	int chunkCount = 0;
-	int worldScale, waterScale;
-	bool meshEverything = false;
-	int area = 10 * Chunk::ChunkSize;
+	int area = 16 * Chunk::ChunkSize;
 	ConcurentQueue<Position> positionQueue;
 };

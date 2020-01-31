@@ -17,6 +17,9 @@ struct Position {
 	Position operator+(const Position& other) const noexcept{
 		return { x + other.x, y + other.y, z + other.z };
 	}
+	Position operator-(const Position& other) const noexcept {
+		return { x - other.x, y - other.y, z - other.z };
+	}
 	bool operator<(const Position& rhs) const noexcept{
 		if (x != rhs.x) return x < rhs.x;
 		else if (y != rhs.y) return y < rhs.y;

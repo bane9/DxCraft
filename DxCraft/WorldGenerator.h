@@ -39,7 +39,6 @@ public:
 	void AppendMesh(const Container& mesh,
 		std::vector<Vertex>& vertexBuffer, std::vector<uint16_t>& indexBuffer,
 		const UVs& textures, float offsetX, float offsetY, float offsetZ);
-	bool BlockVisible(std::shared_ptr<Chunk>, int x, int y, int z, Block::BlockType type = Block::BlockType::None);
 
 	int threadCount = std::thread::hardware_concurrency();
 	std::vector<std::thread> threads;

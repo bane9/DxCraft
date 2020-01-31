@@ -34,4 +34,6 @@ private:
 	std::uniform_int_distribution<> dis{0, static_cast<int>(Chunk::Biome::Biome_count)};
 
 	FastNoise noise;
+
+	static constexpr int worldScaler = 16;
 };

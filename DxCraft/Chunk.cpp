@@ -2,7 +2,7 @@
 #include "MathFunctions.h"
 
 Chunk::Chunk(int x, int y, int z)
-	: x(x), y(y), z(z), aabb({ 16.0f, 16.0f, 16.0f })
+	: x(x), y(y), z(z), aabb({ static_cast<float>(ChunkSize), static_cast<float>(ChunkSize), static_cast<float>(ChunkSize) })
 {
 	aabb.SetPosition({ static_cast<float>(x), static_cast<float>(y), static_cast<float>(z) });
 }

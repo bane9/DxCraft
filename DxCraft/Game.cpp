@@ -17,7 +17,7 @@
 GDIPlusManager gdipm;
 
 Game::Game(size_t width, size_t height)
-	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager), test(wnd.Gfx())
+	: wnd(width, height), wManager(wnd.Gfx()), player(wnd.Gfx(), wManager)
 {
 }
 
@@ -34,7 +34,7 @@ void Game::DoFrame()
 			(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
 		);
 		if (pos != oldpos) {
-			wManager.UnloadChunks(pos, area);
+			wManager.UnloadChunks(pos, area / 2);
 			positionQueue.push(pos);
 			oldpos = pos;
 		}
@@ -70,9 +70,6 @@ void Game::DoFrame()
 				break;
 			case 'N':
 				player.ChangeBlock();
-				break;
-			case 'O':
-				meshEverything = true;
 				break;
 			case VK_SPACE:
 				if (jumpTimer.GetTime() < 0.2f) player.ToggleFlying();
@@ -168,16 +165,6 @@ void Game::DoFrame()
 		}
 
 		player.LoopThenDraw();
-
-
-		auto model = DirectX::XMMatrixTranslation(0, 16, 0);
-		const Transforms tf =
-		{
-			DirectX::XMMatrixTranspose(model * wnd.Gfx().getCamera() * wnd.Gfx().getProjection()),
-			DirectX::XMMatrixTranspose(model)
-		};
-
-		test.UpdateVScBuf(tf);
 		
 		wManager.RenderChunks(player.GetCamera());
 
@@ -193,9 +180,9 @@ void Game::MakeChunkThread()
 		if (exit) return;
 		Position pos = positionQueue.pop();
 		auto orig = pos;
-		for (int areaX = orig.x - area; areaX < orig.x + area; areaX += Chunk::ChunkSize / 2) {
+		for (int areaX = orig.x - area / 2; areaX < orig.x + area / 2; areaX += Chunk::ChunkSize / 2) {
 			pos.x = areaX;
-			for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += Chunk::ChunkSize / 2) {
+			for (int areaZ = orig.z - area / 2; areaZ < orig.z + area / 2; areaZ += Chunk::ChunkSize / 2) {
 				pos.z = areaZ;
 				wManager.CreateChunkAtPlayerPos(pos);
 			}

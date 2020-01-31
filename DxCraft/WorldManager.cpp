@@ -65,12 +65,6 @@ bool WorldManager::ModifyBlock(const Position& pos, Block::BlockType type)
 	return ModifyBlock(pos.x, pos.y, pos.z, type);
 }
 
-void WorldManager::GenerateMeshes() {
-	for (auto& chunk : chunks) {
-		GenerateMesh(chunk.second);
-	}
-}
-
 void WorldManager::RenderChunks(Camera& cam)
 {
 	struct TextureTransforms
@@ -104,7 +98,7 @@ void WorldManager::RenderChunks(Camera& cam)
 
 	for (auto& chunkIt : chunks) {
 		auto& chunk = chunkIt.second;
-		if (chunk == nullptr || !chunk->SafeToAccess || chunk->AdditionalIndexBufferSize == 0) continue;
+	if (chunk == nullptr || !chunk->SafeToAccess || chunk->AdditionalIndexBufferSize == 0) continue;
 		if (!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
@@ -135,27 +129,6 @@ void WorldManager::UnloadChunks(const Position& pos, float area)
 		}
 	}
 	lockThread = false;
-}
-
-bool WorldManager::BlockVisible(std::shared_ptr<Chunk> chunkPtr, int x, int y, int z, Block::BlockType type)
-{
-	if (chunkPtr == nullptr) return true;
-	auto& chunk = *chunkPtr;
-	if (y < 0) return true;
-	if (x < Chunk::ChunkSize - 1 && y < Chunk::ChunkSize - 1 && z < Chunk::ChunkSize - 1
-		&& x > 0 && y > 0 && z > 0)
-	{
-		auto block = chunk(x, y, z);
-		return block.IsTransparent() && block.GetBlockType() != type;
-	}
-	else
-	{
-		auto chunk = GetChunkFromBlock(x, y, z);
-		if (chunk == nullptr) return true;
-		auto& block = chunk->operator()(x, y, z);
-		return block.IsTransparent() && block.GetBlockType() != type;
-	}
-	return false;
 }
 
 std::shared_ptr<Chunk> WorldManager::GetChunkFromBlock(int x, int y, int z, bool safetyCheck)
@@ -190,8 +163,8 @@ bool WorldManager::CreateChunkAtPlayerPos(const Position& pos)
 		(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
 	);
 	if (chunks.find(chunkPosition) == chunks.end()) {
-		for (int i = 0; i < 16; i++) {
-			CreateChunk(chunkPosition.x, i * 16, chunkPosition.z);
+		for (int i = 0; i < (Chunk::ChunkSize / 16) * 16; i++) {
+			CreateChunk(chunkPosition.x, i * Chunk::ChunkSize, chunkPosition.z);
 		}
 		return true;
 	}
