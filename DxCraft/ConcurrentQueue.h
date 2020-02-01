@@ -23,6 +23,14 @@ public:
 		return temp;
 	}
 
+	T popOrDefault(){
+		std::unique_lock<std::mutex> lock(mutex);
+		if (queue.empty()) return T{};
+		T temp = queue.front();
+		queue.pop();
+		return temp;
+	}
+
 	T front() {
 		std::unique_lock<std::mutex> lock(mutex);
 		return queue.front();

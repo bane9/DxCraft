@@ -47,6 +47,10 @@ void ChunkGenerator::GenerateGrassChunk(const chunkArray& chunkArea)
 		for (int z = 0; z < Chunk::ChunkSize; z++) {
 			for (int y = 0; y < std::clamp((int)chunk.heightMap[hMapIndex(x, z)] - chunk.y, 0, Chunk::ChunkSize); y++) {
 				chunk(x, y, z).SetBlockType(Block::BlockType::Grass);
+				if (chunk.y + y == 0) chunk(x, y, z).SetBlockType(Block::BlockType::Bedrock);
+			}
+			for (int y = 0; y < Chunk::ChunkSize; y++) {
+				if (chunk.y + y < (worldScale * Chunk::ChunkSize) * 0.7f && chunk(x, y, z).GetBlockType() == Block::BlockType::Air) chunk(x, y, z).SetBlockType(Block::BlockType::Water);
 			}
 		}
 	}
@@ -65,6 +69,10 @@ void ChunkGenerator::GenerateSandChunk(const chunkArray& chunkArea)
 		for (int z = 0; z < Chunk::ChunkSize; z++) {
 			for (int y = 0; y < std::clamp((int)chunk.heightMap[hMapIndex(x, z)] - chunk.y, 0, Chunk::ChunkSize); y++) {
 				chunk(x, y, z).SetBlockType(Block::BlockType::Sand);
+				if (chunk.y + y == 0) chunk(x, y, z).SetBlockType(Block::BlockType::Bedrock);
+			}
+			for (int y = 0; y < Chunk::ChunkSize; y++) {
+				if (chunk.y + y < (worldScale * Chunk::ChunkSize) * 0.75f && chunk(x, y, z).GetBlockType() == Block::BlockType::Air) chunk(x, y, z).SetBlockType(Block::BlockType::Water);
 			}
 		}
 	}
@@ -84,6 +92,7 @@ void ChunkGenerator::GenerateDirtChunk(const chunkArray& chunkArea)
 		for (int z = 0; z < Chunk::ChunkSize; z++) {
 			for (int y = 0; y < std::clamp((int)chunk.heightMap[hMapIndex(x, z)] - chunk.y, 0, Chunk::ChunkSize); y++) {
 				chunk(x, y, z).SetBlockType(Block::BlockType::Dirt);
+				if (chunk.y + y == 0) chunk(x, y, z).SetBlockType(Block::BlockType::Bedrock);
 			}
 		}
 	}
@@ -102,6 +111,7 @@ void ChunkGenerator::GenerateStoneChunk(const chunkArray& chunkArea)
 		for (int z = 0; z < Chunk::ChunkSize; z++) {
 			for (int y = 0; y < std::clamp((int)chunk.heightMap[hMapIndex(x, z)] - chunk.y, 0, Chunk::ChunkSize); y++) {
 				chunk(x, y, z).SetBlockType(Block::BlockType::Oak_Wood);
+				if (chunk.y + y == 0) chunk(x, y, z).SetBlockType(Block::BlockType::Bedrock);
 			}
 		}
 	}

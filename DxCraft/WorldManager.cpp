@@ -76,9 +76,11 @@ void WorldManager::RenderChunks(Camera& cam)
 	};
 
 	lockThread = true;
+	using namespace std::chrono_literals;
+	while (creatingChunks) std::this_thread::sleep_for(15ms);
 	for (auto& chunkIt : chunks) {
 		auto& chunk = chunkIt.second;
-		if (chunk == nullptr || !chunk->SafeToAccess || chunk->IndexBufferSize == 0) continue;
+		if (!chunk->SafeToAccess || chunk->IndexBufferSize == 0) continue;
 		if(!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
@@ -98,7 +100,7 @@ void WorldManager::RenderChunks(Camera& cam)
 
 	for (auto& chunkIt : chunks) {
 		auto& chunk = chunkIt.second;
-	if (chunk == nullptr || !chunk->SafeToAccess || chunk->AdditionalIndexBufferSize == 0) continue;
+	if (!chunk->SafeToAccess || chunk->AdditionalIndexBufferSize == 0) continue;
 		if (!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
@@ -121,8 +123,10 @@ void WorldManager::RenderChunks(Camera& cam)
 void WorldManager::UnloadChunks(const Position& pos, float area)
 {
 	lockThread = true;
+	using namespace std::chrono_literals;
+	while (creatingChunks) std::this_thread::sleep_for(15ms);
 	for (auto it = chunks.begin(); it != chunks.end(); ++it) {
-		float x = (*it).first.x, z = (*it).first.z;
+		float x = it->first.x, z = it->first.z;
 		if (pos.x < x - area || pos.x > x + area ||
 			pos.z < z - area || pos.z > z + area) {
 			if ((it = chunks.erase(it)) == chunks.end()) break;
@@ -141,14 +145,16 @@ std::shared_ptr<Chunk> WorldManager::GetChunkFromBlock(int x, int y, int z, bool
 		y - FixedMod(y, Chunk::ChunkSize),
 		z - FixedMod(z, Chunk::ChunkSize)
 	);
-		
+	
+	using namespace std::chrono_literals;
+	while (creatingChunks) std::this_thread::sleep_for(15ms);
 	auto chunk = chunks.find(chunkPosition);
 	if (chunk == chunks.end() || !chunk->second || (!chunk->second->SafeToAccess && safetyCheck)) {
 		lockThread = false;
 		return nullptr;
 	}
 	else {
-		lockThread = true;
+		lockThread = false;
 		return chunk->second;
 	}
 
@@ -156,7 +162,9 @@ std::shared_ptr<Chunk> WorldManager::GetChunkFromBlock(int x, int y, int z, bool
 
 bool WorldManager::CreateChunkAtPlayerPos(const Position& pos)
 {
-	while (lockThread) std::this_thread::yield();
+	using namespace std::chrono_literals;
+	while (lockThread) std::this_thread::sleep_for(15ms);
+	creatingChunks = true;
 	Position chunkPosition(
 		(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
 		0,
@@ -166,8 +174,10 @@ bool WorldManager::CreateChunkAtPlayerPos(const Position& pos)
 		for (int i = 0; i < (Chunk::ChunkSize / 16) * 16; i++) {
 			CreateChunk(chunkPosition.x, i * Chunk::ChunkSize, chunkPosition.z);
 		}
+		creatingChunks = false;
 		return true;
 	}
+	creatingChunks = false;
 	return false;
 }
 

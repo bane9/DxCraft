@@ -43,4 +43,5 @@ public:
 
 	RenderData renderData;
 	bool lockThread = false;
+	bool creatingChunks = false;
 };
