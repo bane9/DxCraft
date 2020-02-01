@@ -133,7 +133,7 @@ void WorldGenerator::GenerateMesh(std::shared_ptr<Chunk> chunkPtr)
 				else if (offset.z == -Chunk::ChunkSize && chunks[5] == nullptr) return Visibility::Null;
 			}
 		}
-		
+		return Visibility::Visible;
 	};
 
 	std::vector<Vertex> VertexBuffer;

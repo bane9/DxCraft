@@ -18,7 +18,7 @@ class Chunk
 public:
 	Chunk(int x, int y, int z);
 	Position GetPosition() const noexcept;
-	static constexpr int ChunkSize = 32;
+	static constexpr int ChunkSize = 16;
 
 	Block& operator()(int x, int y, int z);
 	bool SafeToAccess = false;

@@ -29,6 +29,6 @@ private:
 	Player player;
 	Timer jumpTimer;
 	Timer sprintTimer;
-	int area = 16 * Chunk::ChunkSize;
+	int area = 20 * Chunk::ChunkSize;
 	ConcurentQueue<Position> positionQueue;
 };
