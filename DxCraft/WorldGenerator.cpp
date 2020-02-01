@@ -284,10 +284,10 @@ void WorldGenerator::GenerateChunk(std::shared_ptr<Chunk> chunkPtr, ChunkGenerat
 	chunkArea[ChunkGenerator::ChunkPosition::Origin] = chunkPtr;
 
 	Position pos = chunkPtr->GetPosition();
-	chunkArea[ChunkGenerator::ChunkPosition::Top] = GetChunkFromBlock(pos.x, pos.y, pos.z + 1);
-	chunkArea[ChunkGenerator::ChunkPosition::Bottom] = GetChunkFromBlock(pos.x, pos.y, pos.z - 1);
-	chunkArea[ChunkGenerator::ChunkPosition::Left] = GetChunkFromBlock(pos.x - 1, pos.y, pos.z);
-	chunkArea[ChunkGenerator::ChunkPosition::Right] = GetChunkFromBlock(pos.x + 1, pos.y, pos.z + 1);
+	chunkArea[ChunkGenerator::ChunkPosition::Top] = GetChunkFromBlock(pos.x, pos.y, pos.z + Chunk::ChunkSize);
+	chunkArea[ChunkGenerator::ChunkPosition::Bottom] = GetChunkFromBlock(pos.x, pos.y, pos.z - Chunk::ChunkSize / 2);
+	chunkArea[ChunkGenerator::ChunkPosition::Left] = GetChunkFromBlock(pos.x - Chunk::ChunkSize / 2, pos.y, pos.z);
+	chunkArea[ChunkGenerator::ChunkPosition::Right] = GetChunkFromBlock(pos.x + Chunk::ChunkSize, pos.y, pos.z + 1);
 
 	chunkGen.ProccessChunk(chunkArea);
 	chunkPtr->HasGenerated = true;
@@ -295,22 +295,22 @@ void WorldGenerator::GenerateChunk(std::shared_ptr<Chunk> chunkPtr, ChunkGenerat
 	std::array<std::shared_ptr<Chunk>, 6> chunks;
 
 	chunks[0] = GetChunkFromBlock(chunkPtr->x + Chunk::ChunkSize, chunkPtr->y, chunkPtr->z);
-	if (chunks[0] != nullptr && !chunks[0]->SafeToAccess && !chunks[0]->OcludedOnNull) chunks[0] = nullptr;
+	if (chunks[0] != nullptr && !chunks[0]->OcludedOnNull) chunks[0] = nullptr;
 
 	chunks[1] = GetChunkFromBlock(chunkPtr->x - 1, chunkPtr->y, chunkPtr->z);
-	if (chunks[1] != nullptr && !chunks[1]->SafeToAccess && !chunks[1]->OcludedOnNull) chunks[1] = nullptr;
+	if (chunks[1] != nullptr && !chunks[1]->OcludedOnNull) chunks[1] = nullptr;
 
 	chunks[2] = GetChunkFromBlock(chunkPtr->x, chunkPtr->y + Chunk::ChunkSize, chunkPtr->z);
-	if (chunks[2] != nullptr && !chunks[2]->SafeToAccess && !chunks[2]->OcludedOnNull) chunks[2] = nullptr;
+	if (chunks[2] != nullptr && !chunks[2]->OcludedOnNull) chunks[2] = nullptr;
 
 	chunks[3] = GetChunkFromBlock(chunkPtr->x, chunkPtr->y - 1, chunkPtr->z);
-	if (chunks[3] != nullptr && !chunks[3]->SafeToAccess && !chunks[3]->OcludedOnNull) chunks[3] = nullptr;
+	if (chunks[3] != nullptr && !chunks[3]->OcludedOnNull) chunks[3] = nullptr;
 
 	chunks[4] = GetChunkFromBlock(chunkPtr->x, chunkPtr->y, chunkPtr->z + Chunk::ChunkSize);
-	if (chunks[4] != nullptr && !chunks[4]->SafeToAccess && !chunks[4]->OcludedOnNull) chunks[4] = nullptr;
+	if (chunks[4] != nullptr && !chunks[4]->OcludedOnNull) chunks[4] = nullptr;
 
 	chunks[5] = GetChunkFromBlock(chunkPtr->x, chunkPtr->y, chunkPtr->z - 1);
-	if (chunks[5] != nullptr && !chunks[5]->SafeToAccess && !chunks[5]->OcludedOnNull) chunks[5] = nullptr;
+	if (chunks[5] != nullptr && !chunks[5]->OcludedOnNull) chunks[5] = nullptr;
 
 	for (auto& chunk : chunks) {
 		if(chunk != nullptr) AddChunkForMeshing(chunk);

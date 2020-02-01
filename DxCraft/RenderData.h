@@ -3,6 +3,8 @@
 #include <wrl.h>
 #include "Graphics.h"
 #include "ExceptionMacros.h"
+#include "Cbuffer.h"
+#include <vector>
 
 class RenderData {
 public:
@@ -33,13 +35,13 @@ public:
 	void Create2DTexture(const char* filePath);
 
 	template<typename T>
-	void UpdateVScBuf(const T& cBuf);
+	void UpdateVScBuf(const T& cBuf, int slot = 0);
 
 	template<typename T>
-	void UpdatePScBuf(const T& cBuf);
+	void UpdatePScBuf(const T& cBuf, int slot = 0);
 
 	template<typename T>
-	void UpdateGScBuf(const T& cBuf);
+	void UpdateGScBuf(const T& cBuf, int slot = 0);
 
 	static void Render(const RenderData& data, const Microsoft::WRL::ComPtr<ID3D11Buffer> optVertexBuffer,
 		Microsoft::WRL::ComPtr<ID3D11Buffer> optIndexBuffer, UINT indexBufferSize, UINT stride);
@@ -55,9 +57,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> pSampler;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> pVertexInputLayout;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexCBuff;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pPixelCBuff;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> pGeometryCBuff;
+	std::vector<Cbuffer> VertexCbuffers{ D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT };
+	std::vector<Cbuffer> PixelCbuffers{ D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT };
+	std::vector<Cbuffer> GeomteryCbuffers{ D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT };
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelInputLayout;
 	Microsoft::WRL::ComPtr<ID3D11GeometryShader> pGeometryShader;
@@ -171,67 +173,19 @@ inline void RenderData::CreateVertexShader(const wchar_t* filePath, const Contai
 }
 
 template<typename T>
-inline void RenderData::UpdateVScBuf(const T& cBuf)
+inline void RenderData::UpdateVScBuf(const T& cBuf, int slot)
 {
-	INFOMAN(gfx);
-	if (pVertexCBuff.Get() == nullptr) {
-		D3D11_BUFFER_DESC cbd;
-		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		cbd.Usage = D3D11_USAGE_DYNAMIC;
-		cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		cbd.MiscFlags = 0;
-		cbd.ByteWidth = sizeof(cBuf);
-		cbd.StructureByteStride = 0;
-
-		GFX_EXCEPT_INFO(gfx.pDevice->CreateBuffer(&cbd, nullptr, pVertexCBuff.ReleaseAndGetAddressOf()));
-	}
-
-	D3D11_MAPPED_SUBRESOURCE msr;
-	gfx.pContext->Map(pVertexCBuff.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, &cBuf, sizeof(cBuf));
-	gfx.pContext->Unmap(pVertexCBuff.Get(), 0);
+	VertexCbuffers[slot].Update(cBuf, gfx);
 }
 
 template<typename T>
-inline void RenderData::UpdatePScBuf(const T& cBuf)
+inline void RenderData::UpdatePScBuf(const T& cBuf, int slot)
 {
-	INFOMAN(gfx);
-	if (pPixelCBuff.Get() == nullptr) {
-		D3D11_BUFFER_DESC cbd;
-		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		cbd.Usage = D3D11_USAGE_DYNAMIC;
-		cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		cbd.MiscFlags = 0;
-		cbd.ByteWidth = sizeof(cBuf);
-		cbd.StructureByteStride = 0;
-
-		GFX_EXCEPT_INFO(gfx.pDevice->CreateBuffer(&cbd, nullptr, pPixelCBuff.ReleaseAndGetAddressOf()));
-	}
-
-	D3D11_MAPPED_SUBRESOURCE msr;
-	gfx.pContext->Map(pPixelCBuff.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, &cBuf, sizeof(cBuf));
-	gfx.pContext->Unmap(pPixelCBuff.Get(), 0);
+	PixelCbuffers[slot].Update(cBuf, gfx);
 }
 
 template<typename T>
-inline void RenderData::UpdateGScBuf(const T& cBuf)
+inline void RenderData::UpdateGScBuf(const T& cBuf, int slot)
 {
-	INFOMAN(gfx);
-	if (pGeometryCBuff.Get() == nullptr) {
-		D3D11_BUFFER_DESC cbd;
-		cbd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-		cbd.Usage = D3D11_USAGE_DYNAMIC;
-		cbd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		cbd.MiscFlags = 0;
-		cbd.ByteWidth = sizeof(cBuf);
-		cbd.StructureByteStride = 0;
-
-		GFX_EXCEPT_INFO(gfx.pDevice->CreateBuffer(&cbd, nullptr, pGeometryCBuff.ReleaseAndGetAddressOf()));
-	}
-
-	D3D11_MAPPED_SUBRESOURCE msr;
-	gfx.pContext->Map(pGeometryCBuff.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &msr);
-	memcpy(msr.pData, &cBuf, sizeof(cBuf));
-	gfx.pContext->Unmap(pGeometryCBuff.Get(), 0);
+	GeomteryCbuffers[slot].Update(cBuf, gfx);
 }

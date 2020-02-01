@@ -36,4 +36,6 @@ private:
 	FastNoise noise;
 
 	static constexpr int worldScaler = 16;
+	const float worldScale = 3;
+	const float prescale = 30;
 };

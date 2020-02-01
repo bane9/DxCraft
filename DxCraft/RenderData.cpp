@@ -119,14 +119,23 @@ void RenderData::Render(const RenderData& data, const Microsoft::WRL::ComPtr<ID3
 		data.gfx.pContext->PSSetSamplers(0, 1, data.pSampler.GetAddressOf());
 	}
 
-	if (data.pVertexCBuff.Get() != nullptr)
-		data.gfx.pContext->VSSetConstantBuffers(0, 1, data.pVertexCBuff.GetAddressOf());
+	for (int i = 0; i < data.VertexCbuffers.size(); i++) {
+		if (data.VertexCbuffers[i].buffer != nullptr) {
+			data.gfx.pContext->VSSetConstantBuffers(i, 1, data.VertexCbuffers[i].buffer.GetAddressOf());
+		}
+	}
 
-	if (data.pPixelCBuff.Get() != nullptr)
-		data.gfx.pContext->PSSetConstantBuffers(0, 1, data.pPixelCBuff.GetAddressOf());
+	for (int i = 0; i < data.VertexCbuffers.size(); i++) {
+		if (data.PixelCbuffers[i].buffer != nullptr) {
+			data.gfx.pContext->PSSetConstantBuffers(i, 1, data.PixelCbuffers[i].buffer.GetAddressOf());
+		}
+	}
 
-	if (data.pGeometryCBuff.Get() != nullptr)
-		data.gfx.pContext->GSSetConstantBuffers(0, 1, data.pGeometryCBuff.GetAddressOf());
+	for (int i = 0; i < data.GeomteryCbuffers.size(); i++) {
+		if (data.GeomteryCbuffers[i].buffer != nullptr) {
+			data.gfx.pContext->GSSetConstantBuffers(i, 1, data.GeomteryCbuffers[i].buffer.GetAddressOf());
+		}
+	}
 
 	switch (data.topology) {
 	case D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST:

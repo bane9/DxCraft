@@ -202,6 +202,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h" />
+    <ClInclude Include="Cbuffer.h" />
     <ClInclude Include="Chunk.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="BlockSelector.h" />

@@ -20,6 +20,7 @@
 class Graphics
 {
 	friend class RenderData;
+	friend struct Cbuffer;
 public:
 	Graphics(HWND hWnd, size_t width, size_t height);
 	Graphics(Graphics&) = delete;

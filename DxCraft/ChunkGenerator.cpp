@@ -9,12 +9,14 @@ void ChunkGenerator::ProccessChunk(chunkArray& chunkArea)
 {
 	std::shared_ptr<Chunk> inheritsFrom = nullptr;
 	auto& origin = *chunkArea[ChunkPosition::Origin];
-	noise.SetNoiseType(FastNoise::NoiseType::Simplex);
-	noise.SetFrequency(0.001f);
+	noise.SetNoiseType(FastNoise::NoiseType::SimplexFractal);
+	noise.SetFractalOctaves(3);
+	noise.SetFrequency(0.0001f);
 	origin.biome = static_cast<Chunk::Biome>(
 		ValueMap(noise.GetNoise(origin.x, origin.z), -1.0f, 1.0f, 0, static_cast<int>(Chunk::Biome::Biome_count))
 		);
-
+	noise.SetNoiseType(FastNoise::NoiseType::ValueFractal);
+	noise.SetFrequency(0.01f);
 	switch (origin.biome)
 	{
 	default:
@@ -35,13 +37,13 @@ void ChunkGenerator::ProccessChunk(chunkArray& chunkArea)
 
 void ChunkGenerator::GenerateGrassChunk(const chunkArray& chunkArea)
 {
-	noise.SetNoiseType(FastNoise::NoiseType::SimplexFractal);
+	/*noise.SetNoiseType(FastNoise::NoiseType::SimplexFractal);
 	noise.SetFrequency(0.01f);
 	noise.SetFractalOctaves(2);
+	constexpr float worldScale = 3;
+	constexpr float prescale = 20;*/
 	auto& chunk = *chunkArea[ChunkPosition::Origin];
 	Position pos = chunk.GetPosition();
-	constexpr float worldScale = 3;
-	constexpr float prescale = 20;
 	GenerateHeightMap(chunkArea, worldScale, prescale);
 	for (int x = 0; x < Chunk::ChunkSize; x++) {
 		for (int z = 0; z < Chunk::ChunkSize; z++) {
@@ -58,12 +60,9 @@ void ChunkGenerator::GenerateGrassChunk(const chunkArray& chunkArea)
 
 void ChunkGenerator::GenerateSandChunk(const chunkArray& chunkArea)
 {
-	noise.SetNoiseType(FastNoise::NoiseType::Value);
-	noise.SetFrequency(0.01f);
 	auto& chunk = *chunkArea[ChunkPosition::Origin];
 	Position pos = chunk.GetPosition();
-	constexpr float worldScale = 3;
-	constexpr float prescale = 30;
+	
 	GenerateHeightMap(chunkArea, worldScale, prescale);
 	for (int x = 0; x < Chunk::ChunkSize; x++) {
 		for (int z = 0; z < Chunk::ChunkSize; z++) {
@@ -80,13 +79,13 @@ void ChunkGenerator::GenerateSandChunk(const chunkArray& chunkArea)
 
 void ChunkGenerator::GenerateDirtChunk(const chunkArray& chunkArea)
 {
-	noise.SetNoiseType(FastNoise::NoiseType::PerlinFractal);
+	/*noise.SetNoiseType(FastNoise::NoiseType::PerlinFractal);
 	noise.SetFrequency(0.01f);
 	noise.SetFractalOctaves(3);
+	constexpr float worldScale = 2;
+	constexpr float prescale = 27;*/
 	auto& chunk = *chunkArea[ChunkPosition::Origin];
 	Position pos = chunk.GetPosition();
-	constexpr float worldScale = 2;
-	constexpr float prescale = 27;
 	GenerateHeightMap(chunkArea, worldScale, prescale);
 	for (int x = 0; x < Chunk::ChunkSize; x++) {
 		for (int z = 0; z < Chunk::ChunkSize; z++) {
@@ -100,12 +99,12 @@ void ChunkGenerator::GenerateDirtChunk(const chunkArray& chunkArea)
 
 void ChunkGenerator::GenerateStoneChunk(const chunkArray& chunkArea)
 {
-	noise.SetNoiseType(FastNoise::NoiseType::Perlin);
+	/*noise.SetNoiseType(FastNoise::NoiseType::Perlin);
 	noise.SetFrequency(0.025f);
+	constexpr float worldScale = 2;
+	constexpr float prescale = 20;*/
 	auto& chunk = *chunkArea[ChunkPosition::Origin];
 	Position pos = chunk.GetPosition();
-	constexpr float worldScale = 2;
-	constexpr float prescale = 20;
 	GenerateHeightMap(chunkArea, worldScale, prescale);
 	for (int x = 0; x < Chunk::ChunkSize; x++) {
 		for (int z = 0; z < Chunk::ChunkSize; z++) {
@@ -131,12 +130,13 @@ void ChunkGenerator::GenerateHeightMap(const chunkArray& chunkArea, int worldSca
 					255.0f - prescale);
 		}
 	}
+	return;
 
 	if (chunkArea[ChunkPosition::Top] != nullptr && chunkArea[ChunkPosition::Top]->HasGenerated) {
-		float bottomLeft = chunk.heightMap[hMapIndex(0, 0)];
-		float topLeft = chunkArea[ChunkPosition::Top]->heightMap[hMapIndex(0, Chunk::ChunkSize - 1)];
-		float bottomRight = chunk.heightMap[hMapIndex(Chunk::ChunkSize - 1, 0)];
-		float topRight = chunkArea[ChunkPosition::Top]->heightMap[hMapIndex(Chunk::ChunkSize - 1, Chunk::ChunkSize - 1)];
+		float bottomLeft = chunk.heightMap[hMapIndex(Chunk::ChunkSize - 1, 0)];
+		float topLeft = chunkArea[ChunkPosition::Top]->heightMap[hMapIndex(0, 0)];
+		float bottomRight = chunk.heightMap[hMapIndex(Chunk::ChunkSize - 1, Chunk::ChunkSize - 1)];
+		float topRight = chunkArea[ChunkPosition::Top]->heightMap[hMapIndex(0, Chunk::ChunkSize - 1)];
 
 		for (int x = 0; x < Chunk::ChunkSize; x++) {
 			for (int z = 0; z < Chunk::ChunkSize; z++) {
@@ -149,13 +149,12 @@ void ChunkGenerator::GenerateHeightMap(const chunkArray& chunkArea, int worldSca
 			}
 		}
 	}
-
 
 	if (chunkArea[ChunkPosition::Right] != nullptr && chunkArea[ChunkPosition::Right]->HasGenerated) {
 		float bottomLeft = chunk.heightMap[hMapIndex(0, 0)];
 		float topLeft = chunk.heightMap[hMapIndex(Chunk::ChunkSize - 1, 0)];
-		float bottomRight = chunkArea[ChunkPosition::Right]->heightMap[hMapIndex(Chunk::ChunkSize - 1, 0)];
-		float topRight = chunkArea[ChunkPosition::Right]->heightMap[hMapIndex(Chunk::ChunkSize - 1, Chunk::ChunkSize - 1)];
+		float bottomRight = chunkArea[ChunkPosition::Right]->heightMap[hMapIndex(0, 0)];
+		float topRight = chunkArea[ChunkPosition::Right]->heightMap[hMapIndex(Chunk::ChunkSize - 1, 0)];
 
 		for (int x = 0; x < Chunk::ChunkSize; x++) {
 			for (int z = 0; z < Chunk::ChunkSize; z++) {
@@ -168,5 +167,41 @@ void ChunkGenerator::GenerateHeightMap(const chunkArray& chunkArea, int worldSca
 			}
 		}
 	}
-	
+
+	if (chunkArea[ChunkPosition::Left] != nullptr && chunkArea[ChunkPosition::Left]->HasGenerated) {
+		float bottomLeft = chunkArea[ChunkPosition::Left]->heightMap[hMapIndex(Chunk::ChunkSize - 1, 0)];
+		float topLeft = chunkArea[ChunkPosition::Left]->heightMap[hMapIndex(Chunk::ChunkSize - 1, Chunk::ChunkSize - 1)];
+		float bottomRight = chunk.heightMap[hMapIndex(0, 0)];
+		float topRight = chunk.heightMap[hMapIndex(0, Chunk::ChunkSize - 1)];
+
+		for (int x = 0; x < Chunk::ChunkSize; x++) {
+			for (int z = 0; z < Chunk::ChunkSize; z++) {
+				chunk.heightMap[hMapIndex(x, z)] = BilinearInterpolation(
+					bottomLeft, topLeft, bottomRight, topRight,
+					0, Chunk::ChunkSize - 1,
+					0, Chunk::ChunkSize - 1,
+					x, z
+				);
+			}
+		}
+	}
+
+
+	if (false && chunkArea[ChunkPosition::Bottom] != nullptr && chunkArea[ChunkPosition::Bottom]->HasGenerated) {
+		float bottomLeft = chunk.heightMap[hMapIndex(0, 0)];
+		float topLeft = chunkArea[ChunkPosition::Bottom]->heightMap[hMapIndex(0, Chunk::ChunkSize - 1)];
+		float bottomRight = chunkArea[ChunkPosition::Bottom]->heightMap[hMapIndex(Chunk::ChunkSize - 1, Chunk::ChunkSize - 1)];
+		float topRight = chunk.heightMap[hMapIndex(Chunk::ChunkSize - 1, 0)];
+
+		for (int x = 0; x < Chunk::ChunkSize; x++) {
+			for (int z = 0; z < Chunk::ChunkSize; z++) {
+				chunk.heightMap[hMapIndex(x, z)] = BilinearInterpolation(
+					bottomLeft, topLeft, bottomRight, topRight,
+					0, Chunk::ChunkSize - 1,
+					0, Chunk::ChunkSize - 1,
+					x, z
+				);
+			}
+		}
+	}
 }

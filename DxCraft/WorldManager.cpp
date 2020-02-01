@@ -80,7 +80,7 @@ void WorldManager::RenderChunks(Camera& cam)
 	while (creatingChunks) std::this_thread::sleep_for(15ms);
 	for (auto& chunkIt : chunks) {
 		auto& chunk = chunkIt.second;
-		if (!chunk->SafeToAccess || chunk->IndexBufferSize == 0) continue;
+		if (!chunk || !chunk->SafeToAccess || chunk->IndexBufferSize == 0) continue;
 		if(!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
@@ -100,7 +100,7 @@ void WorldManager::RenderChunks(Camera& cam)
 
 	for (auto& chunkIt : chunks) {
 		auto& chunk = chunkIt.second;
-	if (!chunk->SafeToAccess || chunk->AdditionalIndexBufferSize == 0) continue;
+	if (!chunk || !chunk->SafeToAccess || chunk->AdditionalIndexBufferSize == 0) continue;
 		if (!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
