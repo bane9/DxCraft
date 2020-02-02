@@ -26,7 +26,7 @@ void Game::DoFrame()
 	Position oldpos = { 0, 1, 0 };
 	while (!exit) {
 		wnd.Gfx().BeginFrame(0.5f * skyIntesity, 0.91f * skyIntesity, 1.0f * skyIntesity);
-		
+
 		Position pos = player.GetPositon();
 		pos = Position(
 			(pos.x - FixedMod(pos.x, Chunk::ChunkSize)),
@@ -34,7 +34,7 @@ void Game::DoFrame()
 			(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
 		);
 		if (pos != oldpos) {
-			wManager.UnloadChunks(pos, area / 2);
+			wManager.UnloadChunks(pos, area);
 			positionQueue.push(pos);
 			oldpos = pos;
 		}
@@ -180,9 +180,9 @@ void Game::MakeChunkThread()
 		if (exit) return;
 		Position pos = positionQueue.pop();
 		auto orig = pos;
-		for (int areaX = orig.x - area / 2; areaX < orig.x + area / 2; areaX += Chunk::ChunkSize / 2) {
+		for (int areaX = orig.x - area; areaX < orig.x + area; areaX += Chunk::ChunkSize) {
 			pos.x = areaX;
-			for (int areaZ = orig.z - area / 2; areaZ < orig.z + area / 2; areaZ += Chunk::ChunkSize / 2) {
+			for (int areaZ = orig.z - area; areaZ < orig.z + area; areaZ += Chunk::ChunkSize) {
 				pos.z = areaZ;
 				wManager.CreateChunkAtPlayerPos(pos);
 			}

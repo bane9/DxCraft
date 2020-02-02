@@ -23,9 +23,9 @@ public:
 	Block& operator()(int x, int y, int z);
 	bool SafeToAccess = false;
 	enum class Biome {
+		Dirt,
 		Grass,
 		Sand,
-		Dirt,
 		Stone,
 
 		Biome_count,

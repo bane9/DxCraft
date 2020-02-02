@@ -6,8 +6,8 @@
 #include "Graphics.h"
 
 struct Cbuffer {
-	Cbuffer() {
-		type = const_cast<type_info*>(&typeid(this));
+	Cbuffer() : type(const_cast<type_info*>(&typeid(void)))
+	{
 	}
 
 	template<typename T>
@@ -32,6 +32,11 @@ struct Cbuffer {
 		GFX_EXCEPT_INFO(gfx.pDevice->CreateBuffer(&cbd, nullptr, buffer.ReleaseAndGetAddressOf()));
 
 		type = const_cast<type_info*>(&typeid(T));
+	}
+
+	void Clear() {
+		buffer = nullptr;
+		type = const_cast<type_info*>(&typeid(void));
 	}
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> buffer;

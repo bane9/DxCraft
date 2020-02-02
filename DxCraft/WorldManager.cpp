@@ -78,10 +78,18 @@ void WorldManager::RenderChunks(Camera& cam)
 	lockThread = true;
 	using namespace std::chrono_literals;
 	while (creatingChunks) std::this_thread::sleep_for(15ms);
+
+	static std::array<bool, 50000> checks;
+	std::transform(chunks.begin(), chunks.end(), checks.begin(), [&](auto& it) {
+		return !(!it.second || !it.second->SafeToAccess ||
+			!cam.GetFrustum().IsBoxInFrustum(it.second->aabb));
+		}
+	);
+
+	int count = 0;
 	for (auto& chunkIt : chunks) {
+		if (!checks[count++] || chunkIt.second->IndexBufferSize == 0) continue;
 		auto& chunk = chunkIt.second;
-		if (!chunk || !chunk->SafeToAccess || chunk->IndexBufferSize == 0) continue;
-		if(!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
 		const TextureTransforms tf =
@@ -98,10 +106,10 @@ void WorldManager::RenderChunks(Camera& cam)
 			chunk->IndexBufferSize, sizeof(Vertex));
 	}
 
+	count = 0;
 	for (auto& chunkIt : chunks) {
+		if (!checks[count++] || chunkIt.second->AdditionalIndexBufferSize == 0) continue;
 		auto& chunk = chunkIt.second;
-	if (!chunk || !chunk->SafeToAccess || chunk->AdditionalIndexBufferSize == 0) continue;
-		if (!cam.GetFrustum().IsBoxInFrustum(chunk->aabb)) continue;
 		auto model = DirectX::XMMatrixTranslation(chunk->x, chunk->y, chunk->z);
 
 		const TextureTransforms tf =

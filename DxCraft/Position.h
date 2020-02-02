@@ -36,8 +36,7 @@ private:
 
 struct PositionHash {
 	std::size_t operator()(const Position& position) const {
-		static robin_hood::hash<int> hash;
-		return (73856093 * position.x ^ 19349663 * position.y ^ 83492791 * position.z) & std::numeric_limits<int>::max();
+		return 73856093U * (unsigned)position.x ^ 19349663U * (unsigned)position.y ^ 83492791U * (unsigned)position.z;
 	}
 };
 

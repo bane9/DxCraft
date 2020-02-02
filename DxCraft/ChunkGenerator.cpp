@@ -9,14 +9,15 @@ void ChunkGenerator::ProccessChunk(chunkArray& chunkArea)
 {
 	std::shared_ptr<Chunk> inheritsFrom = nullptr;
 	auto& origin = *chunkArea[ChunkPosition::Origin];
-	noise.SetNoiseType(FastNoise::NoiseType::SimplexFractal);
-	noise.SetFractalOctaves(3);
+	noise.SetNoiseType(FastNoise::NoiseType::Simplex);
+	
 	noise.SetFrequency(0.0001f);
 	origin.biome = static_cast<Chunk::Biome>(
 		ValueMap(noise.GetNoise(origin.x, origin.z), -1.0f, 1.0f, 0, static_cast<int>(Chunk::Biome::Biome_count))
 		);
-	noise.SetNoiseType(FastNoise::NoiseType::ValueFractal);
-	noise.SetFrequency(0.01f);
+	noise.SetNoiseType(FastNoise::NoiseType::SimplexFractal);
+	noise.SetFrequency(0.005f);
+	noise.SetFractalOctaves(2);
 	switch (origin.biome)
 	{
 	default:
@@ -48,11 +49,14 @@ void ChunkGenerator::GenerateGrassChunk(const chunkArray& chunkArea)
 	for (int x = 0; x < Chunk::ChunkSize; x++) {
 		for (int z = 0; z < Chunk::ChunkSize; z++) {
 			for (int y = 0; y < std::clamp((int)chunk.heightMap[hMapIndex(x, z)] - chunk.y, 0, Chunk::ChunkSize); y++) {
-				chunk(x, y, z).SetBlockType(Block::BlockType::Grass);
 				if (chunk.y + y == 0) chunk(x, y, z).SetBlockType(Block::BlockType::Bedrock);
+				else if (chunk.heightMap[hMapIndex(x, z)] - chunk.y + y < Chunk::ChunkSize && chunk.y + y < (worldScale * Chunk::ChunkSize) * 0.85f) chunk(x, y, z).SetBlockType(Block::BlockType::Sand);
+				else chunk(x, y, z).SetBlockType(Block::BlockType::Grass);
 			}
 			for (int y = 0; y < Chunk::ChunkSize; y++) {
-				if (chunk.y + y < (worldScale * Chunk::ChunkSize) * 0.7f && chunk(x, y, z).GetBlockType() == Block::BlockType::Air) chunk(x, y, z).SetBlockType(Block::BlockType::Water);
+				if (chunk.y + y < (worldScale * Chunk::ChunkSize) * 0.8f && chunk(x, y, z).GetBlockType() == Block::BlockType::Air) {
+					chunk(x, y, z).SetBlockType(Block::BlockType::Water);
+				}
 			}
 		}
 	}
