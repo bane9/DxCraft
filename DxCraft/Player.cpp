@@ -4,7 +4,7 @@
 #include <algorithm>
 #include "TreeGenerator.h"
 
-static constexpr bool checkBlocks = true;
+static constexpr bool checkBlocks = false;
 
 #define FRAMETIME_COMPESATED(x) ((x) * (gfx.GetFrametime() / 16.667f))
 

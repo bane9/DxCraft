@@ -100,5 +100,3 @@ inline void WorldGenerator::AppendMesh(const Container& mesh,
 	std::transform(mesh.second.begin(), mesh.second.end(), std::back_inserter(indexBuffer),
 		[offset](int a) {return offset + a; });
 }
-
-

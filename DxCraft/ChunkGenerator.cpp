@@ -50,11 +50,11 @@ void ChunkGenerator::GenerateGrassChunk(const chunkArray& chunkArea)
 		for (int z = 0; z < Chunk::ChunkSize; z++) {
 			for (int y = 0; y < std::clamp((int)chunk.heightMap[hMapIndex(x, z)] - chunk.y, 0, Chunk::ChunkSize); y++) {
 				if (chunk.y + y == 0) chunk(x, y, z).SetBlockType(Block::BlockType::Bedrock);
-				else if (chunk.heightMap[hMapIndex(x, z)] - chunk.y + y < Chunk::ChunkSize && chunk.y + y < (worldScale * Chunk::ChunkSize) * 0.85f) chunk(x, y, z).SetBlockType(Block::BlockType::Sand);
+				else if (chunk.heightMap[hMapIndex(x, z)] - chunk.y + y < Chunk::ChunkSize + 2 && chunk.y + y < (worldScale * Chunk::ChunkSize) * 0.85f) chunk(x, y, z).SetBlockType(Block::BlockType::Sand);
 				else chunk(x, y, z).SetBlockType(Block::BlockType::Grass);
 			}
 			for (int y = 0; y < Chunk::ChunkSize; y++) {
-				if (chunk.y + y < (worldScale * Chunk::ChunkSize) * 0.8f && chunk(x, y, z).GetBlockType() == Block::BlockType::Air) {
+				if (chunk.y + y < (worldScale * Chunk::ChunkSize) * 0.85f && chunk(x, y, z).GetBlockType() == Block::BlockType::Air) {
 					chunk(x, y, z).SetBlockType(Block::BlockType::Water);
 				}
 			}

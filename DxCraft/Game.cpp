@@ -34,7 +34,6 @@ void Game::DoFrame()
 			(pos.z - FixedMod(pos.z, Chunk::ChunkSize))
 		);
 		if (pos != oldpos) {
-			wManager.UnloadChunks(pos, area);
 			positionQueue.push(pos);
 			oldpos = pos;
 		}
@@ -176,9 +175,11 @@ void Game::MakeChunkThread()
 {
 	using namespace std::chrono_literals;
 	while (!exit) {
-		while (!exit && positionQueue.empty()) std::this_thread::sleep_for(10ms);
+		while (!exit && (positionQueue.empty() || wManager.lockThread)) std::this_thread::sleep_for(10ms);
 		if (exit) return;
 		Position pos = positionQueue.pop();
+		wManager.creatingChunks = true;
+		wManager.UnloadChunks(pos, area);
 		auto orig = pos;
 		for (int areaX = orig.x - area; areaX < orig.x + area; areaX += Chunk::ChunkSize) {
 			pos.x = areaX;
@@ -187,6 +188,7 @@ void Game::MakeChunkThread()
 				wManager.CreateChunkAtPlayerPos(pos);
 			}
 		}
+		wManager.creatingChunks = false;
 	}
 }
 

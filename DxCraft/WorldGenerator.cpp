@@ -57,7 +57,7 @@ void WorldGenerator::ThreadLoop()
 	using namespace std::chrono_literals;
 	ChunkGenerator chunkGen;
 	while (running) {
-		while (running && chunkActions.empty()) std::this_thread::sleep_for(10ms);
+		while (running && chunkActions.empty()) std::this_thread::sleep_for(1ms);
 		if (!running) return;
 		ChunkAction action = chunkActions.popOrDefault();
 		if (action.chunk != nullptr && action.chunk.use_count() > 1) {		
