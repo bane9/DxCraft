@@ -12,14 +12,15 @@ struct VSOut
     float2 tc : Texcoord;
 	//float visibility : Visibility;
     float4 pos : SV_Position;
+    float light : Light;
 };
 
-VSOut main(float3 pos : Position, float2 tc : Texcoord)
+VSOut main(float3 pos : Position, float2 tc : Texcoord, float light : Light)
 {
     VSOut vso;
 	vso.pos = mul(float4(pos, 1.0f), modelViewProj);
 	vso.tc = tc;
     //vso.visibility = exp(-pow(mul(length(mul(projMatrix, vso.pos).xyz), 0.005f), 1.0f));
-    
+    vso.light = light;
     return vso;
 }

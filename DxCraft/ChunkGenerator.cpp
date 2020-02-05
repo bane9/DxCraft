@@ -134,7 +134,7 @@ void ChunkGenerator::GenerateHeightMap(const chunkArray& chunkArea)
 	if (chunkArea[ChunkPosition::Bottom] != nullptr && chunkArea[ChunkPosition::Bottom]->HasGenerated) {
 		for (int x = 0; x < Chunk::ChunkSize; x++) {
 			for (int z = 0; z < Chunk::ChunkSize; z++) {
-				chunk.heightMap[hMapIndex(x, z)] = interpolate(
+				chunk.heightMap[hMapIndex(x, z)] = Lerp(
 					chunkArea[ChunkPosition::Bottom]->heightMap[hMapIndex(x, Chunk::ChunkSize - 1)],
 					chunk.heightMap[hMapIndex(x, Chunk::ChunkSize - 1)],
 					(float)z / Chunk::ChunkSize
@@ -145,7 +145,7 @@ void ChunkGenerator::GenerateHeightMap(const chunkArray& chunkArea)
 	else if (chunkArea[ChunkPosition::Top] != nullptr && chunkArea[ChunkPosition::Top]->HasGenerated) {
 		for (int x = 0; x < Chunk::ChunkSize; x++) {
 			for (int z = 0; z < Chunk::ChunkSize; z++) {
-				chunk.heightMap[hMapIndex(x, z)] = interpolate(
+				chunk.heightMap[hMapIndex(x, z)] = Lerp(
 					chunk.heightMap[hMapIndex(x, 0)],
 					chunkArea[ChunkPosition::Top]->heightMap[hMapIndex(x, 0)],
 					(float)z/ Chunk::ChunkSize
@@ -158,7 +158,7 @@ void ChunkGenerator::GenerateHeightMap(const chunkArray& chunkArea)
 	if (chunkArea[ChunkPosition::Left] != nullptr && chunkArea[ChunkPosition::Left]->HasGenerated) {
 		for (int x = 0; x < Chunk::ChunkSize; x++) {
 			for (int z = 0; z < Chunk::ChunkSize; z++) {
-				chunk.heightMap[hMapIndex(x, z)] = interpolate(
+				chunk.heightMap[hMapIndex(x, z)] = Lerp(
 					chunkArea[ChunkPosition::Left]->heightMap[hMapIndex(Chunk::ChunkSize - 1, z)],
 					chunk.heightMap[hMapIndex(Chunk::ChunkSize - 1, z)],
 					(float)x / Chunk::ChunkSize
@@ -169,7 +169,7 @@ void ChunkGenerator::GenerateHeightMap(const chunkArray& chunkArea)
 	else if (chunkArea[ChunkPosition::Right] != nullptr && chunkArea[ChunkPosition::Right]->HasGenerated) {
 		for (int x = 0; x < Chunk::ChunkSize; x++) {
 			for (int z = 0; z < Chunk::ChunkSize; z++) {
-				chunk.heightMap[hMapIndex(x, z)] = interpolate(
+				chunk.heightMap[hMapIndex(x, z)] = Lerp(
 					chunk.heightMap[hMapIndex(0, z)],
 					chunkArea[ChunkPosition::Right]->heightMap[hMapIndex(0, z)],
 					(float)x / Chunk::ChunkSize
