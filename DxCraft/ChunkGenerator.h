@@ -21,21 +21,23 @@ public:
 	ChunkGenerator() { gen.seed(time(0)); noise.SetSeed(time(0)); };
 	~ChunkGenerator() = default;
 	void ProccessChunk(chunkArray& chunkArea);
-
+	static Chunk::Biome GetBiome(int x, int z);
+	struct BiomeInfo {
+		float worldScale;
+		float prescale;
+	};
 private:
 	void GenerateGrassChunk(const chunkArray& chunkArea);
 	void GenerateSandChunk(const chunkArray& chunkArea);
 	void GenerateDirtChunk(const chunkArray& chunkArea);
 	void GenerateStoneChunk(const chunkArray& chunkArea);
-	void GenerateHeightMap(const chunkArray& chunkArea, int worldScale, int prescale);
+	void GenerateHeightMap(const chunkArray& chunkArea);
 
 	std::random_device rd;
-	std::mt19937 gen{rd()};
-	std::uniform_int_distribution<> dis{0, static_cast<int>(Chunk::Biome::Biome_count)};
+	std::mt19937 gen{ rd() };
+	std::uniform_int_distribution<> dis{ 0, static_cast<int>(Chunk::Biome::Biome_count) };
 
 	FastNoise noise;
 
 	static constexpr int worldScaler = 16;
-	const float worldScale = 3;
-	const float prescale = 30;
 };

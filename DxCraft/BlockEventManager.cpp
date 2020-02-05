@@ -222,13 +222,13 @@ std::array<std::function<PlaceSignature>, 6> PlaceEvent = {
 		return wManager.ModifyBlock(BlockPosition.x, BlockPosition.y, BlockPosition.z, BlockType);
 	},
 	[](PLACE_PARAMATERS) { //Liquid
-		//if (evt.water_level < 1) return true;
-		//wManager.ModifyBlock(evt.blockPosition, Block::BlockType::Water);
-		//auto block = wManager.GetBlock(evt.blockPosition);
+		if (evt.water_level < 1) return true;
+		wManager.ModifyBlock(evt.blockPosition, Block::BlockType::Water);
+		auto block = wManager.GetBlock(evt.blockPosition);
 		//block->liquidInfo.level = evt.water_level;
-		//if (evt.UpdateDepth > 0) return true;
-		//bool result = HandleLiquid(wManager, blockEvt, evt);
-		////blockEvt.CreateSurroundingUpdates(evt.blockPosition, 1);
+		if (evt.UpdateDepth > 0) return true;
+		bool result = HandleLiquid(wManager, blockEvt, evt);
+		//blockEvt.CreateSurroundingUpdates(evt.blockPosition, 1);
 		return true;
 	},
 };
@@ -345,8 +345,8 @@ bool BlockEventManager::PlaceBlock(const Position& BlockPosition, const Position
 		return PlaceEvent[4](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
 	case Block::BlockType::Water:
 	{
-		//auto block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z);
-		//if (block == nullptr || block->GetBlockType() != Block::BlockType::Air) return false;
+		auto block = wManager.GetBlock(evt.blockPosition.x, evt.blockPosition.y, evt.blockPosition.z);
+		if (block == nullptr || block->GetBlockType() != Block::BlockType::Air) return false;
 		return PlaceEvent[5](wManager, *this, BlockPosition, PlaceDirection, BlockType, evt);
 	}
 	default:
@@ -405,11 +405,11 @@ void BlockEventManager::Loop()
 				break;
 			case Block::BlockType::Water:
 			{
-				//auto block = wManager.GetBlock(evt.blockPosition);
+				auto block = wManager.GetBlock(evt.blockPosition);
 				//evt.water_level = block->liquidInfo.level;
-				//evt.blockType = block->GetBlockType();
-				//result = UpdateEvent[3](wManager, *this, evt);
-				//break;
+				evt.blockType = block->GetBlockType();
+				result = UpdateEvent[3](wManager, *this, evt);
+				break;
 			}
 			default:
 				result = UpdateEvent[0](wManager, *this, evt);

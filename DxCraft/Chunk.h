@@ -32,6 +32,7 @@ public:
 		None,
 	};
 	Biome GetBiome();
+	
 public:
 	Position Normalize(int x, int y, int z) const noexcept;
 	inline int FlatIndex(int x, int y, int z) const noexcept;
