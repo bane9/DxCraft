@@ -13,10 +13,8 @@ DxCraft is a work in progress Minecraft clone made in C++17 and DirectX11
   - [X] Frustum culling
   - [x] Metadata system
   - [x] Plants/trees
-  - [ ] Water/lava (in progress)
-  - [ ] Biomes (in progress)
+  - [x] Biomes
   - [x] Dynamic world generation
-  - [ ] Shading
 
 # Thanks to
 First of all, I have to thank [ChiliTomatoNoode](https://www.youtube.com/user/ChiliTomatoNoodle) and his [C++ 3D DirectX Programming](https://www.youtube.com/playlist?list=PLqCJpWy5Fohd3S7ICFXwUomYW0Wv67pDD) tutorials. A lot of my DirectX/Win32 knowledge came directly from him and I thank him a lot for making those tutorials.
