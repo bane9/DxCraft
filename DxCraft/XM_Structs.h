@@ -7,7 +7,7 @@ struct Vertex
 {
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT2 tc;
-	float light = 1.0f;
+	float light;
 };
 
 struct Transforms
@@ -21,6 +21,7 @@ static constexpr float bottomLight = 0.75f;
 
 struct Faces {
 	static constexpr float side = 0.499999f;
+	
 	static constexpr std::pair<std::array<Vertex, 4>, std::array<uint16_t, 6>> NearSide{
 		{
 		Vertex{DirectX::XMFLOAT3(-side ,-side,-side), { 1, 2 },  sideLight},
